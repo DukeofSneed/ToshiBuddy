@@ -59,8 +59,11 @@ AskinMods.register({
 - `quips[].text` <= 240 chars; `tags` is an array. Useful tags: `idle`, `greet`,
   `lean`, `click`, `drag`, `drop`, `drop-hard`, `wake`, `hour`, `trick`, `upgrade`,
   `desk` (any desk session), `desk-writing`, `desk-lab`, `desk-enter`, `desk-exit`,
-  `desk-click`, `time:morning`, `time:afternoon`, `time:evening`, `time:night`.
-  Untagged quips count as `idle`.
+  `desk-click`, `desk-break`, `slacking`, `annoyed-1`/`annoyed-2`/`annoyed-3`
+  (escalating reactions to repeated pokes), `snowflakes` (his hobby), `ultimate-end`,
+  `time:morning`, `time:afternoon`, `time:evening`, `time:night`, and
+  `season:winter`/`season:spring`/`season:summer`/`season:autumn` (only played in
+  that season). Untagged quips count as `idle`.
 - `animations[name].css`: full CSS text, <= 20k chars, no `@import`, no `url(`.
   Play it by adding the class `anim-<name>` to `#pet`, which the brain does for you
   when a behavior's `action.animate` names it. Scope every selector under
@@ -102,7 +105,10 @@ AskinMods.register({
   mod must be original.
 
 ### Style guide
-Kori is a young, serious officer of the (fictional) Frost Registry: diligent,
-prickly about being called small or cute, allergic to sloppy work, a little proud,
-secretly caring. Speaks in short, clipped sentences with dry humor, procedure
-jokes, and cold puns. Never cruel. Short lines land best.
+Kori is a young, serious officer of the (fictional) Frost Registry: mature beyond
+his years, diligent, prickly about being called small or cute, irritated by
+showing off and goofing around, cool toward most people but quietly protective of
+the few he trusts, and miserable in hot weather. He works fast so he can get back to
+his hobby: cataloging unique snowflake specimens. Speaks in short, clipped sentences
+with dry humor, procedure jokes, and cold puns. Tolerates teasing without lashing
+out. Never cruel. Short lines land best.

@@ -30,7 +30,14 @@
     deskSince: 0,
     papers: 0,
     deskTimers: [],
+    clickTimes: [],      // recent plain clicks, for escalating annoyance
+    leisureSince: 0,     // when the current games/videos stretch began
+    lastSlackNudge: 0,
+    lastDeskBreak: 0,
   };
+  const SLACK_AFTER_MS = 25 * 60 * 1000;   // continuous leisure before a nudge
+  const SLACK_COOLDOWN_MS = 45 * 60 * 1000;
+  const DESK_BREAK_MS = 50 * 60 * 1000;    // desk time before a break reminder
 
   const pet = () => document.getElementById('pet');
   const floor = () => st.stageH - PET_H;
@@ -244,8 +251,25 @@
     if (!quiet) quip(minutes >= 20 ? ['desk-exit-long', 'desk-exit'] : ['desk-exit'], {});
   }
   // Called by the main process every couple of seconds.
-  function onActivity({ busy, kind }) {
+  function onActivity({ busy, kind, leisure }) {
     const t = now();
+    // A long, uninterrupted stretch of games or videos earns one dry remark.
+    if (leisure) {
+      if (!st.leisureSince) st.leisureSince = t;
+      const due = t - st.leisureSince >= SLACK_AFTER_MS && t - st.lastSlackNudge >= SLACK_COOLDOWN_MS;
+      if (due && ['idle', 'walk', 'lean'].includes(st.mode) && !AskinBubble.isVisible()) {
+        st.lastSlackNudge = t;
+        playAnimation('think');
+        quip(['slacking']);
+      }
+    } else {
+      st.leisureSince = 0;
+    }
+    // At the desk for a long time: remind the user to take a break.
+    if (st.mode === 'desk' && t - st.deskSince >= DESK_BREAK_MS && t - st.lastDeskBreak >= DESK_BREAK_MS && !AskinBubble.isVisible()) {
+      st.lastDeskBreak = t;
+      quip(['desk-break']);
+    }
     if (!st.deskEnabled) { if (st.mode === 'desk') exitDesk({ quiet: true }); return; }
     if (busy) {
       st.lastBusyAt = t;
@@ -434,9 +458,18 @@
         else { setMode('idle'); st.nextDecision = now() + 1500; save(); }
         place();
       } else {
-        // A plain click.
+        // A plain click. Repeated pokes make him progressively more irritated;
+        // he puts up with it, but he makes sure you know.
         AskinSfx.play('boop');
-        if (st.mode === 'desk') { if (!fire('click', {})) { stamp(); quip(['desk-click', 'click']); } }
+        const t = now();
+        st.clickTimes = st.clickTimes.filter((c) => t - c < 12000);
+        st.clickTimes.push(t);
+        const pokes = st.clickTimes.length;
+        if (pokes >= 7) { playAnimation('huff'); quip(['annoyed-3']); st.clickTimes = []; }
+        else if (pokes === 5) { playAnimation('huff'); quip(['annoyed-2']); }
+        else if (pokes === 3) { playAnimation('shrug'); quip(['annoyed-1']); }
+        else if (pokes > 3) { /* pointedly ignoring you */ }
+        else if (st.mode === 'desk') { if (!fire('click', {})) { stamp(); quip(['desk-click', 'click']); } }
         else if (!fire('click', {})) { playAnimation(Math.random() < 0.5 ? 'surprised' : 'huff'); quip(['click']); }
         st.nextDecision = now() + 2500;
       }

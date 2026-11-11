@@ -154,7 +154,7 @@ function start() {
   ipcMain.handle('jar:fund', (_e, { goalId, tokens }) => ({ ...ledger.fundGoal(goalId, tokens), state: jarState() }));
   ipcMain.handle('jar:remove-goal', (_e, { goalId }) => ({ ok: ledger.removeGoal(goalId), state: jarState() }));
   ipcMain.handle('jar:settings', (_e, patch) => {
-    const allowed = ['muted', 'sfx', 'sfxVolume', 'paused', 'autostart', 'deskMode', 'skin', 'maxUtilization', 'calibrationRunTokens', 'autoBuild', 'allowUsageEndpointFallback', 'upgradeModel', 'upgradeEffort', 'maxTurns'];
+    const allowed = ['muted', 'sfx', 'sfxVolume', 'paused', 'autostart', 'deskMode', 'slackNudges', 'skin', 'maxUtilization', 'calibrationRunTokens', 'autoBuild', 'allowUsageEndpointFallback', 'upgradeModel', 'upgradeEffort', 'maxTurns'];
     const clean = {};
     for (const k of allowed) if (k in patch) clean[k] = patch[k];
     const skinChanged = 'skin' in clean && clean.skin !== settings.get('skin');
@@ -230,15 +230,19 @@ function start() {
     log,
     onSample: (sample) => {
       if (!overlay || overlay.isDestroyed()) return;
-      const kind = settings.get('deskMode') === false ? null : classify(sample, {
+      const kind = classify(sample, {
         apps: settings.get('deskApps') || undefined,
         titles: settings.get('deskTitles') || undefined,
       });
-      const busy = !!kind && powerMonitor.getSystemIdleTime() < 20;
-      overlay.webContents.send('activity', { busy, kind });
+      const idle = powerMonitor.getSystemIdleTime();
+      const work = kind === 'writing' || kind === 'lab';
+      const busy = work && settings.get('deskMode') !== false && idle < 20;
+      const leisure = kind === 'leisure' && settings.get('slackNudges') !== false && idle < 120;
+      overlay.webContents.send('activity', { busy, kind: work ? kind : null, leisure });
     },
   });
-  if (settings.get('deskMode') !== false && !process.env.ASKIN_SELFTEST) activity.start();
+  const watcherWanted = () => settings.get('deskMode') !== false || settings.get('slackNudges') !== false;
+  if (watcherWanted() && !process.env.ASKIN_SELFTEST) activity.start();
 
   // ---- tray + menus ----
   function buildMenu() {
@@ -257,6 +261,7 @@ function start() {
       { label: 'Mute voice', type: 'checkbox', checked: !!settings.get('muted'), click: (m) => toggleSetting('muted', m.checked) },
       { label: 'Sound effects', type: 'checkbox', checked: settings.get('sfx') !== false, click: (m) => toggleSetting('sfx', m.checked) },
       { label: 'Desk mode (writing and labs)', type: 'checkbox', checked: settings.get('deskMode') !== false, click: (m) => toggleSetting('deskMode', m.checked) },
+      { label: 'Nudge me when I slack off', type: 'checkbox', checked: settings.get('slackNudges') !== false, click: (m) => toggleSetting('slackNudges', m.checked) },
       { label: 'Skin', submenu: skinItems },
       { label: 'Pause wandering', type: 'checkbox', checked: !!settings.get('paused'), click: (m) => toggleSetting('paused', m.checked) },
       { label: 'Start with Windows', type: 'checkbox', checked: !!settings.get('autostart'), click: (m) => toggleSetting('autostart', m.checked) },
@@ -280,7 +285,7 @@ function start() {
   function toggleSetting(key, value) {
     settings.set(key, value);
     if (key === 'autostart') applyAutostart();
-    if (key === 'deskMode') { if (value) activity.start(); else activity.stop(); }
+    if (key === 'deskMode' || key === 'slackNudges') { if (watcherWanted()) activity.start(); else activity.stop(); }
     if (overlay && !overlay.isDestroyed()) overlay.webContents.send('settings', settings.all());
     refreshTray();
     pushJar();

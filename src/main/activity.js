@@ -35,10 +35,14 @@ const DEFAULT_APPS = {
     'sublime_text', 'soffice.bin', 'scrivener', 'marktext', 'joplin', 'logseq', 'zettlr', 'acrord32', 'acrobat'],
   lab: ['vmware', 'vmplayer', 'vmware-vmx', 'virtualbox', 'virtualboxvm', 'vmconnect', 'wireshark', 'putty',
     'windowsterminal', 'mobaxterm', 'mstsc', 'packettracer', 'gns3', 'winscp', 'burpsuite'],
+  // Only used for Kori's rare "are you slacking?" nudge, never for the desk.
+  leisure: ['robloxplayerbeta', 'steam', 'steamwebhelper', 'epicgameslauncher', 'riotclientservices', 'leagueclient',
+    'valorant', 'minecraft', 'javaw', 'battle.net', 'spotify'],
 };
 const DEFAULT_TITLES = {
   writing: ['google docs', 'overleaf', 'word online', 'microsoft word', 'notion', 'grammarly', 'quizlet', 'canvas', 'blackboard'],
   lab: ['kali', 'opnsense', 'pfsense', 'ubuntu', 'vmware', 'wireshark', 'tryhackme', 'hack the box', 'hackthebox', 'labs'],
+  leisure: ['youtube', 'netflix', 'twitch', 'crunchyroll', 'hulu', 'disney+', 'tiktok', 'reddit'],
 };
 const IGNORE = ['electron', 'askin-buddy', 'claude', 'explorer', 'shellexperiencehost', 'searchhost', 'lockapp', 'taskmgr'];
 
@@ -49,11 +53,12 @@ function classify(sample, cfg = {}) {
   if (!proc || IGNORE.includes(proc)) return null;
   const apps = cfg.apps || DEFAULT_APPS;
   const titles = cfg.titles || DEFAULT_TITLES;
-  for (const kind of ['lab', 'writing']) {
-    if ((apps[kind] || []).includes(proc)) return kind;
+  // Work kinds win over leisure (a lab tutorial on YouTube still counts as a lab).
+  for (const kind of ['lab', 'writing', 'leisure']) {
+    if ((apps[kind] || DEFAULT_APPS[kind] || []).includes(proc)) return kind;
   }
-  for (const kind of ['lab', 'writing']) {
-    if ((titles[kind] || []).some((k) => k && title.includes(k))) return kind;
+  for (const kind of ['lab', 'writing', 'leisure']) {
+    if ((titles[kind] || DEFAULT_TITLES[kind] || []).some((k) => k && title.includes(k))) return kind;
   }
   return null;
 }

@@ -9,6 +9,7 @@ const DEFAULTS = {
   sfxVolume: 0.5,   // 0-1
   paused: false,
   deskMode: true,   // sit at the desk while the user writes or does labs
+  slackNudges: true, // a rare comment after a long stretch of games or videos
   deskApps: null,   // override { writing: [...process names], lab: [...] }
   deskTitles: null, // override { writing: [...title keywords], lab: [...] }
   skin: '',         // '' = Kori; otherwise a folder name under skins/

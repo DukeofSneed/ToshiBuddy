@@ -18,15 +18,26 @@
     return 'night';
   }
 
+  function seasonTag() {
+    const m = new Date().getMonth(); // 0 = January (northern hemisphere seasons)
+    if (m === 11 || m <= 1) return 'winter';
+    if (m <= 4) return 'spring';
+    if (m <= 7) return 'summer';
+    return 'autumn';
+  }
+
   // Pick a quip matching any of the given tags. Falls back to 'idle'.
+  // Quips tagged time:<part> or season:<name> only play in that time/season.
   function pick(tags, vars = {}) {
     const wanted = new Set(Array.isArray(tags) ? tags : [tags]);
     const ctx = `time:${timeTag()}`;
+    const season = `season:${seasonTag()}`;
     let pool = all().filter((q) => q.tags.some((t) => wanted.has(t)));
     if (!pool.length) pool = all().filter((q) => q.tags.includes('idle'));
+    pool = pool.filter((q) => !q.tags.some((t) => t.startsWith('season:') && t !== season));
     if (!pool.length) return null;
     // Prefer quips that match the current time of day when they declare one.
-    const timed = pool.filter((q) => q.tags.includes(ctx));
+    const timed = pool.filter((q) => q.tags.includes(ctx) || q.tags.includes(season));
     if (timed.length && Math.random() < 0.6) pool = timed;
     else pool = pool.filter((q) => !q.tags.some((t) => t.startsWith('time:') && t !== ctx));
     if (!pool.length) return null;
@@ -45,5 +56,5 @@
     return text.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
   }
 
-  window.AskinQuips = { setBase, setFromMods, pick, timeTag, all };
+  window.AskinQuips = { setBase, setFromMods, pick, timeTag, seasonTag, all };
 })();
