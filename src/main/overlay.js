@@ -5,10 +5,12 @@ const { BrowserWindow, screen } = require('electron');
 const path = require('path');
 
 const RENDERER = path.join(__dirname, '..', 'renderer');
+const ICON = path.join(__dirname, '..', '..', 'assets', 'icon.png');
 
 function createOverlay() {
   const { workArea } = screen.getPrimaryDisplay();
   const win = new BrowserWindow({
+    icon: ICON,
     x: workArea.x,
     y: workArea.y,
     width: workArea.width,
@@ -60,6 +62,7 @@ function createJarWindow(parent) {
   const width = 440;
   const height = 640;
   const win = new BrowserWindow({
+    icon: ICON,
     width,
     height,
     x: workArea.x + workArea.width - width - 24,
@@ -97,6 +100,7 @@ function createJarWindow(parent) {
 // A normal window for renaming the character and editing quips.
 function createCustomizeWindow() {
   const win = new BrowserWindow({
+    icon: ICON,
     width: 620,
     height: 720,
     minWidth: 460,

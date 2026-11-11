@@ -55,9 +55,19 @@ function iceOrbPng(size = 16) {
   ]);
 }
 
+// The snowflake icon (assets/icon.png); the generated ice orb is the fallback.
+const ICON_FILE = require('path').join(__dirname, '..', '..', 'assets', 'icon.png');
+function appIcon() {
+  try {
+    const img = nativeImage.createFromPath(ICON_FILE);
+    if (!img.isEmpty()) return img;
+  } catch (_) { /* fall back */ }
+  return null;
+}
 function trayIcon() {
-  const img = nativeImage.createFromBuffer(iceOrbPng(32), { scaleFactor: 2 });
-  return img.resize({ width: 16, height: 16 });
+  const img = appIcon();
+  if (img) return img.resize({ width: 32, height: 32, quality: 'best' });
+  return nativeImage.createFromBuffer(iceOrbPng(32));
 }
 
-module.exports = { trayIcon, iceOrbPng };
+module.exports = { trayIcon, appIcon, iceOrbPng, ICON_FILE };
