@@ -1,32 +1,51 @@
-# Skins
+# Characters
 
-Use your own images instead of the built-in Kori. Skins stay on your PC: everything
-in this folder except this file is git-ignored.
+Each folder here is one character pack. ToshiToshi (`toshitoshi/`) is the main
+character; `kori-test/` is the built-in drawn test character.
 
-When at least one skin exists, the first one is used by default; Kori is available
-as "Kori (original character)" in the Skin menu. Upgrades bought with the jar apply
-to whichever character is active.
+**The easy way:** right-click the pet or the tray icon and choose
+**Import character…**. Give it a name and personality, drop in a sprite sheet (plus
+optional ultimate sheet, still images, and quips), and press Import. Then use
+**Edit animations and personality…** to pick which poses play when he walks, talks,
+sleeps, and so on. **Export…** in that window zips a pack to share with friends; they
+import the .zip the same way.
 
-1. Make a folder here, for example `skins/my-skin/`.
-2. Put your main image in it as `skin.png` or `skin.jpg` (`.webp` and `.gif` work too).
-3. Optional: add `ultimate.png` or `ultimate.jpg`. After a donation, the pet plays the
-   Frost Release and switches to this image for the ultimate form (30 seconds by
-   default), then switches back. Another donation during the form resets the timer.
-4. Optional: add `skin.json` to fine-tune it:
+## Pack layout
 
-   ```json
-   {
-     "scale": 1.15,
-     "offsetX": 0,
-     "offsetY": 0,
-     "keyMode": "edges",
-     "keyTolerance": 40,
-     "ultimateSeconds": 30,
-     "ultimate": { "scale": 1.3, "offsetY": 4, "keyTolerance": 48 }
-   }
-   ```
+```
+characters/<id>/
+  character.json      name, personality, size, background removal, sheet mapping
+  quips.json          his lines (optional)
+  sheet.png           sprite sheet (frame animation)
+  ultimate-sheet.png  sprite sheet for the 30-second ultimate form (optional)
+  skin.png            still image, used when there is no sheet (optional)
+  ultimate.png        still image for the ultimate form (optional)
+```
 
-   - `scale`: image height relative to the pet (1.0 = 188 pet units, Kori's height).
+Images can be PNG, WebP, GIF, or JPG. The pet uses the sheet when there is one.
+
+## character.json
+
+```json
+{
+  "name": "ToshiToshi",
+  "personality": "Serious, blunt, secretly caring. Short lines.",
+  "scale": 1.15,
+  "offsetY": 6,
+  "keyMode": "edges",
+  "keyTolerance": 40,
+  "ultimateSeconds": 30,
+  "ultimate": { "scale": 1.3, "offsetY": 10 },
+  "sheet": { "scale": 1.0, "animations": { "idle": { "frames": "0:0-4", "fps": 3 } } },
+  "ultimateSheet": { "scale": 1.1, "animations": { "idle": { "frames": "0:0-4" } } }
+}
+```
+
+   - `name`: shown in menus and the jar (**Rename character…** overrides it on your PC).
+   - `personality`: how he talks and acts, up to 600 characters. It is the only
+     thing from a pack that upgrade runs see: they write his new lines in this voice.
+     Images, sheets, and quips are never sent.
+   - `scale`: image height relative to the pet (1.0 = 188 pet units).
      The image keeps its proportions; wide images extend past the sides.
    - `offsetX`, `offsetY`: nudge the image in pet units (positive y moves it down).
    - `keyMode`: background removal for images without transparency. `"edges"`
@@ -39,27 +58,26 @@ to whichever character is active.
      (0-255). Raise it if a gradient background leaves a halo; lower it if parts of
      the character disappear.
    - `ultimateSeconds`: how long the ultimate form lasts (5-600).
-   - `mods`: which upgrade mods this skin uses. Leave it out for all of them,
+   - `mods`: which upgrade mods this character uses. Leave it out for all of them,
      `false` for none, or a list of mod folder names, like `["party-hat"]`. Mods
-     made only for Kori (such as the sample earmuffs) never show on a skin.
+     made only for the drawn test character (such as the sample earmuffs) never show.
    - `ultimate`: the same `scale`, `offsetX`, `offsetY`, `keyMode`, `keyColor`,
      `keyTolerance`, and `anchors` settings for the ultimate image.
    - `anchors`: where upgrades attach props, in pet units (the pet is 160 wide, the
      ground is at y=188). Example:
      `"anchors": { "head": { "x": 80, "y": 70, "size": 70 }, "hand-r": { "x": 104, "y": 128 }, "hand-l": { "x": 56, "y": 128 } }`.
      `size` is the width of the face; props scale with it. Turn on **Show prop anchors**
-     in the tray's Skin menu to see pink crosshairs where they currently land, then
+     in the tray's Character menu to see pink crosshairs where they currently land, then
      adjust until they sit on the head and hands. Without `anchors`, positions are
      estimated from the image size.
-5. Right-click the pet or the tray icon, open **Skin**, and pick your folder. The jar's
-   Settings section has the same picker. Changes to the files apply when you re-pick
-   the skin or choose **Reload mods and quips**.
+Switch characters from **Character** in the tray or right-click menu, or in the jar's
+Settings. File changes apply when you re-pick the character or choose
+**Reload mods and quips**.
 
 ## Dialogue (quips.json)
 
-A skin can bring its own lines in `quips.json`. When it does, the skin uses those
-(plus any quip packs from upgrades) instead of Kori's, and its edits in **Edit
-quips…** are kept separately from Kori's.
+Each character has its own lines in `quips.json` (plus any quip packs from upgrades).
+Edits made in **Edit quips…** are kept separately for each character.
 
 ```json
 {
@@ -95,12 +113,12 @@ The older tags (`greet`, `idle`, `desk-writing`, `annoyed-1`...) work too.
 ## Sprite sheets (frame animation)
 
 Add `sheet.png` (and optionally `ultimate-sheet.png` for the ultimate form) to the
-skin folder. A sheet is a grid of poses with space between them; transparent or
+pack folder. A sheet is a grid of poses with space between them; transparent or
 plain/gradient backgrounds both work. On load the app removes the background,
 finds every figure, numbers them by row and column, and writes
 `sheet-index.png` / `ultimate-sheet-index.png` next to your sheet with a
-`row:frame` label on each pose. Use those labels to map poses to animations in
-`skin.json`:
+`row:frame` label on each pose. Map poses to animations in **Edit animations and
+personality…**, or by hand in `character.json`:
 
 ```json
 "sheet": {
@@ -134,6 +152,5 @@ finds every figure, numbers them by row and column, and writes
 A sheet replaces the still `skin.<ext>` / `ultimate.<ext>` images; those are used
 again if the sheet is removed or fails to load.
 
-A skin gets whole-body motion: walking bounce, landing squash, dangling when dragged,
-leaning, napping, the desk in desk mode, and the Frost Release and ultimate aura
-around it. Limb-level animations need the built-in Kori.
+Without a sheet, a still image gets whole-body motion instead: walking bounce, landing
+squash, dangling when dragged, leaning, and napping.

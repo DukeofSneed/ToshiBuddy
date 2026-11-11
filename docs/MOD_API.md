@@ -5,8 +5,9 @@ A mod is one folder `mods/<slug>/` containing `mod.js` (and optionally `NOTES.md
 page. It has no Node, no `require`, no network. It must call
 `BuddyMods.register({...})` exactly once at top level.
 
-The pet is Kori, an original plush-style ice chibi (huge head, tiny body, stubby
-limbs) drawn as an SVG with id `pet-svg` inside `#pet > #flip > #sprite`. Part ids
+The main character is a **sprite-sheet character** (ToshiToshi by default; users can
+import their own). The built-in **test character** is Kori, an original plush-style
+ice chibi (huge head, tiny body, stubby limbs) drawn as an SVG with id `pet-svg` inside `#pet > #flip > #sprite`. Part ids
 you can target from CSS: `#head`, `#face`, `#lids`, `#mouth`, `#hair-front`,
 `#hair-back`, `#cowlick`, `#clip`, `#torso`, `#pin`, `#arm-l`, `#arm-r`, `#leg-l`,
 `#leg-r`, `#orb` (an ice crystal, shown during the `frost` trick and while an
@@ -17,20 +18,20 @@ Prop anchors are empty `<g>` elements: `#props-head`, `#props-hand-r`,
 `#props-hand-l`, `#props-back` (behind everything), `#props-front` (in front of
 everything), `#props-desk` (on the desk, visible only in desk mode).
 
-**The active character may be a user skin** (their own image, the default when
-one exists) or Kori. Every upgrade must work on both:
-- **Props:** draw them against Kori's coordinates (below). On a skin, the `head`,
-  `hand-r`, and `hand-l` anchors are mapped onto the skin's own head and hands,
-  scaled to fit, so a hat drawn for Kori sits on the skin's head too. `back`,
+**The active character is usually a sprite-sheet character** (images, no separate
+limbs); the drawn test character is Kori. Every upgrade must work on both:
+- **Props:** draw them against Kori's coordinates (below). On a sprite-sheet
+  character, the `head`, `hand-r`, and `hand-l` anchors are mapped onto its own head
+  and hands, scaled to fit, so a hat drawn for Kori sits on the character's head too. `back`,
   `front`, and `desk` stay in place.
 - **Animations:** animate the whole body with `#pet.anim-<name> #sprite { ... }`;
   that works on any character. Limb animations (`#arm-r`, `#head`, `#lids`...)
   only show on Kori; treat them as a bonus.
-- **Don't describe the skin.** You can't see it and shouldn't guess what it is.
+- **Don't describe the character's images.** You can't see them and shouldn't guess.
   Lines use the established voice in the style guide.
 
 After a donation the pet enters the **ultimate form** for about 30 seconds: the
-`ultimate` class is on `#pet` (plus `has-ultimate` when the skin has its own
+`ultimate` class is on `#pet` (plus `has-ultimate` when the character has its own
 ultimate image), with the halo, snow cloak, and sigil held up. Mods can react with
 the `ultimate` trigger or style `#pet.ultimate ...`.
 
@@ -66,9 +67,9 @@ BuddyMods.register({
 - `id`: required, 2-40 chars of `a-z0-9-`.
 - `characters`: optional, `['kori']`, `['skin']`, or both (the default). A mod
   limited to `kori` is skipped entirely (props, animations, quips, behaviors) while
-  a user skin is active. Leave it out for upgrades: they should work on both.
+  a sprite-sheet character is active. Leave it out for upgrades: they should work on both.
 - `quips[].text` <= 240 chars; write `{name}` wherever the character's name goes
-  (the user can rename him, and skins have their own names); `tags` is an array. Useful tags: `idle`, `greet`,
+  (the user can rename him, and every character has its own name); `tags` is an array. Useful tags: `idle`, `greet`,
   `lean`, `click`, `drag`, `drop`, `drop-hard`, `wake`, `hour`, `trick`, `upgrade`,
   `desk` (any desk session), `desk-writing`, `desk-lab`, `desk-enter`, `desk-exit`,
   `desk-click`, `desk-break`, `slacking`, `annoyed-1`/`annoyed-2`/`annoyed-3`
@@ -107,17 +108,18 @@ BuddyMods.register({
   the built-in reaction for that event is skipped that time.
 
 ### What a mod cannot do
-- Touch anything under `src/`, `docs/`, `prompts/`, `skins/`, `package.json`, or
+- Touch anything under `src/`, `docs/`, `prompts/`, `characters/`, `package.json`, or
   `.claude/`. Runs that do are reverted automatically.
 - Use `fetch`, `XMLHttpRequest`, `WebSocket`, `import`, `require`, `eval`, timers
   outside `interval` behaviors, or DOM access outside the API. Keep `mod.js` to
   the single `register` call plus constants.
 - Depend on other mods.
-- Reproduce copyrighted characters, artwork, dialogue, or audio. Kori and every
+- Reproduce copyrighted characters, artwork, dialogue, or audio. Every
   mod must be original.
 
 ### Style guide
-Kori is a young, serious officer of the (fictional) Frost Registry: mature beyond
+The upgrade request gives the active character's name and personality; write every
+line in that voice. For the test character, Kori is a young, serious officer of the (fictional) Frost Registry: mature beyond
 his years, diligent, prickly about being called small or cute, irritated by
 showing off and goofing around, cool toward most people but quietly protective of
 the few he trusts, and miserable in hot weather. He works fast so he can get back to

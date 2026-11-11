@@ -1,31 +1,31 @@
 [
   {
     "title": "Snow globe desk ornament",
-    "summary": "A tiny snow globe prop on the desk (desk anchor) with drifting flakes, plus quips when Kori notices it during paperwork.",
+    "summary": "A tiny snow globe prop on the desk (desk anchor) with drifting flakes, plus quips when the character notices it during paperwork.",
     "size": "S",
     "goalTokens": 22000
   },
   {
     "title": "Hot cocoa break",
-    "summary": "An hourly behavior where Kori sips a steaming mug (hand prop with steam animation) and grudgingly admits it is good, with a pack of cocoa quips.",
+    "summary": "An hourly behavior where the character sips a steaming mug (hand prop with steam animation) and grudgingly admits it is good, with a pack of cocoa quips.",
     "size": "S",
     "goalTokens": 28000
   },
   {
     "title": "Penguin assistant",
-    "summary": "A small penguin prop that appears at the desk now and then to hand Kori more papers, with a waddle animation and complaint quips.",
+    "summary": "A small penguin prop that appears at the desk now and then to hand the character more papers, with a waddle animation and complaint quips.",
     "size": "M",
     "goalTokens": 60000
   },
   {
     "title": "Paperwork avalanche",
-    "summary": "A rare desk-mode click reaction where the paper stack topples in an animation, Kori huffs, and the stack rebuilds itself.",
+    "summary": "A rare desk-mode click reaction where the paper stack topples in an animation, the character huffs, and the stack rebuilds itself.",
     "size": "M",
     "goalTokens": 55000
   },
   {
     "title": "Ice skating idle",
-    "summary": "A new idle animation where Kori glides along the taskbar on skates instead of walking, with a little spin at the end and skating quips.",
+    "summary": "A new idle animation where the character glides along the taskbar on skates instead of walking, with a little spin at the end and skating quips.",
     "size": "M",
     "goalTokens": 65000
   },
@@ -37,13 +37,13 @@
   },
   {
     "title": "Snowball fight",
-    "summary": "An interval behavior where Kori packs a snowball and throws it off screen, then looks around innocently, with denial quips.",
+    "summary": "An interval behavior where the character packs a snowball and throws it off screen, then looks around innocently, with denial quips.",
     "size": "L",
     "goalTokens": 130000
   },
   {
     "title": "Officer quip pack vol. 2",
-    "summary": "Forty new quips in Kori's voice about procedure, cold weather, being underestimated, and keeping you on task, tagged for idle, desk, lean, drag, and night.",
+    "summary": "Forty new quips in the character's voice about procedure, cold weather, being underestimated, and keeping you on task, tagged for idle, desk, lean, drag, and night.",
     "size": "S",
     "goalTokens": 18000
   }
