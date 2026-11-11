@@ -270,11 +270,8 @@ function start() {
   // ---- self-test: ASKIN_SELFTEST=<dir> captures both windows and quits ----
   const selftestDir = process.env.ASKIN_SELFTEST;
   for (const [name, w] of [['overlay', overlay], ['jar', jarWin]]) {
-    w.webContents.on('console-message', (ev, legacyLevel, legacyMessage) => {
-      // Electron 35+ passes one event object; older versions pass (event, level, message).
-      const level = ev && ev.level !== undefined ? ev.level : legacyLevel;
-      const message = ev && ev.message !== undefined ? ev.message : legacyMessage;
-      if (level === 'error' || level === 'warning' || (typeof level === 'number' && level >= 2)) log(`${name} console: ${message}`);
+    w.webContents.on('console-message', (ev) => {
+      if (ev.level === 'error' || ev.level === 'warning') log(`${name} console: ${ev.message}`);
     });
     w.webContents.on('render-process-gone', (_e, d) => log(`${name} renderer gone: ${d.reason}`));
     w.webContents.on('did-fail-load', (_e, code, desc) => log(`${name} failed to load: ${code} ${desc}`));
