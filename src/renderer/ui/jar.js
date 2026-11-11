@@ -22,7 +22,8 @@
   function render(state) {
     S = state;
     NAME = state.settings.characterName || 'Kori';
-    ON_SKIN = !!state.activeSkin && state.activeSkin !== 'kori';
+    const active = (state.characters || []).find((c) => c.id === state.activeCharacter);
+    ON_SKIN = !!active && active.id !== 'kori-test';
     const L = state.ledger;
     const G = state.guard;
 
@@ -87,12 +88,13 @@
     $('voice-muted').checked = !!state.settings.muted;
     $('desk-mode').checked = state.settings.deskMode !== false;
     const skinSel = $('skin');
-    const opts = (state.skins || []).concat(['kori']);
-    const koriLabel = ON_SKIN ? 'Built-in character' : 'Kori (original character)';
-    if (skinSel.options.length !== opts.length || opts.some((v, i) => skinSel.options[i].value !== v) || skinSel.options[opts.length - 1].text !== koriLabel) {
-      skinSel.innerHTML = opts.map((v) => `<option value="${esc(v)}">${v === 'kori' ? (ON_SKIN ? 'Built-in character' : 'Kori (original character)') : esc(v)}</option>`).join('');
+    const chars = state.characters || [];
+    const sig = chars.map((c) => `${c.id}=${c.name}`).join('|');
+    if (skinSel.dataset.sig !== sig) {
+      skinSel.dataset.sig = sig;
+      skinSel.innerHTML = chars.map((c) => `<option value="${esc(c.id)}">${esc(c.name)}${c.test ? ' (test)' : ''}</option>`).join('');
     }
-    skinSel.value = state.activeSkin || 'kori';
+    skinSel.value = state.activeCharacter || '';
     BuddySfx.setEnabled(sfxOn);
     BuddySfx.setVolume(vol / 100);
 
@@ -174,7 +176,7 @@
   $('sfx-vol').onchange = (e) => jar.updateSettings({ sfxVolume: Number(e.target.value) / 100 }).then((s) => { render(s); BuddySfx.play('tick'); });
   $('voice-muted').onchange = (e) => jar.updateSettings({ muted: e.target.checked }).then(render);
   $('desk-mode').onchange = (e) => jar.updateSettings({ deskMode: e.target.checked }).then(render);
-  $('skin').onchange = (e) => jar.updateSettings({ skin: e.target.value }).then(render);
+  $('skin').onchange = (e) => jar.updateSettings({ character: e.target.value }).then(render);
   // Soft tick on every jar button.
   document.addEventListener('click', (e) => { if (e.target.closest('button')) BuddySfx.play('tick'); }, true);
 

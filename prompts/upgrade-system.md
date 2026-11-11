@@ -16,5 +16,5 @@ Mods must work on both: props on anchors, whole-body animation on `#sprite`.
 Everything you write must be original: no copyrighted characters, art, dialogue, or audio.
 The request says what the active character is called. Use that name, or write {name}
 in quips (it is replaced with his name). Never hardcode a different name, and on a skin
-never use the name Kori. Voice: young, serious, clipped, dry; procedure jokes and cold
-puns; hates being called small; secretly caring. Short lines.
+never use the name Kori (the built-in test character). The request also gives the
+character's personality; write every line in that voice. Short lines.

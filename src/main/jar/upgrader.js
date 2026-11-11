@@ -42,7 +42,7 @@ const RUN_SETTINGS = JSON.stringify({
       'Edit(package-lock.json)', 'Write(package-lock.json)',
       'Edit(CLAUDE.md)', 'Write(CLAUDE.md)',
       'Edit(start.cmd)', 'Write(start.cmd)',
-      'Read(skins/**)', 'Edit(skins/**)', 'Write(skins/**)',
+      'Read(characters/**)', 'Edit(characters/**)', 'Write(characters/**)', 'Read(skins/**)',
     ],
   },
 });
@@ -69,7 +69,8 @@ function nodeCheck(file) {
 
 class Upgrader {
   constructor({ projectRoot, ledger, guard, settings, git, log, emit, reloadAndAwaitMods, character }) {
-    // () => { name, isSkin }: who the pet is right now, so prompts use the right name.
+    // () => { name, isSkin, personality }: who the pet is right now (name and the
+    // personality text from character.json; never images or quips).
     this.character = character || (() => ({ name: 'Kori', isSkin: false }));
     this.projectRoot = projectRoot;
     this.ledger = ledger;
@@ -103,7 +104,8 @@ class Upgrader {
         `You have about ${extraTokens} more tokens. Finish the mod with as few file reads as possible, then reply with the JSON summary.`,
       ].join('\n');
     }
-    const { name, isSkin } = this.character();
+    const { name, isSkin, personality } = this.character();
+    const voice = personality || 'serious, clipped, dry; understated humor; never cruel. Short lines.';
     // Catalog ideas were written for Kori; on a skin they're about the active character.
     const named = (s) => (isSkin ? String(s || '').replace(/\bKori\b/g, name) : String(s || ''));
     return [
@@ -121,7 +123,8 @@ class Upgrader {
         : `- The character is called ${name}. In quips, write {name} wherever his name appears.`,
       '- The mod must look right on both the drawn built-in character (with limbs) and a user-supplied skin image (no limbs):',
       '  put items on the head/hand/desk anchors, and animate the whole body by targeting #pet.anim-<name> #sprite. Limb animations (#arm-r etc.) are a bonus that only shows on the built-in character.',
-      '- Do not describe or guess what the skin depicts. Write lines in the established voice: young, serious, clipped, dry, procedure jokes and cold puns, hates being called small.',
+      '- Do not describe or guess what the character image depicts.',
+      `- ${name}'s personality, written by the user (use it for every line): ${voice}`,
       '- Everything must be original. No copyrighted characters, art, dialogue, or audio.',
       '- When done, reply with the JSON summary the schema asks for. The announcement is one short line the character will say out loud.',
     ].join('\n');

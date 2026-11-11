@@ -12,11 +12,13 @@ const DEFAULTS = {
   slackNudges: true, // a rare comment after a long stretch of games or videos
   deskApps: null,   // override { writing: [...process names], lab: [...] }
   deskTitles: null, // override { writing: [...title keywords], lab: [...] }
-  characterNames: {}, // display name per character: { 'my-skin': 'ToshiToshi', kori: 'Kori' }
-  skin: '',       // '' = first user skin (or Kori if none); 'kori' = Kori; else a folder under skins/
-  showAnchors: false, // draw markers where props attach (for tuning a skin's anchors)
+  characterNames: {}, // the user's rename per character id: { toshitoshi: 'ToshiToshi' }
+  character: '',       // id of a pack under characters/; '' = ToshiToshi, else the first one
+  showAnchors: false, // draw markers where props attach (for tuning a character's anchors)
   ultimateSeconds: 30, // how long the ultimate form lasts after a donation (a skin can override)
   autostart: false,
+  showJarProp: true,          // the jar sits in the bottom-right corner of the screen
+  quickDonateTokens: 1000,     // what double-clicking the jar donates
   // Plan-limit guard
   maxUtilization: 80,          // percent of the binding plan window the jar may use
   calibrationRunTokens: 20000, // max run/donation before the guard has learned tokens-per-percent
@@ -47,6 +49,10 @@ class Settings {
     this.data[key] = value;
     this.save();
     return this.data[key];
+  }
+  remove(key) {
+    delete this.data[key];
+    this.save();
   }
   update(patch) {
     Object.assign(this.data, patch);

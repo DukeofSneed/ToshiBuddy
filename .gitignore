@@ -1,7 +1,6 @@
 node_modules/
-# The user's own skin images stay local.
-skins/*
-!skins/README.md
+# Numbered frame previews the app regenerates from each sprite sheet.
+characters/*/*-index.png
 dist/
 *.log
 .DS_Store

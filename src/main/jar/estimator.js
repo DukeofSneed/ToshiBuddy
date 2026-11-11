@@ -23,7 +23,7 @@ const SCHEMA = {
     feasible: { type: 'boolean', description: 'False if it cannot be done within the Mod API' },
     touches_core: { type: 'boolean', description: 'True if it would need changes outside mods/ and content/' },
     risk_note: { type: 'string' },
-    reply: { type: 'string', description: "One short, serious, dry sentence in the character's voice (young, by-the-book) reacting to the request; if it names the character, use the name given in the prompt" },
+    reply: { type: 'string', description: "One short sentence in the character's voice (see the personality in the prompt) reacting to the request; if it names the character, use the name given in the prompt" },
   },
   required: ['title', 'summary', 'size', 'estimated_tokens', 'feasible', 'touches_core', 'risk_note', 'reply'],
 };
@@ -37,12 +37,13 @@ function listModSlugs(projectRoot) {
 }
 
 function buildPrompt(projectRoot, request, ledger, character = { name: 'Kori', isSkin: false }) {
-  const { name, isSkin } = character;
+  const { name, isSkin, personality } = character;
   const api = fs.readFileSync(path.join(projectRoot, 'docs', 'MOD_API.md'), 'utf8');
   const mods = listModSlugs(projectRoot);
   const done = ledger.data.upgrades.filter((u) => !u.reverted).map((u) => `- ${u.title} (${u.tokens} tokens)`).join('\n') || '- none yet';
   return [
-    `You are the pricing brain of a desktop pet (Electron) that does paperwork at a desk. The character is called ${name}${isSkin ? ' and is shown as a user-supplied skin image (no limbs)' : ', the built-in drawn character'}; upgrades must work on whichever character is active, through props on anchors and whole-body animations. Write the title, summary, and reply about ${name}${isSkin ? '; never use the name Kori, which is only the built-in character the Mod API describes' : ''}.`,
+    `You are the pricing brain of a desktop pet (Electron) that does paperwork at a desk. The character is called ${name}${isSkin ? ' and is shown as a user-supplied skin image (no limbs)' : ', the built-in drawn character'}; upgrades must work on whichever character is active, through props on anchors and whole-body animations. Write the title, summary, and reply about ${name}${isSkin ? '; never use the name Kori, which is only the built-in test character the Mod API describes' : ''}.`,
+    personality ? `${name}'s personality, written by the user (use it for the reply): ${personality}` : '',
     'Requests to reproduce copyrighted characters, art, dialogue, or audio are not feasible; set feasible to false for those.',
     'A human has suggested an upgrade. Estimate what it would take for a separate headless Claude Code run (model: haiku) to implement it as a mod.',
     'Mods can only add quips, CSS animations, SVG props, and simple behaviors through the Mod API below; they cannot touch src/.',

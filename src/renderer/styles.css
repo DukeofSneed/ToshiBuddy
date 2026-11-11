@@ -291,3 +291,6 @@ html, body {
   font-size: 13px;
   pointer-events: none;
 }
+
+/* Sprite-sheet characters draw their own sleep "zzz". */
+#pet.sheet #zzz { display: none !important; }

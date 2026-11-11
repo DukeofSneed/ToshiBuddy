@@ -10,7 +10,7 @@ const { Guard } = require('./jar/guard');
 const { Upgrader } = require('./jar/upgrader');
 const { Git } = require('./jar/git');
 const { estimate } = require('./jar/estimator');
-const { listMods, readQuipPacks, readSkinDialogue, listSkins, skinsRoot } = require('./mods');
+const { listMods, readQuipPacks, readCharacterDialogue, listCharacters, charactersRoot } = require('./mods');
 const { trayIcon } = require('./tray-icon');
 const { findClaude } = require('./jar/claude');
 const { ActivityWatcher, classify } = require('./activity');
@@ -26,7 +26,7 @@ if (!app.requestSingleInstanceLock()) {
   app.whenReady().then(start);
 }
 
-// Data from before the rename lived in %APPDATA%\askin-buddy (older package name).
+// Data from before the rename lived under the old package name's folder.
 // Copy it over once so balances, names, and edited quips survive.
 function migrateOldUserData(userData) {
   try {
@@ -42,11 +42,34 @@ function migrateOldUserData(userData) {
   } catch (e) { console.error(`userData migration failed: ${e.message}`); }
 }
 
+// Skins became character packs: skins/my-skin -> characters/toshitoshi and the
+// built-in Kori -> characters/kori-test. Carry the choice, name, and quip edits over.
+function migrateSkinSettings(settings, userData) {
+  const MAP = { 'my-skin': 'toshitoshi', kori: 'kori-test' };
+  const all = settings.all();
+  if ('skin' in all) {
+    const old = all.skin;
+    if (!settings.get('character') && old) settings.set('character', MAP[old] || old);
+    const names = { ...(all.characterNames || {}) };
+    for (const [from, to] of Object.entries(MAP)) if (names[from] && !names[to]) { names[to] = names[from]; delete names[from]; }
+    settings.set('characterNames', names);
+    if (typeof settings.remove === 'function') settings.remove('skin');
+  }
+  try {
+    const from = path.join(userData, 'quips-custom-my-skin.json');
+    const to = path.join(userData, 'quips-custom-toshitoshi.json');
+    if (fs.existsSync(from) && !fs.existsSync(to)) {
+      fs.writeFileSync(to, fs.readFileSync(from, 'utf8').split('skin:my-skin|').join('character:toshitoshi|'));
+    }
+  } catch (e) { console.error(`quip edit migration failed: ${e.message}`); }
+}
+
 function start() {
   const userData = app.getPath('userData');
   migrateOldUserData(userData);
   try { app.setAppUserModelId('ToshiBuddy'); } catch (_) { /* Windows only */ }
   const settings = new Settings(userData);
+  migrateSkinSettings(settings, userData);
   const ledger = new Ledger(userData);
   const logLines = [];
   const log = (line) => {
@@ -58,17 +81,17 @@ function start() {
   };
   const git = new Git(PROJECT_ROOT);
   const guard = new Guard({ ledger, settings, projectRoot: PROJECT_ROOT, log });
-  // Dialogue belongs to the active character: a skin with its own quips.json uses
-  // that (plus upgrade packs) instead of Kori's base.json; edits are per character.
+  // Dialogue belongs to the active character (characters/<id>/quips.json, plus
+  // quip packs from upgrades); the user's edits are kept per character.
   const quipStores = new Map();
   const quipStore = () => {
-    const who = activeSkinName();
+    const who = activeCharacterId();
     if (!quipStores.has(who)) quipStores.set(who, new QuipStore(userData, who));
     return quipStores.get(who);
   };
   const activePacks = () => {
-    const d = readSkinDialogue(PROJECT_ROOT, activeSkinName());
-    return d ? [...d.quips, ...readQuipPacks(PROJECT_ROOT, { skipBase: true })] : readQuipPacks(PROJECT_ROOT);
+    const d = readCharacterDialogue(PROJECT_ROOT, activeCharacterId());
+    return [...(d ? d.quips : []), ...readQuipPacks(PROJECT_ROOT)];
   };
   const quipsForPet = () => quipStore().merged(activePacks());
 
@@ -100,7 +123,7 @@ function start() {
 
   const upgrader = new Upgrader({
     projectRoot: PROJECT_ROOT, ledger, guard, settings, git, log,
-    character: () => ({ name: charName(), isSkin: activeSkinName() !== 'kori' }),
+    character: () => characterInfo(),
     emit: (ev) => {
       if (overlay && !overlay.isDestroyed()) overlay.webContents.send('upgrade-event', ev);
       pushJar();
@@ -123,8 +146,8 @@ function start() {
       settings: publicSettings(),
       busy: upgrader.isBusy(),
       claudeInstalled: !!findClaude(),
-      skins: listSkins(PROJECT_ROOT).map((s) => s.name),
-      activeSkin: activeSkinName(),
+      characters: listCharacters(PROJECT_ROOT).map((c) => ({ id: c.name, name: displayNameOf(c), test: c.test })),
+      activeCharacter: activeCharacterId(),
       log: logLines.slice(-80),
       projectRoot: PROJECT_ROOT,
     };
@@ -149,35 +172,39 @@ function start() {
     if (overlay && !overlay.isDestroyed()) overlay.setIgnoreMouseEvents(ignore, { forward: true });
   });
   ipcMain.on('overlay:log', (_e, line) => log(`renderer: ${line}`));
-  // Which character is active: a user skin is the default when one exists;
-  // 'kori' explicitly picks the built-in original character.
-  const activeSkinName = () => {
-    const want = process.env.TOSHI_CHARACTER || settings.get('skin') || '';
-    if (want === 'kori') return 'kori';
-    const skins = listSkins(PROJECT_ROOT);
-    if (want && skins.some((s) => s.name === want)) return want;
-    return skins.length ? skins[0].name : 'kori';
+  // Which character is active: settings.character (or TOSHI_CHARACTER), else
+  // ToshiToshi, else the first regular character, else the first test character.
+  const activeCharacterId = () => {
+    const chars = listCharacters(PROJECT_ROOT);
+    const want = process.env.TOSHI_CHARACTER || settings.get('character') || '';
+    if (want && chars.some((c) => c.name === want)) return want;
+    if (chars.some((c) => c.name === 'toshitoshi')) return 'toshitoshi';
+    const regular = chars.find((c) => !c.test);
+    return (regular || chars[0] || { name: 'kori-test' }).name;
   };
-  // The display name belongs to the active character: each skin (and Kori) has its own.
-  const prettySkin = (n) => n.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
-  const charName = () => {
-    const who = activeSkinName();
-    const names = settings.get('characterNames') || {};
-    return String(names[who] || '').trim() || (who === 'kori' ? 'Kori' : prettySkin(who));
+  const activeCharacter = () => listCharacters(PROJECT_ROOT).find((c) => c.name === activeCharacterId()) || null;
+  // The drawn test character renders from code; every other character is a pack of images.
+  const isBuiltinActive = () => { const c = activeCharacter(); return !c || c.builtin === 'kori'; };
+  // Display name: the user's rename for this character, else character.json "name".
+  const displayNameOf = (c) => String(((settings.get('characterNames') || {})[c.name]) || '').trim() || c.displayName || c.name;
+  const charName = () => { const c = activeCharacter(); return c ? displayNameOf(c) : 'Kori'; };
+  // What upgrade runs and estimates are told about the character: its name and the
+  // personality text from character.json. Never images, sheets, or quips.
+  const characterInfo = () => {
+    const c = activeCharacter();
+    const personality = c && typeof c.config.personality === 'string' ? c.config.personality.replace(/s+/g, ' ').trim().slice(0, 600) : '';
+    return { name: charName(), isSkin: !isBuiltinActive(), personality };
   };
   const publicSettings = () => ({ ...settings.all(), characterName: charName() });
-  const currentSkin = () => {
-    const name = activeSkinName();
-    return name === 'kori' ? null : listSkins(PROJECT_ROOT).find((s) => s.name === name) || null;
-  };
+  const currentSkin = () => (isBuiltinActive() ? null : activeCharacter());
   // The renderer slices sprite sheets and sends back a numbered preview
   // (sheet-index.png / ultimate-sheet-index.png) so the user can map frames.
   ipcMain.on('overlay:sheet-index', (_e, { skin, kind, dataUrl } = {}) => {
     try {
       if (!['sheet', 'ultimate-sheet'].includes(kind)) return;
       if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image/png;base64,')) return;
-      if (!listSkins(PROJECT_ROOT).some((s) => s.name === skin)) return;
-      const file = path.join(skinsRoot(PROJECT_ROOT), skin, `${kind}-index.png`);
+      if (!listCharacters(PROJECT_ROOT).some((c) => c.name === skin && !c.builtin)) return;
+      const file = path.join(charactersRoot(PROJECT_ROOT), skin, `${kind}-index.png`);
       fs.writeFileSync(file, Buffer.from(dataUrl.slice(22), 'base64'));
     } catch (e) { log(`sheet index not saved: ${e.message}`); }
   });
@@ -228,7 +255,7 @@ function start() {
   ipcMain.handle('custom:set-name', guarded(({ name }) => {
     const clean = String(name || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40);
     if (!clean) throw new Error('The name can\'t be empty.');
-    settings.set('characterNames', { ...(settings.get('characterNames') || {}), [activeSkinName()]: clean });
+    settings.set('characterNames', { ...(settings.get('characterNames') || {}), [activeCharacterId()]: clean });
     if (overlay && !overlay.isDestroyed()) overlay.webContents.send('settings', publicSettings());
     refreshTray();
     pushJar();
@@ -266,11 +293,11 @@ function start() {
   });
   ipcMain.handle('jar:remove-goal', (_e, { goalId }) => ({ ok: ledger.removeGoal(goalId), state: jarState() }));
   ipcMain.handle('jar:settings', (_e, patch) => {
-    const allowed = ['muted', 'sfx', 'sfxVolume', 'paused', 'autostart', 'deskMode', 'slackNudges', 'skin', 'maxUtilization', 'calibrationRunTokens', 'autoBuild', 'allowUsageEndpointFallback', 'upgradeModel', 'upgradeEffort', 'maxTurns'];
+    const allowed = ['muted', 'sfx', 'sfxVolume', 'paused', 'autostart', 'deskMode', 'slackNudges', 'character', 'maxUtilization', 'calibrationRunTokens', 'autoBuild', 'allowUsageEndpointFallback', 'upgradeModel', 'upgradeEffort', 'maxTurns'];
     const clean = {};
     for (const k of allowed) if (k in patch) clean[k] = patch[k];
-    const skinChanged = 'skin' in clean && clean.skin !== settings.get('skin');
-    if ('skin' in clean && clean.skin && clean.skin !== 'kori' && !listSkins(PROJECT_ROOT).some((s) => s.name === clean.skin)) clean.skin = '';
+    if ('character' in clean && !listCharacters(PROJECT_ROOT).some((c) => c.name === clean.character)) delete clean.character;
+    const skinChanged = 'character' in clean && clean.character !== activeCharacterId();
     if ('maxUtilization' in clean) clean.maxUtilization = Math.min(95, Math.max(10, Number(clean.maxUtilization) || 80));
     if ('sfxVolume' in clean) clean.sfxVolume = Math.min(1, Math.max(0, Number(clean.sfxVolume) || 0));
     settings.update(clean);
@@ -295,7 +322,7 @@ function start() {
     if (!text) return { ok: false, error: 'empty suggestion' };
     if (!findClaude()) return { ok: false, error: 'Claude Code is not installed or not logged in' };
     say(`"${text.slice(0, 60)}${text.length > 60 ? '…' : ''}" Noted. I'll draft a cost estimate. Estimates cost tokens too.`, { animate: 'think' });
-    const r = await estimate({ projectRoot: PROJECT_ROOT, ledger, request: text, log, character: { name: charName(), isSkin: activeSkinName() !== 'kori' } });
+    const r = await estimate({ projectRoot: PROJECT_ROOT, ledger, request: text, log, character: characterInfo() });
     if (r.rateLimit) guard.observe(r.rateLimit);
     if (!r.ok) { say(`I couldn't estimate that one: ${r.error}`); return { ok: false, error: r.error, state: jarState() }; }
     if (!r.goal.feasible || r.goal.touchesCore) {
@@ -359,13 +386,16 @@ function start() {
 
   // ---- tray + menus ----
   function buildMenu() {
-    const skins = listSkins(PROJECT_ROOT);
+    const chars = listCharacters(PROJECT_ROOT);
+    const item = (c) => ({ label: displayNameOf(c), type: 'radio', checked: activeCharacterId() === c.name, click: () => setSkin(c.name) });
+    const regular = chars.filter((c) => !c.test).map(item);
+    const tests = chars.filter((c) => c.test).map(item);
     const skinItems = [
-      ...skins.map((s) => ({ label: s.name, type: 'radio', checked: activeSkinName() === s.name, click: () => setSkin(s.name) })),
-      { label: activeSkinName() === 'kori' ? 'Kori (original character)' : 'Built-in character', type: 'radio', checked: activeSkinName() === 'kori', click: () => setSkin('kori') },
+      ...regular,
+      ...(tests.length ? [{ type: 'separator' }, { label: 'Test characters', enabled: false }, ...tests] : []),
       { type: 'separator' },
-      { label: 'Show prop anchors (for tuning skin.json)', type: 'checkbox', checked: !!settings.get('showAnchors'), click: (m) => toggleSetting('showAnchors', m.checked) },
-      { label: 'Open skins folder', click: () => { const d = skinsRoot(PROJECT_ROOT); fs.mkdirSync(d, { recursive: true }); shell.openPath(d); } },
+      { label: 'Show prop anchors (for tuning character.json)', type: 'checkbox', checked: !!settings.get('showAnchors'), click: (m) => toggleSetting('showAnchors', m.checked) },
+      { label: 'Open characters folder', click: () => { const d = charactersRoot(PROJECT_ROOT); fs.mkdirSync(d, { recursive: true }); shell.openPath(d); } },
     ];
     return Menu.buildFromTemplate([
       { label: `${charName()} Buddy`, enabled: false },
@@ -380,7 +410,7 @@ function start() {
       { label: 'Sound effects', type: 'checkbox', checked: settings.get('sfx') !== false, click: (m) => toggleSetting('sfx', m.checked) },
       { label: 'Desk mode (writing and labs)', type: 'checkbox', checked: settings.get('deskMode') !== false, click: (m) => toggleSetting('deskMode', m.checked) },
       { label: 'Nudge me when I slack off', type: 'checkbox', checked: settings.get('slackNudges') !== false, click: (m) => toggleSetting('slackNudges', m.checked) },
-      { label: 'Skin', submenu: skinItems },
+      { label: 'Character', submenu: skinItems },
       { label: 'Pause wandering', type: 'checkbox', checked: !!settings.get('paused'), click: (m) => toggleSetting('paused', m.checked) },
       { label: 'Start with Windows', type: 'checkbox', checked: !!settings.get('autostart'), click: (m) => toggleSetting('autostart', m.checked) },
       { type: 'separator' },
@@ -395,7 +425,7 @@ function start() {
     say(s.utilization !== null ? usageLine(s, 0) : 'No usage reading came back. Check the jar.', { tags: ['guard'] });
   });
   function setSkin(name) {
-    settings.set('skin', name);
+    settings.set('character', name);
     reloadAndAwaitMods([], 1000);
     refreshTray();
     pushJar();

@@ -335,10 +335,10 @@
 <svg id="pet-svg" viewBox="0 0 160 200" xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round">
   ${DEFS}
   <ellipse id="shadow" cx="80" cy="191" rx="30" ry="4" fill="rgba(0,0,0,0.3)"/>
-  ${RELEASE_BACK}
+  ${skin ? '' /* the halo, snow cloak, and sigil are Kori's own art */ : RELEASE_BACK}
   <g id="props-back"></g>
   ${body}
-  ${HALO}
+  ${skin ? '' : HALO}
   <g id="props-front"></g>
   <text id="zzz" x="118" y="28">z z z</text>
 </svg>`;

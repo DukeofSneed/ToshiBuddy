@@ -44,79 +44,90 @@ function parseQuipList(data, pack) {
   return out;
 }
 
-// content/quips/*.json. opts.skipBase leaves out base.json (Kori's lines) when a
-// skin brings its own dialogue; upgrade packs still apply.
-function readQuipPacks(projectRoot, opts = {}) {
+// content/quips/*.json: quip packs added by upgrades. They apply to every character.
+function readQuipPacks(projectRoot) {
   const dir = path.join(projectRoot, 'content', 'quips');
   const quips = [];
   let files = [];
   try { files = fs.readdirSync(dir).filter((f) => f.endsWith('.json')); } catch (_) { return quips; }
   for (const f of files) {
-    if (opts.skipBase && f === 'base.json') continue;
     try { quips.push(...parseQuipList(readJson(path.join(dir, f)), f)); } catch (e) { console.error(`quips: bad pack ${f}: ${e.message}`); }
   }
   return quips;
 }
 
-// A skin's own dialogue: skins/<name>/quips.json, { quips: [...] }. Returns null
-// when the skin has none. Used only by the pet itself; never sent to upgrade runs.
-function readSkinDialogue(projectRoot, skinName) {
-  if (!skinName || skinName === 'kori' || /[\\/]/.test(skinName)) return null;
-  const file = path.join(skinsRoot(projectRoot), skinName, 'quips.json');
-  if (!fs.existsSync(file)) return null;
-  try {
-    const data = readJson(file);
-    return { quips: parseQuipList(data, `skin:${skinName}`) };
-  } catch (e) {
-    console.error(`quips: bad skin dialogue ${skinName}: ${e.message}`);
-    return null;
-  }
-}
-
-// User skins: skins/<name>/ with a primary image (skin.<ext>, or the first image
-// not named ultimate.<ext>), an optional ultimate.<ext> shown for a while after a
-// donation, and an optional skin.json (see skins/README.md).
-const IMG_RE = /\.(png|webp|gif|jpe?g)$/i;
+// Character packs: characters/<id>/ holding character.json (name, personality,
+// layout, sheet mapping; see characters/README.md), quips.json, and images:
+// sheet.<ext> / ultimate-sheet.<ext> (sprite sheets), skin.<ext> / ultimate.<ext>
+// (still images). A pack with "builtin": "kori" is the drawn test character.
+const IMG_RE = /.(png|webp|gif|jpe?g)$/i;
+const ID_RE = /^[a-z0-9][a-z0-9_-]{0,39}$/;
 
 function fileUrl(file) {
   return pathToFileURL(file).href + `?v=${fs.statSync(file).mtimeMs}`;
 }
 
-function skinsRoot(projectRoot) {
-  return process.env.TOSHI_CHARACTERS_DIR || path.join(projectRoot, 'skins');
+function charactersRoot(projectRoot) {
+  return process.env.TOSHI_CHARACTERS_DIR || path.join(projectRoot, 'characters');
 }
 
-function listSkins(projectRoot) {
-  const dir = skinsRoot(projectRoot);
+function readCharacterConfig(folder) {
+  for (const name of ['character.json', 'skin.json']) {
+    try { return readJson(path.join(folder, name)); } catch (_) { /* try the next */ }
+  }
+  return {};
+}
+
+function listCharacters(projectRoot) {
+  const dir = charactersRoot(projectRoot);
   let entries = [];
   try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch (_) { return []; }
   const out = [];
   for (const e of entries) {
-    if (!e.isDirectory()) continue;
+    if (!e.isDirectory() || !ID_RE.test(e.name)) continue;
     const folder = path.join(dir, e.name);
+    const config = readCharacterConfig(folder);
+    const base = {
+      name: e.name, // the pack id (folder name)
+      displayName: String(config.name || e.name).slice(0, 40),
+      test: !!config.test,
+      builtin: config.builtin === 'kori' ? 'kori' : null,
+      config,
+    };
+    if (base.builtin) { out.push(base); continue; }
     let files = [];
     try { files = fs.readdirSync(folder).filter((f) => IMG_RE.test(f)); } catch (_) { continue; }
-    const byBase = (base) => files.find((f) => f.toLowerCase().replace(IMG_RE, '') === base);
-    // sheet.<ext> / ultimate-sheet.<ext> are sprite sheets; *-index.png are the
-    // numbered previews the app writes next to them.
-    const special = (f) => /^ultimate\./i.test(f) || /sheet/i.test(f) || /-index\.png$/i.test(f);
+    const byBase = (b) => files.find((f) => f.toLowerCase().replace(IMG_RE, '') === b);
+    const special = (f) => /^ultimate./i.test(f) || /sheet/i.test(f) || /-index.png$/i.test(f);
     const primary = byBase('skin') || files.find((f) => !special(f));
     const sheet = byBase('sheet');
     const ultimateSheet = byBase('ultimate-sheet');
     if (!primary && !sheet) continue;
     const ultimate = byBase('ultimate');
-    let config = {};
-    try { config = readJson(path.join(folder, 'skin.json')); } catch (_) { /* optional */ }
     out.push({
-      name: e.name,
+      ...base,
       url: primary ? fileUrl(path.join(folder, primary)) : null,
-      config,
       ultimate: ultimate ? { url: fileUrl(path.join(folder, ultimate)), config: config.ultimate || {} } : null,
       sheet: sheet ? { url: fileUrl(path.join(folder, sheet)), config: config.sheet || {} } : null,
       ultimateSheet: ultimateSheet ? { url: fileUrl(path.join(folder, ultimateSheet)), config: config.ultimateSheet || {} } : null,
     });
   }
-  return out;
+  // Regular characters first, test characters last.
+  return out.sort((a, b) => (a.test - b.test) || a.displayName.localeCompare(b.displayName));
 }
 
-module.exports = { listMods, readQuipPacks, readSkinDialogue, parseQuipList, listSkins, skinsRoot };
+// A character's own dialogue: characters/<id>/quips.json. Used only by the pet
+// itself; never sent to upgrade runs.
+function readCharacterDialogue(projectRoot, id) {
+  if (!id || !ID_RE.test(id)) return null;
+  const file = path.join(charactersRoot(projectRoot), id, 'quips.json');
+  if (!fs.existsSync(file)) return null;
+  try {
+    return { quips: parseQuipList(readJson(file), `character:${id}`) };
+  } catch (e) {
+    console.error(`quips: bad dialogue for ${id}: ${e.message}`);
+    return null;
+  }
+}
+
+module.exports = { listMods, readQuipPacks, readCharacterDialogue, readCharacterConfig, parseQuipList, listCharacters, charactersRoot, readJson, ID_RE, IMG_RE };

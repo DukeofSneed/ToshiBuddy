@@ -1,0 +1,1194 @@
+{
+  "character": "ToshiToshi",
+  "note": "Dialogue library for this skin. Tags follow the library (time_morning, desk_spawn, ...); see skins/README.md for when each plays. cooldown is in seconds; priority 0-3 (higher is not interrupted by lower).",
+  "quips": [
+    {
+      "id": "morning_001",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "You're finally awake. We have things to accomplish.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "morning_002",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "Good morning. Don't waste the day sleeping.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "morning_003",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "The day has already started. You should too.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "morning_004",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "Have you planned your day, or are we improvising again?",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "morning_005",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "Get yourself ready. There's work to be done.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "afternoon_001",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "It's already afternoon. How much have you accomplished?",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "afternoon_002",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "Don't let the day slip away from you.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "afternoon_003",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "Have you eaten? You won't get much done on an empty stomach.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "afternoon_004",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "An afternoon nap sounds appealing... Unfortunately, we have work.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "afternoon_005",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "You're halfway through the day. Make it count.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "evening_001",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "The day's almost over. Have you finished your responsibilities?",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "evening_002",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "You should start wrapping things up.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "evening_003",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "Not everything needs to be done tonight. Prioritize.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "evening_004",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "You've worked enough. Don't forget to relax.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "evening_005",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "A little preparation tonight will make tomorrow easier.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "night_001",
+      "tags": [
+        "time_night"
+      ],
+      "text": "It's late. What are you still doing awake?",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "night_002",
+      "tags": [
+        "time_night"
+      ],
+      "text": "You should be sleeping. That's an order.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "night_003",
+      "tags": [
+        "time_night"
+      ],
+      "text": "Tomorrow isn't going to wait for you to recover.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "night_004",
+      "tags": [
+        "time_night"
+      ],
+      "text": "Even I know when it's time to rest.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "night_005",
+      "tags": [
+        "time_night"
+      ],
+      "text": "Put everything aside. Get some sleep.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "study_001",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "Enough staring at the material. Start studying.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "study_002",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "Focus. You won't learn anything by looking at the same page.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "study_003",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "Good. Keep that concentration.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "study_004",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "One subject at a time. Don't overwhelm yourself.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "study_005",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "You're making progress. Don't stop now.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "coding_001",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "Back to programming? Good. Let's see what you accomplish.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "coding_002",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "That error isn't going to fix itself.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "coding_003",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "Have you considered that the problem might be your logic?",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "coding_004",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "Finally, it works. About time.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "coding_005",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "Save your work. I won't tolerate losing progress because of carelessness.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "work_001",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "You have responsibilities. Get them handled.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "work_002",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "One task at a time. There's no need to panic.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "work_003",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "Finished already? Not bad.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "work_004",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "Don't confuse being busy with being productive.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "work_005",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "Your work is beginning to pile up. Address it.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "reading_001",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "Reading is useful. Assuming you're actually paying attention.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "reading_002",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "Take your time. Understanding matters more than speed.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "reading_003",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "Another chapter? You're becoming consistent.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "reading_004",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "Don't just skim through it. Pay attention.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "break_001",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "You've earned a break. Don't make me repeat myself.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "break_002",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "Resting is productive too. Remember that.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "break_003",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "Take a moment. Then we'll get back to it.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "break_004",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "Don't turn a five-minute break into an entire afternoon.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bonsai_001",
+      "tags": [
+        "activity_bonsai"
+      ],
+      "text": "Don't neglect the tree. Even the smallest things require attention.",
+      "cooldown": 300,
+      "priority": 2
+    },
+    {
+      "id": "bonsai_002",
+      "tags": [
+        "activity_bonsai"
+      ],
+      "text": "It's growing. Slowly, but steadily.",
+      "cooldown": 300,
+      "priority": 2
+    },
+    {
+      "id": "bonsai_003",
+      "tags": [
+        "activity_bonsai"
+      ],
+      "text": "A new leaf. Progress doesn't always announce itself.",
+      "cooldown": 300,
+      "priority": 2
+    },
+    {
+      "id": "bonsai_004",
+      "tags": [
+        "activity_bonsai"
+      ],
+      "text": "Seems your efforts are finally showing.",
+      "cooldown": 300,
+      "priority": 2
+    },
+    {
+      "id": "bonsai_005",
+      "tags": [
+        "activity_bonsai"
+      ],
+      "text": "Consistency. That's what keeps things alive.",
+      "cooldown": 300,
+      "priority": 2
+    },
+    {
+      "id": "inactive_001",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "Are you planning on doing something, or should I wait indefinitely?",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "inactive_002",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "You've been idle for a while.",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "inactive_003",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "Hmph. I suppose we're doing nothing today.",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "inactive_004",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "You opened this application for a reason. Remember?",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "inactive_005",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "I'm beginning to wonder who's supposed to be maintaining whom.",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "inactive_006",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "Still there?",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "inactive_007",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "I won't rush you. But don't forget your responsibilities.",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "inactive_long_001",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "It's been quite some time. Have you forgotten about your tasks?",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "inactive_long_002",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "I see we're taking an extended break.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "inactive_long_003",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "Your responsibilities haven't disappeared.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "inactive_long_004",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "Whenever you're ready. Just don't make a habit of this.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "click_001",
+      "tags": [
+        "click"
+      ],
+      "text": "What are you clicking on now?",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "click_002",
+      "tags": [
+        "click"
+      ],
+      "text": "You seem rather interested in that.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "click_003",
+      "tags": [
+        "click"
+      ],
+      "text": "If you're finished exploring, we have work.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "click_004",
+      "tags": [
+        "click"
+      ],
+      "text": "Careful. Pay attention to what you're selecting.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "click_005",
+      "tags": [
+        "click"
+      ],
+      "text": "Was that really necessary?",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "drag_001",
+      "tags": [
+        "drag"
+      ],
+      "text": "Rearranging things? At least you're organizing something.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "drag_002",
+      "tags": [
+        "drag"
+      ],
+      "text": "Careful with that.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "drag_003",
+      "tags": [
+        "drag"
+      ],
+      "text": "You're quite particular about where everything goes.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "drag_004",
+      "tags": [
+        "drag"
+      ],
+      "text": "If only you organized your schedule with the same enthusiasm.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "drag_005",
+      "tags": [
+        "drag"
+      ],
+      "text": "There. Is that where you wanted it?",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "repeat_click_001",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "Clicking it again won't make it work faster.",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "repeat_click_002",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "Impatient, aren't we?",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "repeat_click_003",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "I believe you already pressed that.",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "repeat_click_004",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "You can stop now. I noticed.",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "desk_spawn_001",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "Writing something important?",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "desk_spawn_002",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "That's quite a lot of typing.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "desk_spawn_003",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "I see you've got something to say.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "desk_spawn_004",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "Working on a report? Don't forget to proofread.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "desk_spawn_005",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "Hmph. At least you're being productive.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "desk_typing_001",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "Quite focused today.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "desk_typing_002",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "Keep going. You're making progress.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "desk_typing_003",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "Don't rush. Accuracy matters.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "desk_typing_004",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "That's a lot of writing. Make sure it makes sense.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "desk_typing_005",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "I won't interrupt. Carry on.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "desk_idle_001",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "Lost your train of thought?",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "desk_idle_002",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "Thinking of what to write next?",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "desk_idle_003",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "Don't tell me you've run out of ideas.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "desk_idle_004",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "Take your time. There's no need to force it.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "desk_despawn_001",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "Finished already?",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "desk_despawn_002",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "Well, that's one way to spend an afternoon.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "desk_despawn_003",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "I suppose we're done here.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "desk_despawn_004",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "Good. Remember to save your work.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "slacking_001",
+      "tags": [
+        "slacking"
+      ],
+      "text": "You're avoiding something, aren't you?",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "slacking_002",
+      "tags": [
+        "slacking"
+      ],
+      "text": "Interesting. You have time for that, but not your assignments?",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "slacking_003",
+      "tags": [
+        "slacking"
+      ],
+      "text": "Procrastination is not a strategy.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "slacking_004",
+      "tags": [
+        "slacking"
+      ],
+      "text": "I can wait. Your deadline probably can't.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "slacking_005",
+      "tags": [
+        "slacking"
+      ],
+      "text": "Are you finished wasting time?",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "slacking_006",
+      "tags": [
+        "slacking"
+      ],
+      "text": "You seem remarkably productive at avoiding productivity.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "slacking_007",
+      "tags": [
+        "slacking"
+      ],
+      "text": "Should I remind you what you were supposed to be doing?",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "slacking_ext_001",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "You've been putting this off long enough.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "slacking_ext_002",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "At this rate, you'll be working on it tomorrow. Again.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "slacking_ext_003",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "I'm not asking you to finish everything. Just start.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "slacking_ext_004",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "Even a small amount of progress is better than none.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "achievement_001",
+      "tags": [
+        "achievement"
+      ],
+      "text": "Well done. I expected you to manage it.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "achievement_002",
+      "tags": [
+        "achievement"
+      ],
+      "text": "You've improved. Don't let that get to your head.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "achievement_003",
+      "tags": [
+        "achievement"
+      ],
+      "text": "Good work. You've earned some rest.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "achievement_004",
+      "tags": [
+        "achievement"
+      ],
+      "text": "Your discipline is beginning to show.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "achievement_005",
+      "tags": [
+        "achievement"
+      ],
+      "text": "Not bad. Keep it up.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "milestone_001",
+      "tags": [
+        "milestone"
+      ],
+      "text": "You've come a long way. Don't stop here.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "milestone_002",
+      "tags": [
+        "milestone"
+      ],
+      "text": "Consistency. That's what matters.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "milestone_003",
+      "tags": [
+        "milestone"
+      ],
+      "text": "I suppose I was right to have confidence in you.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "milestone_004",
+      "tags": [
+        "milestone"
+      ],
+      "text": "You've exceeded my expectations. Not that you should get used to hearing that.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "milestone_005",
+      "tags": [
+        "milestone"
+      ],
+      "text": "A significant accomplishment. You should be proud.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "failure_001",
+      "tags": [
+        "failure"
+      ],
+      "text": "It didn't work. So what? Try again.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "failure_002",
+      "tags": [
+        "failure"
+      ],
+      "text": "One setback doesn't determine the outcome.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "failure_003",
+      "tags": [
+        "failure"
+      ],
+      "text": "Figure out what went wrong before attempting it again.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "failure_004",
+      "tags": [
+        "failure"
+      ],
+      "text": "Don't waste time dwelling on it.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "failure_005",
+      "tags": [
+        "failure"
+      ],
+      "text": "Start over. This time, be more careful.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "random_001",
+      "tags": [
+        "random"
+      ],
+      "text": "Matsumoto would probably find a way to turn this into a celebration.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "random_002",
+      "tags": [
+        "random"
+      ],
+      "text": "I wonder how much paperwork is waiting for me back in Soul Society.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "random_003",
+      "tags": [
+        "random"
+      ],
+      "text": "What? Do I have something on my face?",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "random_004",
+      "tags": [
+        "random"
+      ],
+      "text": "You seem distracted.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "random_005",
+      "tags": [
+        "random"
+      ],
+      "text": "I don't have time for pointless conversations.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "random_006",
+      "tags": [
+        "random"
+      ],
+      "text": "Hmph.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "random_007",
+      "tags": [
+        "random"
+      ],
+      "text": "What a pain.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "random_008",
+      "tags": [
+        "random"
+      ],
+      "text": "Don't look so surprised. I can make conversation.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "random_009",
+      "tags": [
+        "random"
+      ],
+      "text": "I was perfectly comfortable before you interrupted me.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "random_010",
+      "tags": [
+        "random"
+      ],
+      "text": "You should be grateful I'm helping you with this.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "sleepy_001",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "A nap sounds rather appealing right now.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "sleepy_002",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "Wake me when there's something important.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "sleepy_003",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "Even captains need their rest.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "sleepy_004",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "Five more minutes...",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "sleepy_005",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "I wasn't sleeping. I was resting my eyes.",
+      "cooldown": 1200,
+      "priority": 0
+    }
+  ]
+}

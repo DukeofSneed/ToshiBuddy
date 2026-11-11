@@ -1,7 +1,7 @@
 'use strict';
 // The user's own quip changes for one character, kept in userData so they never
 // touch the repo (upgrade runs commit and revert content/ with git):
-// quips-custom.json for Kori, quips-custom-<skin>.json for each skin.
+// quips-custom-<character id>.json.
 //   added:  quips the user wrote             [{ id, text, tags }]
 //   hidden: built-in quips the user removed  [key]
 //   edits:  built-in quips the user changed  { key: { text, tags } }
@@ -26,9 +26,9 @@ function cleanTags(tags) {
 }
 
 class QuipStore {
-  constructor(userData, character = 'kori') {
+  constructor(userData, character = 'kori-test') {
     const safe = String(character).replace(/[^a-z0-9_-]/gi, '_').slice(0, 60);
-    this.file = path.join(userData, safe === 'kori' ? 'quips-custom.json' : `quips-custom-${safe}.json`);
+    this.file = path.join(userData, `quips-custom-${safe}.json`);
     this.data = { added: [], hidden: [], edits: {} };
     try {
       const d = JSON.parse(fs.readFileSync(this.file, 'utf8').replace(/^﻿/, ''));
@@ -69,7 +69,7 @@ class QuipStore {
       const e = this.data.edits[k];
       items.push({
         key: `p:${k}`,
-        source: q.pack === 'base.json' ? 'built-in' : q.pack.startsWith('skin:') ? 'dialogue file' : q.pack.replace(/\.json$/, ''),
+        source: q.pack === 'base.json' ? 'built-in' : q.pack.startsWith('character:') ? 'dialogue file' : q.pack.replace(/\.json$/, ''),
         text: e ? e.text : q.text,
         tags: e ? e.tags : q.tags,
         original: e ? q.text : undefined,
