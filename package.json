@@ -1,0 +1,13 @@
+{
+  "name": "askin-buddy",
+  "version": "0.1.0",
+  "description": "A chibi Askin Nakk le Vaar desktop buddy with a Claude-token donation jar that funds its own upgrades",
+  "main": "src/main/main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "^45.3.0"
+  }
+}

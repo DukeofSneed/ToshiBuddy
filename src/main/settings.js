@@ -1,0 +1,54 @@
+'use strict';
+// Tiny JSON settings store in Electron's userData folder. No dependencies.
+const fs = require('fs');
+const path = require('path');
+
+const DEFAULTS = {
+  muted: false,
+  paused: false,
+  autostart: false,
+  // Plan-limit guard
+  maxUtilization: 80,          // percent of the binding plan window the jar may use
+  calibrationRunTokens: 20000, // max run/donation before the guard has learned tokens-per-percent
+  autoBuild: false,            // start a run automatically once a goal is funded
+  allowUsageEndpointFallback: false, // opt-in: read /usage numbers from the undocumented oauth endpoint
+  upgradeModel: 'haiku',
+  upgradeEffort: 'medium',
+  maxTurns: 30,
+};
+
+class Settings {
+  constructor(userDataDir) {
+    this.file = path.join(userDataDir, 'settings.json');
+    this.data = { ...DEFAULTS };
+    try {
+      if (fs.existsSync(this.file)) {
+        this.data = { ...DEFAULTS, ...JSON.parse(fs.readFileSync(this.file, 'utf8')) };
+      }
+    } catch (e) {
+      console.error('settings: failed to read, using defaults', e);
+    }
+  }
+  get(key) { return this.data[key]; }
+  all() { return { ...this.data }; }
+  set(key, value) {
+    this.data[key] = value;
+    this.save();
+    return this.data[key];
+  }
+  update(patch) {
+    Object.assign(this.data, patch);
+    this.save();
+    return this.all();
+  }
+  save() {
+    try {
+      fs.mkdirSync(path.dirname(this.file), { recursive: true });
+      fs.writeFileSync(this.file, JSON.stringify(this.data, null, 2));
+    } catch (e) {
+      console.error('settings: failed to save', e);
+    }
+  }
+}
+
+module.exports = { Settings, DEFAULTS };

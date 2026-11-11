@@ -1,0 +1,97 @@
+'use strict';
+// Window factories: the full-work-area transparent overlay the pet lives in,
+// and the small focusable jar panel window.
+const { BrowserWindow, screen } = require('electron');
+const path = require('path');
+
+const RENDERER = path.join(__dirname, '..', 'renderer');
+
+function createOverlay() {
+  const { workArea } = screen.getPrimaryDisplay();
+  const win = new BrowserWindow({
+    x: workArea.x,
+    y: workArea.y,
+    width: workArea.width,
+    height: workArea.height,
+    transparent: true,
+    frame: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    hasShadow: false,
+    resizable: false,
+    movable: false,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    focusable: false,
+    show: false,
+    backgroundColor: '#00000000',
+    webPreferences: {
+      preload: path.join(__dirname, 'preload-overlay.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: false,
+      backgroundThrottling: false,
+      autoplayPolicy: 'no-user-gesture-required',
+    },
+  });
+  win.setAlwaysOnTop(true, 'screen-saver');
+  win.setMenu(null);
+  // Click-through by default; the renderer toggles this while the cursor is over the pet.
+  win.setIgnoreMouseEvents(true, { forward: true });
+  win.loadFile(path.join(RENDERER, 'index.html'));
+  win.once('ready-to-show', () => win.showInactive());
+
+  // Keep the overlay matched to the work area if the taskbar or resolution changes.
+  const refit = () => {
+    if (win.isDestroyed()) return;
+    const wa = screen.getPrimaryDisplay().workArea;
+    win.setBounds({ x: wa.x, y: wa.y, width: wa.width, height: wa.height });
+    win.webContents.send('work-area', wa);
+  };
+  screen.on('display-metrics-changed', refit);
+  screen.on('display-added', refit);
+  screen.on('display-removed', refit);
+  return win;
+}
+
+function createJarWindow(parent) {
+  const { workArea } = screen.getPrimaryDisplay();
+  const width = 440;
+  const height = 640;
+  const win = new BrowserWindow({
+    width,
+    height,
+    x: workArea.x + workArea.width - width - 24,
+    y: workArea.y + workArea.height - height - 24,
+    transparent: true,
+    frame: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    hasShadow: true,
+    resizable: false,
+    minimizable: false,
+    maximizable: false,
+    show: false,
+    backgroundColor: '#00000000',
+    webPreferences: {
+      preload: path.join(__dirname, 'preload-jar.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: false,
+    },
+  });
+  win.setAlwaysOnTop(true, 'floating');
+  win.setMenu(null);
+  win.loadFile(path.join(RENDERER, 'jar.html'));
+  win.on('close', (e) => {
+    // Hide instead of destroying so state and scroll survive.
+    if (!win.__reallyClose) {
+      e.preventDefault();
+      win.hide();
+    }
+  });
+  return win;
+}
+
+module.exports = { createOverlay, createJarWindow };

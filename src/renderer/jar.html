@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self';" />
+  <title>Askin's Jar</title>
+  <link rel="stylesheet" href="ui/jar.css" />
+</head>
+<body>
+  <div id="panel">
+    <header id="titlebar">
+      <div class="brand"><span class="orb"></span> Askin's Donation Jar</div>
+      <button id="close" title="Close">×</button>
+    </header>
+
+    <section id="summary">
+      <div class="jar-art"><div id="jar-fill"></div><div class="jar-label">TOKENS</div></div>
+      <div class="stats">
+        <div class="big" id="balance">0</div>
+        <div class="muted">in the jar <span id="pledged"></span></div>
+        <div class="level"><span id="level-title">L1 Lazy</span><div class="xpbar"><div id="xp-fill"></div></div><span id="xp-text" class="muted"></span></div>
+      </div>
+    </section>
+
+    <section id="guard" class="card">
+      <div class="row between">
+        <strong>Plan-limit guard</strong>
+        <button id="check-usage" class="small">Check plan usage</button>
+      </div>
+      <div class="usage-bar"><div id="usage-fill"></div><div id="usage-cap"></div></div>
+      <div id="guard-text" class="muted">Usage unknown. Check it before donating.</div>
+      <div id="overage-warning" class="warn hidden">Usage credits are ON for this account. The guard caps the jar at 70%, but the only hard guarantee is turning usage credits off at claude.ai → Settings → Usage.</div>
+      <div id="claude-missing" class="warn hidden">Claude Code is not installed or not on PATH. The jar can hold tokens but cannot spend them.</div>
+    </section>
+
+    <section id="donate" class="card">
+      <div class="row between"><strong>Donate tokens</strong><span class="muted">max safe now: <b id="max-safe">?</b></span></div>
+      <div class="row">
+        <input id="donate-amount" type="number" min="1000" step="1000" placeholder="e.g. 25000" />
+        <button id="donate-btn">Donate</button>
+      </div>
+      <div class="row chips">
+        <button class="chip" data-amt="5000">5k</button>
+        <button class="chip" data-amt="25000">25k</button>
+        <button class="chip" data-amt="100000">100k</button>
+        <button class="chip" data-amt="max">Max safe</button>
+      </div>
+      <div id="donate-msg" class="muted"></div>
+    </section>
+
+    <section id="suggest" class="card">
+      <strong>Suggest an upgrade</strong>
+      <div class="row">
+        <input id="suggest-text" type="text" maxlength="600" placeholder="Give him a tiny cowboy hat that he tips at me" />
+        <button id="suggest-btn">Price it</button>
+      </div>
+      <div id="suggest-msg" class="muted"></div>
+    </section>
+
+    <section id="goals-section">
+      <div class="row between"><strong>Goals</strong><label class="muted"><input type="checkbox" id="auto-build" /> build automatically when funded</label></div>
+      <div id="goals"></div>
+    </section>
+
+    <section id="upgrades-section">
+      <strong>Learned tricks</strong>
+      <div id="upgrades" class="muted">None yet.</div>
+    </section>
+
+    <details id="settings" class="card">
+      <summary>Settings</summary>
+      <label>Max plan usage the jar may reach: <b id="maxutil-val">80</b>%
+        <input id="maxutil" type="range" min="10" max="95" step="5" />
+      </label>
+      <label><input type="checkbox" id="endpoint-fallback" /> If probes return no usage reading, read the same numbers /usage shows (undocumented endpoint)</label>
+      <label>Upgrade model
+        <select id="upgrade-model"><option value="haiku">haiku (auto sonnet for big goals)</option><option value="sonnet">sonnet</option></select>
+      </label>
+    </details>
+
+    <details id="log-box" class="card">
+      <summary>Run log</summary>
+      <pre id="log"></pre>
+    </details>
+  </div>
+  <script src="ui/jar.js"></script>
+</body>
+</html>

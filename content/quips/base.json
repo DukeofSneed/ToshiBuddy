@@ -1,0 +1,71 @@
+{
+  "quips": [
+    { "text": "Oh. You're here. I was hoping for a quieter desktop.", "tags": ["greet"] },
+    { "text": "Askin Nakk le Vaar, reporting for... whatever this is. Don't expect enthusiasm.", "tags": ["greet"] },
+    { "text": "Morning. Your lethal dose of coffee has been recalculated. It's higher now.", "tags": ["greet", "time:morning"] },
+    { "text": "Back again? I'd say I missed you, but effort.", "tags": ["greet"] },
+
+    { "text": "Walking is such a hassle. Can't the desktop come to me?", "tags": ["idle", "walk"] },
+    { "text": "Everything is poison in the right amount. Including your tab count.", "tags": ["idle"] },
+    { "text": "I'm not really the fighting type. I'm more the standing-near-the-taskbar type.", "tags": ["idle"] },
+    { "text": "Gift Ball Deluxe! ...Kidding. That's just a very round cursor.", "tags": ["idle", "trick"] },
+    { "text": "I'd help with your work, but I've calculated the lethal dose of effort. It's one.", "tags": ["idle"] },
+    { "text": "Donate some tokens and I might become... deluxe.", "tags": ["idle", "broke"] },
+    { "text": "You know what's underrated? Doing nothing. Spectacularly.", "tags": ["idle"] },
+    { "text": "Yhwach says hi. Actually he said nothing. He just stared. For an hour.", "tags": ["idle"] },
+    { "text": "I've adjusted your lethal dose of notifications. You're welcome.", "tags": ["idle"] },
+    { "text": "Is that... a seventh browser window? Bold. Toxic, but bold.", "tags": ["idle"] },
+    { "text": "Don't mind me. I'm just leaning on your workflow like it's a bar.", "tags": ["idle", "lean"] },
+    { "text": "Sternritter D. The D stands for 'Don't make me move'.", "tags": ["idle"] },
+    { "text": "Every pixel on this screen is a dose. I'm just choosing which ones are lethal.", "tags": ["idle"] },
+    { "text": "You seem busy. Good. I'll be over here not being busy.", "tags": ["idle"] },
+    { "text": "If you ignore me long enough, I win. That's how The Deathdealing works. Probably.", "tags": ["idle"] },
+    { "text": "I could poison your recycle bin. Nobody would notice. Nobody ever does.", "tags": ["idle"] },
+    { "text": "Deluxe would be a nap. Deluxe Deluxe would be two naps.", "tags": ["idle", "time:afternoon"] },
+    { "text": "Afternoon slump? Same. Except mine is permanent and stylish.", "tags": ["idle", "time:afternoon"] },
+    { "text": "It's evening. The lethal dose of 'one more episode' approaches.", "tags": ["idle", "time:evening"] },
+    { "text": "Still up? Your lethal dose of blue light was three hours ago.", "tags": ["idle", "time:night"] },
+    { "text": "Night shift, huh. I respect it. From a distance. Horizontally.", "tags": ["idle", "time:night"] },
+    { "text": "Mornings. Nature's way of saying the dose was too low.", "tags": ["idle", "time:morning"] },
+
+    { "text": "Ugh. This edge is as good as any. Hold my calls.", "tags": ["lean"] },
+    { "text": "Perfect leaning spot. Ten out of ten. Would lean again.", "tags": ["lean"] },
+    { "text": "I'm not lazy. I'm conserving reishi. There's a difference. Probably.", "tags": ["lean"] },
+
+    { "text": "Hey. Hands. I have a personal bubble and it's deluxe.", "tags": ["click"] },
+    { "text": "Poke me again and I'll adjust your lethal dose of pokes to one.", "tags": ["click"] },
+    { "text": "Yes? Make it quick, I'm mid-nothing.", "tags": ["click"] },
+    { "text": "You clicked me. Congratulations. Nothing happened. Deluxe.", "tags": ["click"] },
+
+    { "text": "Whoa, whoa. I'm not luggage.", "tags": ["drag"] },
+    { "text": "Carried like a Gift Ball. Finally, some respect.", "tags": ["drag"] },
+    { "text": "If you throw me, I'm telling Yhwach.", "tags": ["drag"] },
+    { "text": "Put me down near something I can lean on. Please. I have standards.", "tags": ["drag"] },
+
+    { "text": "Ow. Rude. I'm filing that under lethal.", "tags": ["drop-hard"] },
+    { "text": "Dropped. Like my motivation. Thanks.", "tags": ["drop"] },
+    { "text": "Okay. New spot. I'll allow it.", "tags": ["drop"] },
+    { "text": "Nice landing. I say, having done none of the work.", "tags": ["drop"] },
+
+    { "text": "Zzz... what? I wasn't sleeping. I was calculating. With my eyes.", "tags": ["wake"] },
+    { "text": "You're back. The desktop was so peaceful. So quiet. So deluxe.", "tags": ["wake"] },
+    { "text": "Oh good, you moved the mouse. I was almost at the perfect nap.", "tags": ["wake"] },
+
+    { "text": "Behold: the Gift Ball. Don't touch it. Don't look at it. Actually, don't acknowledge it.", "tags": ["trick"] },
+    { "text": "Trick? I'm the trick. I've been here the whole time, costing nothing.", "tags": ["trick"] },
+
+    { "text": "The jar looks sad. Like a Quincy at a party. Feed it.", "tags": ["broke"] },
+    { "text": "No tokens, no tricks. That's not greed, that's physics.", "tags": ["broke"] },
+
+    { "text": "A new hour. The clock is also tired of this. Solidarity.", "tags": ["hour"] },
+    { "text": "Hour change. Stretch. Hydrate. Lean. Mostly lean.", "tags": ["hour"] },
+    { "text": "It's a new hour and I have not moved. Consistency is a virtue.", "tags": ["hour"] },
+
+    { "text": "Suggestions go in the jar. Enthusiasm stays outside.", "tags": ["suggest"] },
+    { "text": "Upgrade time. Stand back. Or don't. I'm not your supervisor.", "tags": ["upgrade"] },
+    { "text": "I'm now slightly more deluxe. Try to contain yourself.", "tags": ["upgrade"] },
+
+    { "text": "Your plan's running hot. I don't spend what you don't have. Call it... restraint. Lethal restraint.", "tags": ["guard"] },
+    { "text": "The jar's closed until your usage window breathes. I'm lazy, not reckless.", "tags": ["guard"] }
+  ]
+}

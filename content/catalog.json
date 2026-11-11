@@ -1,0 +1,50 @@
+[
+  {
+    "title": "Party hat rack",
+    "summary": "A small rack of hats (party cone, tiny crown, Quincy cap) as head props; Askin swaps hats on the hour and comments on each one.",
+    "size": "S",
+    "goalTokens": 25000
+  },
+  {
+    "title": "Deathdealing RAM meter",
+    "summary": "An hourly behavior where Askin announces a made-up 'lethal dose' reading based on the time of day, with a pulsing Gift Ball animation and a pack of dosage quips.",
+    "size": "S",
+    "goalTokens": 30000
+  },
+  {
+    "title": "Yhwach cameo at midnight",
+    "summary": "At midnight a shadowy Yhwach silhouette prop appears behind Askin for a minute while he whispers nervous quips, then fades out.",
+    "size": "M",
+    "goalTokens": 55000
+  },
+  {
+    "title": "Gift Ball Deluxe dome",
+    "summary": "A double-click trick: a translucent purple dome animation expands around Askin with a rumble of sparkles, plus three dome-themed quips.",
+    "size": "M",
+    "goalTokens": 60000
+  },
+  {
+    "title": "Lazy stretch routine",
+    "summary": "A new idle animation where Askin stretches both arms, cracks his neck, and sighs, triggered randomly while idle with a 10 percent chance.",
+    "size": "S",
+    "goalTokens": 20000
+  },
+  {
+    "title": "Seasonal outfits",
+    "summary": "Scarf and earmuffs in winter months, sunglasses in summer, a tiny pumpkin in October: date-aware props with matching quips.",
+    "size": "M",
+    "goalTokens": 70000
+  },
+  {
+    "title": "Taskbar fishing",
+    "summary": "An interval behavior where Askin lowers a fishing line prop off the taskbar, waits, and reels in nonsense (a boot, a Gift Ball, a 'lethal dose of nothing') with quips.",
+    "size": "L",
+    "goalTokens": 140000
+  },
+  {
+    "title": "Quincy quip pack vol. 2",
+    "summary": "Forty new quips in Askin's voice about Sternritters, Soul Reapers, and the indignity of being a desktop pet, tagged for idle, lean, drag, and night.",
+    "size": "S",
+    "goalTokens": 18000
+  }
+]

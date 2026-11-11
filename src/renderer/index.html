@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data:;" />
+  <title>Askin Buddy</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="stage">
+    <div id="pet" class="idle face-right">
+      <div id="flip">
+        <div id="sprite"></div>
+      </div>
+    </div>
+    <div id="bubble" class="hidden"><div id="bubble-text"></div><div id="bubble-tail"></div></div>
+    <div id="toast" class="hidden"></div>
+  </div>
+  <script src="pet/askin.js"></script>
+  <script src="pet/quips.js"></script>
+  <script src="pet/voice.js"></script>
+  <script src="ui/bubble.js"></script>
+  <script src="mods/loader.js"></script>
+  <script src="pet/brain.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

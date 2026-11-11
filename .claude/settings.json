@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "deny": [
+      "Bash",
+      "PowerShell",
+      "WebFetch",
+      "WebSearch",
+      "Edit(src/**)",
+      "Write(src/**)",
+      "Edit(docs/**)",
+      "Write(docs/**)",
+      "Edit(prompts/**)",
+      "Write(prompts/**)",
+      "Edit(.claude/**)",
+      "Write(.claude/**)",
+      "Edit(package.json)",
+      "Write(package.json)",
+      "Edit(package-lock.json)",
+      "Write(package-lock.json)",
+      "Edit(CLAUDE.md)",
+      "Write(CLAUDE.md)"
+    ]
+  }
+}
