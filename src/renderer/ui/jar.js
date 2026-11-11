@@ -68,6 +68,14 @@
     $('maxutil-val').textContent = state.settings.maxUtilization;
     $('endpoint-fallback').checked = !!state.settings.allowUsageEndpointFallback;
     $('upgrade-model').value = state.settings.upgradeModel || 'haiku';
+    const sfxOn = state.settings.sfx !== false;
+    const vol = Math.round((state.settings.sfxVolume ?? 0.5) * 100);
+    $('sfx-on').checked = sfxOn;
+    $('sfx-vol').value = vol;
+    $('sfx-vol-val').textContent = vol;
+    $('voice-muted').checked = !!state.settings.muted;
+    AskinSfx.setEnabled(sfxOn);
+    AskinSfx.setVolume(vol / 100);
 
     $('log').textContent = (state.log || []).join('\n');
   }
@@ -142,6 +150,12 @@
   $('maxutil').onchange = (e) => jar.updateSettings({ maxUtilization: Number(e.target.value) }).then(render);
   $('endpoint-fallback').onchange = (e) => jar.updateSettings({ allowUsageEndpointFallback: e.target.checked }).then(render);
   $('upgrade-model').onchange = (e) => jar.updateSettings({ upgradeModel: e.target.value }).then(render);
+  $('sfx-on').onchange = (e) => jar.updateSettings({ sfx: e.target.checked }).then(render);
+  $('sfx-vol').oninput = (e) => { $('sfx-vol-val').textContent = e.target.value; AskinSfx.setVolume(e.target.value / 100); };
+  $('sfx-vol').onchange = (e) => jar.updateSettings({ sfxVolume: Number(e.target.value) / 100 }).then((s) => { render(s); AskinSfx.play('tick'); });
+  $('voice-muted').onchange = (e) => jar.updateSettings({ muted: e.target.checked }).then(render);
+  // Soft tick on every jar button.
+  document.addEventListener('click', (e) => { if (e.target.closest('button')) AskinSfx.play('tick'); }, true);
 
   $('goals').addEventListener('click', async (e) => {
     const b = e.target.closest('button');

@@ -16,6 +16,7 @@
     b.classList.remove('pop');
     void b.offsetWidth; // restart the pop animation
     b.classList.add('pop');
+    if (!visible && window.AskinSfx) AskinSfx.play('pop');
     visible = true;
     position();
     clearTimeout(hideTimer);

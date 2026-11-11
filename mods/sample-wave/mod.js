@@ -31,6 +31,6 @@ AskinMods.register({
   ],
   behaviors: [
     { trigger: 'click', chance: 0.3, action: { animate: 'lazy-salute', say: ['Salute. Minimal.', 'Two fingers. All you get.'] } },
-    { trigger: 'click', chance: 0.25, action: { prop: { id: 'shades', toggle: true }, say: ['Deluxe shades.', 'Shades. For the glare of your monitor.'] } },
+    { trigger: 'click', chance: 0.25, action: { prop: { id: 'shades', toggle: true }, sound: 'chirp', say: ['Deluxe shades.', 'Shades. For the glare of your monitor.'] } },
   ],
 });

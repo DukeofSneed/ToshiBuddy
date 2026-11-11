@@ -51,6 +51,7 @@
         if (a.animate !== undefined && typeof a.animate !== 'string') fail('action.animate must be a string');
         if (a.say !== undefined && typeof a.say !== 'string' && !Array.isArray(a.say)) fail('action.say must be a string or array');
         if (a.prop !== undefined && (typeof a.prop !== 'object' || !a.prop.id)) fail('action.prop needs { id, show|toggle }');
+        if (a.sound !== undefined && (!window.AskinSfx || !AskinSfx.names.includes(a.sound))) fail(`action.sound must be one of ${window.AskinSfx ? AskinSfx.names.join(', ') : 'the built-in sounds'}`);
       }
     }
     if (def.onTick !== undefined) fail('onTick is not part of the API; use behaviors');

@@ -139,6 +139,7 @@ function start() {
   ipcMain.handle('jar:donate', (_e, { tokens, goalId }) => {
     const ceiling = guard.maxSafeDonation();
     const r = ledger.donate(tokens, { ceiling, goalId });
+    if (r.accepted && overlay && !overlay.isDestroyed()) overlay.webContents.send('sfx', { name: 'coin' });
     if (r.accepted) say(pickDonationLine(r.accepted), { tags: ['donate'], animate: 'giftball' });
     if (r.pledged) say(`I'll only take ${fmt(r.accepted)} right now. The other ${fmt(r.pledged)} waits until your plan window breathes again. Lethal doses are my thing, not yours.`, { tags: ['guard'] });
     return { ...r, ceiling, state: jarState() };
@@ -146,10 +147,11 @@ function start() {
   ipcMain.handle('jar:fund', (_e, { goalId, tokens }) => ({ ...ledger.fundGoal(goalId, tokens), state: jarState() }));
   ipcMain.handle('jar:remove-goal', (_e, { goalId }) => ({ ok: ledger.removeGoal(goalId), state: jarState() }));
   ipcMain.handle('jar:settings', (_e, patch) => {
-    const allowed = ['muted', 'paused', 'autostart', 'maxUtilization', 'calibrationRunTokens', 'autoBuild', 'allowUsageEndpointFallback', 'upgradeModel', 'upgradeEffort', 'maxTurns'];
+    const allowed = ['muted', 'sfx', 'sfxVolume', 'paused', 'autostart', 'maxUtilization', 'calibrationRunTokens', 'autoBuild', 'allowUsageEndpointFallback', 'upgradeModel', 'upgradeEffort', 'maxTurns'];
     const clean = {};
     for (const k of allowed) if (k in patch) clean[k] = patch[k];
     if ('maxUtilization' in clean) clean.maxUtilization = Math.min(95, Math.max(10, Number(clean.maxUtilization) || 80));
+    if ('sfxVolume' in clean) clean.sfxVolume = Math.min(1, Math.max(0, Number(clean.sfxVolume) || 0));
     settings.update(clean);
     if ('autostart' in clean) applyAutostart();
     if (overlay && !overlay.isDestroyed()) overlay.webContents.send('settings', settings.all());
@@ -219,6 +221,7 @@ function start() {
       { label: 'Check plan usage', click: () => ipcMain.emit('__check-usage') },
       { type: 'separator' },
       { label: 'Mute voice', type: 'checkbox', checked: !!settings.get('muted'), click: (m) => toggleSetting('muted', m.checked) },
+      { label: 'Sound effects', type: 'checkbox', checked: settings.get('sfx') !== false, click: (m) => toggleSetting('sfx', m.checked) },
       { label: 'Pause wandering', type: 'checkbox', checked: !!settings.get('paused'), click: (m) => toggleSetting('paused', m.checked) },
       { label: 'Start with Windows', type: 'checkbox', checked: !!settings.get('autostart'), click: (m) => toggleSetting('autostart', m.checked) },
       { type: 'separator' },
@@ -301,6 +304,8 @@ function start() {
         fs.writeFileSync(path.join(selftestDir, 'closeup.png'), close.resize({ width: 800 }).toPNG());
         const jp = await jarWin.webContents.capturePage();
         fs.writeFileSync(path.join(selftestDir, 'jar.png'), jp.toPNG());
+        const sfxCheck = await overlay.webContents.executeJavaScript(`JSON.stringify(AskinSfx.names.map((n) => { try { return [n, AskinSfx.play(n)]; } catch (e) { return [n, 'ERR ' + e.message]; } }))`);
+        fs.writeFileSync(path.join(selftestDir, 'sfx.json'), sfxCheck);
         const probe = await overlay.webContents.executeJavaScript(`JSON.stringify({ mods: AskinMods.list(), quips: AskinQuips.all().length, mode: AskinBrain.state.mode, x: AskinBrain.state.x, y: AskinBrain.state.y, bubble: AskinBubble.isVisible(), text: document.getElementById('bubble-text').textContent, petClass: document.getElementById('pet').className, lidsTransform: getComputedStyle(document.getElementById('lids')).transform, lidsBox: (() => { const r = document.getElementById('lids').getBoundingClientRect(); return [r.top, r.height]; })(), irisBox: (() => { const r = document.querySelector('#face circle').getBoundingClientRect(); return [r.top, r.height]; })(), idle: AskinBrain.state.idleSeconds })`);
         fs.writeFileSync(path.join(selftestDir, 'state.json'), probe);
         fs.writeFileSync(path.join(selftestDir, 'log.txt'), logLines.join('\n'));

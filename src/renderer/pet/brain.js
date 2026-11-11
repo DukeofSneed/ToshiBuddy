@@ -73,6 +73,7 @@
     const dur = durationMs || BUILTIN_ANIMS[name] || (modAnims[name] && modAnims[name].durationMs);
     if (!dur) return false;
     const cls = BUILTIN_ANIMS[name] ? name : `anim-${name}`;
+    if (name === 'giftball') AskinSfx.play('shimmer');
     const el = pet();
     el.classList.remove(cls);
     void el.offsetWidth;
@@ -97,6 +98,7 @@
     const a = b.action;
     try {
       if (a.animate) playAnimation(a.animate);
+      if (a.sound) AskinSfx.play(a.sound);
       if (a.say) {
         const text = Array.isArray(a.say) ? a.say[Math.floor(Math.random() * a.say.length)] : a.say;
         say(String(text).replace(/\{(\w+)\}/g, (m, k) => (k in extra ? extra[k] : m)));
@@ -161,6 +163,7 @@
         st.vy = 0;
         setMode('idle');
         playAnimation('land');
+        AskinSfx.play(hard ? 'land-hard' : 'land');
         save();
         st.nextDecision = now() + 1500;
         if (!fire('drop', {})) quip(hard ? ['drop-hard', 'drop'] : ['drop']);
@@ -194,6 +197,7 @@
       setMode('sleep');
       AskinVoice.stop();
       AskinBubble.hide();
+      AskinSfx.play('yawn');
       fire('sleep', {});
     } else if (sec < 8 && st.mode === 'sleep') {
       wake();
@@ -201,6 +205,7 @@
   }
   function wake() {
     setMode('idle');
+    AskinSfx.play('chirp');
     st.nextDecision = now() + 2500;
     if (!fire('wake', {})) quip(['wake']);
   }
@@ -223,6 +228,7 @@
         if (!st.dragging.moved && Math.hypot(dx, dy) > 6) {
           st.dragging.moved = true;
           setMode('drag');
+          AskinSfx.play('whee');
           AskinBubble.hide();
           if (Math.random() < 0.6) quip(['drag']);
         }
@@ -250,6 +256,7 @@
         place();
       } else {
         // A plain click.
+        AskinSfx.play('boop');
         if (!fire('click', {})) { playAnimation(Math.random() < 0.5 ? 'surprised' : 'shrug'); quip(['click']); }
         st.nextDecision = now() + 2500;
       }

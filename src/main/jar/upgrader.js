@@ -21,7 +21,38 @@ const RESULT_SCHEMA = {
   required: ['title', 'slug', 'summary', 'files', 'announcement'],
 };
 
+const os = require('os');
+
 const ALLOWED_PREFIXES = ['mods/', 'content/'];
+
+// Permission rules for upgrade runs only, passed with --settings so they don't
+// restrict developer sessions in this folder. Defense in depth: the run is also
+// limited to file tools and audited before anything is committed.
+const RUN_SETTINGS = JSON.stringify({
+  permissions: {
+    deny: [
+      'Bash', 'PowerShell', 'WebFetch', 'WebSearch',
+      'Edit(src/**)', 'Write(src/**)',
+      'Edit(docs/**)', 'Write(docs/**)',
+      'Edit(prompts/**)', 'Write(prompts/**)',
+      'Edit(.claude/**)', 'Write(.claude/**)',
+      'Edit(.git/**)', 'Write(.git/**)',
+      'Edit(node_modules/**)', 'Write(node_modules/**)',
+      'Edit(package.json)', 'Write(package.json)',
+      'Edit(package-lock.json)', 'Write(package-lock.json)',
+      'Edit(CLAUDE.md)', 'Write(CLAUDE.md)',
+      'Edit(start.cmd)', 'Write(start.cmd)',
+    ],
+  },
+});
+
+// Written to a file and passed by path: inline JSON on a Windows command line
+// is fragile to quote.
+function runSettingsFile() {
+  const file = path.join(os.tmpdir(), 'askin-buddy-run-settings.json');
+  fs.writeFileSync(file, RUN_SETTINGS);
+  return file;
+}
 
 function slugify(s) {
   return String(s || 'upgrade').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'upgrade';
@@ -125,6 +156,7 @@ class Upgrader {
       '--disallowedTools', 'Bash,PowerShell,WebFetch,WebSearch,Agent,NotebookEdit',
       '--permission-mode', 'acceptEdits',
       '--permission-prompts', 'none',
+      '--settings', runSettingsFile(),
       '--append-system-prompt-file', path.join(this.projectRoot, 'prompts', 'upgrade-system.md'),
       '--json-schema', JSON.stringify(RESULT_SCHEMA),
     ];
@@ -272,4 +304,4 @@ class Upgrader {
   }
 }
 
-module.exports = { Upgrader, slugify };
+module.exports = { Upgrader, slugify, RUN_SETTINGS, runSettingsFile };

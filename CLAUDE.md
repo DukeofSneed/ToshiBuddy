@@ -16,3 +16,6 @@ runs that write mods.
 - State lives in Electron's userData folder (`settings.json`, `ledger.json`), not in the repo.
 - The plan-limit guard must never be weakened: runs are refused above the configured
   utilization cap, killed on rate-limit warnings, and capped by `--max-budget-usd`.
+- Upgrade-run permission rules live in `RUN_SETTINGS` in `src/main/jar/upgrader.js`
+  and are passed with `--settings`. Do not put deny rules in `.claude/settings.json`:
+  that file applies to every session in this folder, developer sessions included.

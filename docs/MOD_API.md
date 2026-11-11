@@ -64,7 +64,9 @@ AskinMods.register({
   `chance` 0-1 (default 1). `action` may combine `animate` (built-in: `giftball`,
   `shrug`, `think`, `wave`, `surprised`, or one of your animation names), `say`
   (string or array of strings; `{hour}` is substituted on `hour`), and
-  `prop: { id, show: true|false }` or `prop: { id, toggle: true }`.
+  `prop: { id, show: true|false }` or `prop: { id, toggle: true }`, and `sound`
+  (one built-in sound effect: `pop`, `boop`, `whee`, `land`, `land-hard`, `shimmer`,
+  `coin`, `yawn`, `chirp`, `fanfare`, `womp`, `hum`, `tick`). Mods cannot add audio files.
   When a mod handles `idle`, `click`, `dblclick`, `drop`, `wake`, or `hour`, the
   built-in reaction for that event is skipped that time.
 

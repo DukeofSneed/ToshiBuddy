@@ -9,6 +9,8 @@
   AskinApp.balance = boot.balance;
   AskinQuips.setBase(boot.quips);
   AskinVoice.setMuted(!!boot.settings.muted);
+  AskinSfx.setEnabled(boot.settings.sfx !== false);
+  AskinSfx.setVolume(boot.settings.sfxVolume ?? 0.5);
 
   await AskinMods.loadAll(boot.mods);
   AskinQuips.setFromMods(AskinMods.quips());
@@ -18,7 +20,13 @@
 
   askin.on('work-area', (wa) => AskinBrain.resize(wa));
   askin.on('idle-seconds', (sec) => AskinBrain.onIdleSeconds(sec));
-  askin.on('settings', (s) => { AskinVoice.setMuted(!!s.muted); AskinBrain.setPaused(!!s.paused); });
+  askin.on('settings', (s) => {
+    AskinVoice.setMuted(!!s.muted);
+    AskinBrain.setPaused(!!s.paused);
+    AskinSfx.setEnabled(s.sfx !== false);
+    AskinSfx.setVolume(s.sfxVolume ?? 0.5);
+  });
+  askin.on('sfx', ({ name }) => AskinSfx.play(name));
   askin.on('say', ({ text, tags, animate }) => AskinBrain.say(text, { tags: tags || [], animate }));
   askin.on('animate', ({ name, durationMs }) => AskinBrain.playAnimation(name, durationMs));
   askin.on('reload-content', () => { try { localStorage.setItem('askin.pos', JSON.stringify({ x: AskinBrain.state.x, dir: AskinBrain.state.dir })); } catch (_) {} location.reload(); });
@@ -27,6 +35,7 @@
     switch (ev.phase) {
       case 'start':
         AskinBrain.setWorking(true);
+        AskinSfx.play('hum');
         AskinBrain.say(`Fine. Working on "${ev.title}". ${ev.model === 'sonnet' ? 'Using the big brain for this one.' : 'Minimal effort, maximum deluxe.'}`, { animate: 'think' });
         break;
       case 'progress':
@@ -34,18 +43,22 @@
         break;
       case 'done':
         AskinBrain.setWorking(false);
+        AskinSfx.play('fanfare');
         AskinBrain.fire('upgrade', { title: ev.title });
         AskinBrain.say(ev.announcement || `New trick: ${ev.title}.`, { animate: 'giftball' });
         break;
       case 'paused':
         AskinBrain.setWorking(false);
+        AskinSfx.play('womp');
         AskinBrain.say(`I got halfway through "${ev.title}" and ran dry. Top up ${Math.round((ev.need || 0) / 1000)}k tokens and I'll finish. Eventually.`, { animate: 'shrug' });
         break;
       case 'failed':
         AskinBrain.setWorking(false);
+        AskinSfx.play('womp');
         AskinBrain.say(`"${ev.title}" didn't take. ${String(ev.reason || '').slice(0, 120)}. Not my fault. Probably.`, { animate: 'shrug' });
         break;
       case 'blocked':
+        AskinSfx.play('womp');
         AskinBrain.say(`Not building "${ev.title}" right now: ${ev.reason}.`, { animate: 'shrug' });
         break;
       case 'undone':

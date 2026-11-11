@@ -10,7 +10,7 @@ contextBridge.exposeInMainWorld('askin', {
   reportMod: (status) => ipcRenderer.send('overlay:mod-status', status),
   log: (...args) => ipcRenderer.send('overlay:log', args.map(String).join(' ')),
   on: (channel, handler) => {
-    const allowed = new Set(['work-area', 'idle-seconds', 'say', 'animate', 'settings', 'reload-content', 'upgrade-event']);
+    const allowed = new Set(['work-area', 'idle-seconds', 'say', 'animate', 'settings', 'reload-content', 'upgrade-event', 'sfx']);
     if (!allowed.has(channel)) return () => {};
     const wrapped = (_e, payload) => handler(payload);
     ipcRenderer.on(channel, wrapped);
