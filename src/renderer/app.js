@@ -134,6 +134,7 @@
   const style = boot.style || {};
   BuddyApp.effects = style.effects || 'ice';
   BuddyApp.noUltimate = style.ultimateForm === false;
+  BuddyApp.ownQuipsOnly = !!style.ownQuipsOnly;
   BuddyTheme.apply(style.theme);
   BuddyApp.sheetPlayers = BuddySheet.start(skin);
   // A sheet's walk can set its own ground speed so the feet match the stride.
@@ -150,7 +151,8 @@
 
   await BuddyMods.loadAll(boot.mods);
   if (BuddyMods.skipped().length) buddy.log(`mods not used on this character: ${BuddyMods.skipped().join(', ')}`);
-  BuddyQuips.setFromMods(BuddyMods.quips());
+  // Characters with "ownQuipsOnly" never use lines that mods add.
+  BuddyQuips.setFromMods(BuddyApp.ownQuipsOnly ? [] : BuddyMods.quips());
 
   BuddyJarProp.mount(boot.jar);
   buddy.on('jar-state', (s) => BuddyJarProp.update(s));
@@ -172,13 +174,12 @@
     BuddySfx.setVolume(s.sfxVolume ?? 0.5);
   });
   buddy.on('sfx', ({ name }) => BuddySfx.play(name));
-  // The main process can name event tags; the character's own line for them is
-  // used when there is one, otherwise the text it sent.
-  buddy.on('say', ({ text, animate, tags }) => {
-    if (Array.isArray(tags) && tags.length && BuddyBrain.quip(tags, { fallback: false, animate })) return;
-    BuddyBrain.say(text, { animate });
-  });
-  buddy.on('quip', ({ tags }) => { if (Array.isArray(tags)) BuddyBrain.quip(tags, { fallback: false }); });
+  // The main process never supplies speech text: it asks for the character's
+  // own line by event tag, and shows app information as a notice.
+  buddy.on('quip', ({ tags, animate }) => { if (Array.isArray(tags)) BuddyBrain.quip(tags, { fallback: false, animate }); });
+  buddy.on('toast', ({ text, ms }) => BuddyBubble.toast(String(text || ''), ms || 5000));
+  // Only for the quip editor's Say button: the user's own line, spoken as written.
+  buddy.on('say', ({ text }) => BuddyBrain.say(text));
   buddy.on('animate', ({ name, durationMs }) => BuddyBrain.playAnimation(name, durationMs));
   buddy.on('reload-content', () => { try { localStorage.setItem('buddy.pos', JSON.stringify({ x: BuddyBrain.state.x, dir: BuddyBrain.state.dir })); } catch (_) {} location.reload(); });
 
@@ -187,7 +188,7 @@
       case 'start':
         BuddyBrain.setWorking(true);
         BuddySfx.play('hum');
-        BuddyBrain.say(`Request received: "${ev.title}". Filing it properly. ${ev.model === 'sonnet' ? 'This one needs senior review.' : 'Do not hover.'}`, { animate: 'think' });
+        BuddyBubble.toast(`Building "${ev.title}"…`, 5000);
         break;
       case 'progress':
         if (ev.tokens && ev.budgetTokens) BuddyBubble.toast(`Upgrading… ${Math.round(ev.tokens / 1000)}k / ${Math.round(ev.budgetTokens / 1000)}k tokens`, 2500);
@@ -196,29 +197,24 @@
         BuddyBrain.setWorking(false);
         BuddySfx.play('fanfare');
         BuddyBrain.fire('upgrade', { title: ev.title });
-        BuddyBrain.say(ev.announcement || `"${ev.title}" is approved and in effect.`, { animate: 'frost', priority: 3 });
-        // Then an achievement line, if the character has them.
-        setTimeout(() => { if (!BuddyBubble.isVisible()) BuddyBrain.quip(['upgrade'], { fallback: false }); }, 9000);
+        BuddyBubble.toast(`New upgrade: "${ev.title}"`, 7000);
+        BuddyBrain.quip(['upgrade'], { fallback: false, animate: 'frost', priority: 3 });
         break;
       case 'paused':
         BuddyBrain.setWorking(false);
         BuddySfx.play('womp');
-        BuddyBrain.say(`"${ev.title}" is half filed. The budget ran out. I need ${Math.round((ev.need || 0) / 1000)}k more tokens to finish it.`, { animate: 'shrug' });
+        BuddyBubble.toast(`"${ev.title}" ran out of budget; it needs ${Math.round((ev.need || 0) / 1000)}k more tokens.`, 8000);
+        BuddyBrain.quip(['upgrade-failed'], { fallback: false, animate: 'shrug' });
         break;
       case 'failed':
         BuddyBrain.setWorking(false);
         BuddySfx.play('womp');
-        // The character's own setback line when it has one; the reason goes in a toast.
-        if (BuddyQuips.has(['upgrade-failed'])) {
-          BuddyBrain.quip(['upgrade-failed'], { fallback: false, animate: 'huff', priority: 3 });
-          BuddyBubble.toast(`"${ev.title}" failed: ${String(ev.reason || '').slice(0, 120)}`, 6000);
-        } else {
-          BuddyBrain.say(`"${ev.title}" was rejected. ${String(ev.reason || '').slice(0, 120)}. I am writing that down.`, { animate: 'huff', priority: 3 });
-        }
+        BuddyBubble.toast(`"${ev.title}" failed: ${String(ev.reason || '').slice(0, 120)}`, 8000);
+        BuddyBrain.quip(['upgrade-failed'], { fallback: false, animate: 'huff', priority: 3 });
         break;
       case 'blocked':
         BuddySfx.play('womp');
-        BuddyBrain.say(`"${ev.title}" is on hold: ${ev.reason}.`, { animate: 'shrug' });
+        BuddyBubble.toast(`"${ev.title}" is on hold: ${ev.reason}`, 7000);
         break;
       default:
         break;

@@ -45,6 +45,15 @@ Images can be PNG, WebP, GIF, or JPG. The pet uses the sheet when there is one.
    - `personality`: how he talks and acts, up to 600 characters. It is the only
      thing from a pack that upgrade runs see: they write his new lines in this voice.
      Images, sheets, and quips are never sent.
+   - `ownQuipsOnly`: `true` means the character only ever says lines from its own
+     `quips.json` (and your edits), never lines that upgrades or mods add. App
+     information (usage, pledges, upgrade status) always shows as a small notice,
+     not as speech.
+   - `theme`: `{ "accent": "#d92b22" }` recolors the speech bubble, the jar on screen,
+     and the app's windows while this character is out.
+   - `effects`: `"explosion"` swaps the ice effects for blasts, sparks, and booms.
+   - `ultimateForm`: `false` means donations play the show-off animation but never
+     switch to an ultimate form.
    - `scale`: image height relative to the pet (1.0 = 188 pet units).
      The image keeps its proportions; wide images extend past the sides.
    - `offsetX`, `offsetY`: nudge the image in pet units (positive y moves it down).
@@ -147,7 +156,10 @@ personality…**, or by hand in `character.json`:
   `shrug`, `wave`, `frost`, `release` (the donation transformation), `stamp`, and
   `anim-<name>` for mod animations. Anything not mapped falls back to `idle`.
 - Small marks floating near a pose ("?", "!", sparkles) are attached to the nearest
-  figure. If one lands on the wrong pose, leave a little more space around it.
+  figure. If one lands on the wrong pose, add `"moveMarks": [["3:4", "3:3"]]` to the
+  sheet settings to move the marks beside pose 3:4 over to pose 3:3.
+- `keyMax`: for a character with colors close to the background (dark hair on black),
+  set it (for example 22) so background removal stops before reaching those colors.
 
 A sheet replaces the still `skin.<ext>` / `ultimate.<ext>` images; those are used
 again if the sheet is removed or fails to load.

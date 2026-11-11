@@ -7,7 +7,7 @@
     "keyMax": 22,
     "animations": {
       "idle": {
-        "frames": "0:0-3,0:2-1",
+        "frames": "0:0-3,0:5,0:3-1",
         "fps": 3
       },
       "blink": {
@@ -19,15 +19,15 @@
         "speed": 85
       },
       "talk": {
-        "frames": "4:0-4",
+        "frames": "4:0-3",
         "fps": 6
       },
       "think": {
-        "frames": "3:3",
+        "frames": "3:2",
         "loop": false
       },
       "surprised": {
-        "frames": "3:4",
+        "frames": "3:3",
         "loop": false
       },
       "huff": {
@@ -35,49 +35,61 @@
         "loop": false
       },
       "shrug": {
-        "frames": "3:1",
+        "frames": "3:4",
         "loop": false
-      },
-      "wave": {
-        "frames": "2:8-9",
-        "fps": 3
-      },
-      "sleep": {
-        "frames": "3:7,3:8",
-        "fps": 0.7,
-        "loopFrom": 1
       },
       "drag": {
         "frames": "3:5"
       },
+      "sleep": {
+        "frames": "3:8"
+      },
       "fall": {
-        "frames": "4:5"
+        "frames": "4:5,4:6",
+        "fps": 6,
+        "loopFrom": 1
       },
       "land": {
-        "frames": "4:6"
+        "frames": "4:7",
+        "loop": false
+      },
+      "wave": {
+        "frames": "4:8",
+        "loop": false
       },
       "frost": {
-        "frames": "2:9-10",
-        "fps": 4,
+        "frames": "2:5,2:6,2:7,2:10",
+        "fps": 6,
         "loop": false
       },
       "release": {
-        "frames": "2:0,2:5,2:6,2:7,2:10",
+        "frames": "2:4,2:5,2:6,2:7,2:10,2:8,2:9",
         "fps": 5,
         "loop": false
       },
-      "stamp": {
-        "frames": "2:1"
-      },
       "working": {
-        "frames": "2:0-4",
+        "frames": "2:0-3",
         "fps": 3
+      },
+      "stamp": {
+        "frames": "2:7"
       }
-    }
+    },
+    "moveMarks": [
+      [
+        "3:3",
+        "3:2"
+      ],
+      [
+        "3:4",
+        "3:3"
+      ]
+    ]
   },
   "theme": {
     "accent": "#d92b22"
   },
   "effects": "explosion",
-  "ultimateForm": false
+  "ultimateForm": false,
+  "ownQuipsOnly": true
 }

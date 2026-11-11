@@ -405,7 +405,7 @@
     try {
       if (a.animate) playAnimation(a.animate);
       if (a.sound) BuddySfx.play(a.sound);
-      if (a.say) {
+      if (a.say && !(window.BuddyApp && BuddyApp.ownQuipsOnly)) {
         const text = Array.isArray(a.say) ? a.say[Math.floor(Math.random() * a.say.length)] : a.say;
         say(String(text).replace(/\{(\w+)\}/g, (m, k) => (k in extra ? extra[k] : m)));
       }
@@ -621,7 +621,7 @@
     requestAnimationFrame(tick);
     setTimeout(blinkLoop, 1500);
     st.timeParts.add(BuddyQuips.timeTag()); // the greeting covers this part of the day
-    if (!fire('wake', {})) setTimeout(() => quip(['greet']), 1200);
+    if (!fire('wake', {})) setTimeout(() => quip(['greet'], { animate: 'wave' }), 1200); // a bow or wave with the greeting
   }
   function resize(workArea) {
     st.stageW = workArea.width;

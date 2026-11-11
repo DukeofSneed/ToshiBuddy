@@ -123,7 +123,10 @@
 
   const median = (arr) => { const a = arr.slice().sort((x, y) => x - y); return a.length ? a[a.length >> 1] : 0; };
 
-  function detectFrames(px, w, h) {
+  // moveMarks: [["3:4", "3:3"], ...] moves the small detached bits ("?", "!")
+  // that sit beside pose 3:4 over to pose 3:3, for sheets where a mark was
+  // drawn closer to the neighboring pose than to its own.
+  function detectFrames(px, w, h, moveMarks) {
     const { label, comps } = components(px, w, h);
     const sizable = comps.filter((c) => c.area >= w * h * 0.0015);
     const medArea = median(sizable.map((c) => c.area));
@@ -162,11 +165,30 @@
       });
       if (best < 0 || bestD > maxGap) continue;
       frameOf[c.id] = best;
+      (frames[best].bits = frames[best].bits || []).push(c);
       const f = frames[best];
       f.minx = Math.min(f.minx, c.minx); f.miny = Math.min(f.miny, c.miny);
       f.maxx = Math.max(f.maxx, c.maxx); f.maxy = Math.max(f.maxy, c.maxy);
     }
     // Row baseline: where the feet are (median bottom of the main figures).
+    const at = (rc) => { const [r, c] = String(rc).split(':').map(Number); return frames.findIndex((fr) => fr.row === r && fr.col === c); };
+    const refit = (fr) => {
+      const all = [fr.main, ...(fr.bits || [])];
+      fr.minx = Math.min(...all.map((c) => c.minx)); fr.miny = Math.min(...all.map((c) => c.miny));
+      fr.maxx = Math.max(...all.map((c) => c.maxx)); fr.maxy = Math.max(...all.map((c) => c.maxy));
+    };
+    for (const pair of Array.isArray(moveMarks) ? moveMarks : []) {
+      const from = at(pair[0]), to = at(pair[1]);
+      if (from < 0 || to < 0 || from === to) continue;
+      const src = frames[from], dst = frames[to];
+      // Only bits beside the figure (center outside its body), not stray pieces of it.
+      const moving = (src.bits || []).filter((c) => { const cx = (c.minx + c.maxx) / 2; return cx < src.main.minx || cx > src.main.maxx; });
+      if (!moving.length) continue;
+      src.bits = src.bits.filter((c) => !moving.includes(c));
+      dst.bits = [...(dst.bits || []), ...moving];
+      for (const c of moving) frameOf[c.id] = to;
+      refit(src); refit(dst);
+    }
     const baselines = rows.map((r) => median(r.items.map((c) => c.maxy)));
     return { label, frameOf, frames, rows: rows.map((r) => r.items.length), baselines };
   }
@@ -273,7 +295,7 @@
       removed = keyFlood(px, w, h, Math.max(1, Math.min(80, Number(cfg.keyTolerance) || 12)), Math.max(0, Math.min(255, Number(cfg.keyMax) || 0)));
       g.putImageData(data, 0, 0);
     }
-    const det = detectFrames(px, w, h);
+    const det = detectFrames(px, w, h, cfg.moveMarks);
     if (!det.frames.length) throw new Error('no figures found on the sheet');
     const frames = cutFrames(px, w, det);
     const sheet = { frames, rows: det.rows, cfg };

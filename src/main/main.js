@@ -94,7 +94,8 @@ function start() {
   };
   const activePacks = () => {
     const d = readCharacterDialogue(PROJECT_ROOT, activeCharacterId());
-    return [...(d ? d.quips : []), ...readQuipPacks(PROJECT_ROOT)];
+    // "ownQuipsOnly": true in character.json: only the character's own file.
+    return [...(d ? d.quips : []), ...(ownQuipsOnly() ? [] : readQuipPacks(PROJECT_ROOT))];
   };
   const quipsForPet = () => quipStore().merged(activePacks());
 
@@ -169,8 +170,14 @@ function start() {
       projectRoot: PROJECT_ROOT,
     };
   }
-  function say(text, opts = {}) {
-    if (overlay && !overlay.isDestroyed()) overlay.webContents.send('say', { text, ...opts });
+  // The character only ever speaks lines from its own dialogue file. App
+  // information (usage, pledges, estimates, upgrade status) is shown as a small
+  // on-screen notice instead; quip() asks the pet for one of its own lines.
+  function notify(text, ms = 6000) {
+    if (overlay && !overlay.isDestroyed()) overlay.webContents.send('toast', { text: String(text), ms });
+  }
+  function quip(tags, opts = {}) {
+    if (overlay && !overlay.isDestroyed()) overlay.webContents.send('quip', { tags, ...opts });
   }
 
   // Seed the catalog once so there is something to fund on day one.
@@ -213,6 +220,7 @@ function start() {
     return { name: charName(), isSkin: !isBuiltinActive(), personality };
   };
   const publicSettings = () => ({ ...settings.all(), characterName: charName() });
+  const ownQuipsOnly = () => { const c = activeCharacter(); return !!(c && c.config && c.config.ownQuipsOnly); };
   // Look and feel from character.json: theme accent, effect style, ultimate form.
   const characterStyle = () => {
     const c = activeCharacter();
@@ -222,6 +230,7 @@ function start() {
       theme: accent ? { accent } : null,
       effects: cfg.effects === 'explosion' ? 'explosion' : 'ice',
       ultimateForm: cfg.ultimateForm !== false,
+      ownQuipsOnly: !!cfg.ownQuipsOnly,
     };
   };
   ipcMain.handle('app:theme', () => characterStyle().theme);
@@ -300,7 +309,7 @@ function start() {
   ipcMain.handle('custom:restore', guarded(({ key }) => { quipStore().restore(String(key)); return quipsChanged(); }));
   ipcMain.on('custom:say', (_e, { text } = {}) => {
     const t = String(text || '').trim().slice(0, 240);
-    if (t) say(t.replace(/\{name\}/g, charName()).replace(/\{hour\}/g, new Date().getHours()));
+    if (t && overlay && !overlay.isDestroyed()) overlay.webContents.send('say', { text: t.replace(/\{name\}/g, charName()).replace(/\{hour\}/g, new Date().getHours()) });
   });
 
   // ---- characters: import, export, animation mapper ----
@@ -429,11 +438,15 @@ function start() {
     if (r.accepted && overlay && !overlay.isDestroyed()) overlay.webContents.send('sfx', { name: 'coin' });
     // The jar is the thing he tends: a donation is growth (the character's
     // 'activity_bonsai' lines when it has them), a new level is a milestone.
-    if (r.accepted) say(pickDonationLine(r.accepted, characterStyle().effects), { animate: 'ultimate', tags: ['jar-grow'] });
+    if (r.accepted) {
+      if (overlay && !overlay.isDestroyed()) overlay.webContents.send('animate', { name: 'ultimate' });
+      quip(['jar-grow']);
+      notify(`+${fmt(r.accepted)} tokens in the jar`, 3500);
+    }
     if (r.accepted && ledger.level().level > levelBefore && overlay && !overlay.isDestroyed()) {
       setTimeout(() => overlay.webContents.send('quip', { tags: ['level-up'] }), 7000);
     }
-    if (r.pledged) say(`I can only accept ${fmt(r.accepted)} right now. The other ${fmt(r.pledged)} is filed as a pledge until your plan window resets. Regulations.`);
+    if (r.pledged) notify(`Only ${fmt(r.accepted)} tokens fit right now; ${fmt(r.pledged)} are pledged until your plan window resets.`, 8000);
     return { ...r, ceiling, state: jarState() };
   }
   ipcMain.handle('jar:donate', (_e, { tokens, goalId } = {}) => donate(tokens, goalId));
@@ -470,9 +483,9 @@ function start() {
     const s = await guard.refresh({ force: true });
     if (s.utilization !== null) {
       const freed = ledger.data.pledged ? ledger.releasePledges(guard.maxSafeDonation()) : 0;
-      say(usageLine(s, freed), { tags: ['guard'] });
+      notify(usageLine(s, freed), 8000);
     } else {
-      say(`I requested your plan usage and got no reply. The details are in the jar's log.`);
+      notify('No plan usage reading came back. Details are in the jar\'s log.', 7000);
     }
     return jarState();
   });
@@ -480,33 +493,33 @@ function start() {
     text = String(text || '').trim().slice(0, 600);
     if (!text) return { ok: false, error: 'empty suggestion' };
     if (!findClaude()) return { ok: false, error: 'Claude Code is not installed or not logged in' };
-    say(`"${text.slice(0, 60)}${text.length > 60 ? '…' : ''}" Noted. I'll draft a cost estimate. Estimates cost tokens too.`, { animate: 'think' });
+    notify('Pricing your suggestion…', 4000);
     const r = await estimate({ projectRoot: PROJECT_ROOT, ledger, request: text, log, character: characterInfo() });
     if (r.rateLimit) guard.observe(r.rateLimit);
-    if (!r.ok) { say(`I couldn't estimate that one: ${r.error}`); return { ok: false, error: r.error, state: jarState() }; }
+    if (!r.ok) { notify(`Couldn't price that one: ${r.error}`, 7000); return { ok: false, error: r.error, state: jarState() }; }
     if (!r.goal.feasible || r.goal.touchesCore) {
       const goal = ledger.addGoal({ ...r.goal, touchesCore: true });
-      say(r.reply || `That needs changes to my core. Outside what the jar can authorize.`);
+      notify('That idea needs changes to the app itself, which upgrades cannot make.', 7000);
       return { ok: true, goal, reply: r.reply, infeasible: true, state: jarState() };
     }
     const goal = ledger.addGoal(r.goal);
-    say(`${r.reply || 'Acceptable.'} Estimated cost: ${fmt(goal.goalTokens)} tokens. Fill the bar and I'll file it.`);
+    notify(`New goal: ${goal.title}. Estimated cost ${fmt(goal.goalTokens)} tokens.`, 7000);
     return { ok: true, goal, reply: r.reply, state: jarState() };
   });
   ipcMain.handle('jar:build', async (_e, { goalId }) => {
     const r = await upgrader.build(goalId);
-    if (!r.ok && r.reason) say(`Request denied: ${r.reason}.`, { animate: 'shrug' });
+    if (!r.ok && r.reason) notify(`Can't build: ${r.reason}.`, 7000);
     return { ...r, state: jarState() };
   });
   ipcMain.handle('jar:resume', async (_e, { goalId }) => {
     const r = await upgrader.build(goalId, { resume: true });
-    if (!r.ok && r.reason) say(`I can't resume that: ${r.reason}.`, { animate: 'shrug' });
+    if (!r.ok && r.reason) notify(`Can't resume: ${r.reason}.`, 7000);
     return { ...r, state: jarState() };
   });
   ipcMain.handle('jar:cancel-run', () => { upgrader.cancel(); return jarState(); });
   ipcMain.handle('jar:undo', async (_e, { upgradeId }) => {
     const r = await upgrader.undo(upgradeId);
-    if (r.ok) say(`Revoked. I've shredded the paperwork. It never happened.`);
+    if (r.ok) notify('Upgrade undone.', 4000);
     return { ...r, state: jarState() };
   });
 
@@ -583,7 +596,7 @@ function start() {
   }
   ipcMain.on('__check-usage', async () => {
     const s = await guard.refresh({ force: true });
-    say(s.utilization !== null ? usageLine(s, 0) : 'No usage reading came back. Check the jar.', { tags: ['guard'] });
+    notify(s.utilization !== null ? usageLine(s, 0) : 'No usage reading came back. Check the jar.', 8000);
   });
   function setSkin(name) {
     settings.set('character', name);
@@ -685,7 +698,7 @@ function start() {
           await overlay.webContents.executeJavaScript(`BuddyBrain.onIdleSeconds(0); (() => { const p=document.getElementById('pet'); const keep=['skin','has-ultimate','sheet','ultimate-sheet'].filter(c=>p.classList.contains(c)); p.className=['idle','face-right',...keep].join(' '); return 1; })()`);
         }
         // Then a bubble and the ice-crystal trick, cropped wider.
-        await overlay.webContents.executeJavaScript(`document.querySelectorAll('#pet *').forEach(e=>e.style.animationPlayState=''); BuddyBrain.say('Do not touch the crystal. It is evidence.'); BuddyBrain.playAnimation('frost'); 1`);
+        await overlay.webContents.executeJavaScript(`document.querySelectorAll('#pet *').forEach(e=>e.style.animationPlayState=''); BuddyBrain.quip(['click']); BuddyBrain.playAnimation('frost'); 1`);
         await new Promise((r) => setTimeout(r, 900));
         const cx = Math.max(0, Math.round(pos.x) - 120);
         const close = await overlay.webContents.capturePage({ x: cx, y: Math.max(0, Math.round(pos.y) - 130), width: 400, height: 330 });
@@ -794,26 +807,11 @@ function fmt(n) {
   if (n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.?0+$/, '') + 'k';
   return String(n);
 }
-// Used when the character has no "donation" (or "activity_bonsai") lines of its own.
-function pickDonationLine(tokens, effects) {
-  const lines = effects === 'explosion' ? [
-    `${fmt(tokens)} tokens? Now we're talking. Stand back!`,
-    `${fmt(tokens)} tokens. Fine, you've earned a little show. Cover your ears!`,
-    `A donation of ${fmt(tokens)}? Obviously. I deserve it.`,
-    `${fmt(tokens)} tokens! That calls for something loud.`,
-  ] : [
-    `${fmt(tokens)} tokens. Logged, stamped, and received. Stand back. Frost Release!`,
-    `A donation of ${fmt(tokens)}? I... appreciate it. Don't make it weird. Frost Release!`,
-    `${fmt(tokens)} tokens, properly declared. Fine. You've earned a demonstration.`,
-    `Received ${fmt(tokens)} tokens. This is going in the official record. Watch closely.`,
-  ];
-  return lines[Math.floor(Math.random() * lines.length)];
-}
 function usageLine(s, freed) {
   const pct = s.utilization.toFixed(0);
   const reset = s.resetsAt ? ` It resets around ${new Date(s.resetsAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}.` : '';
-  const freedLine = freed ? ` I also cleared ${fmt(freed)} pledged tokens into the jar.` : '';
-  if (s.utilization >= s.maxUtilization) return `Your plan is at ${pct}%, over my ${s.maxUtilization}% limit. The jar is frozen.${reset}${freedLine}`;
-  if (s.utilization >= s.maxUtilization - 15) return `Your plan is at ${pct}%. That's close to my ${s.maxUtilization}% limit. Spend carefully.${reset}${freedLine}`;
+  const freedLine = freed ? ` ${fmt(freed)} pledged tokens moved into the jar.` : '';
+  if (s.utilization >= s.maxUtilization) return `Plan usage ${pct}%, over the ${s.maxUtilization}% cap: the jar is paused.${reset}${freedLine}`;
+  if (s.utilization >= s.maxUtilization - 15) return `Plan usage ${pct}%, close to the ${s.maxUtilization}% cap.${reset}${freedLine}`;
   return `Your plan is at ${pct}%. Well within limits. Carry on.${freedLine}`;
 }

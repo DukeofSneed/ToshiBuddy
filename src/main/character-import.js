@@ -96,6 +96,7 @@ function cleanConfig(cfg) {
   if (cfg.theme && /^#[0-9a-f]{6}$/i.test(cfg.theme.accent || '')) out.theme = { accent: cfg.theme.accent };
   if (cfg.effects === 'explosion' || cfg.effects === 'ice') out.effects = cfg.effects;
   if (cfg.ultimateForm === false) out.ultimateForm = false;
+  if (cfg.ownQuipsOnly === true) out.ownQuipsOnly = true;
   if (cfg.mods === false || Array.isArray(cfg.mods)) out.mods = cfg.mods === false ? false : cfg.mods.map(String).filter((m) => /^[a-z0-9-]{2,40}$/.test(m)).slice(0, 50);
   if (cfg.anchors && typeof cfg.anchors === 'object') out.anchors = cleanAnchors(cfg.anchors);
   if (cfg.ultimate && typeof cfg.ultimate === 'object') {
@@ -140,6 +141,9 @@ function cleanAnimations(anims) {
 function cleanSheet(s) {
   const out = {};
   for (const k of ['scale', 'offsetX', 'offsetY', 'keyTolerance', 'keyMax']) if (Number.isFinite(Number(s[k]))) out[k] = Number(s[k]);
+  if (Array.isArray(s.moveMarks)) {
+    out.moveMarks = s.moveMarks.filter((p) => Array.isArray(p) && p.length === 2 && p.every((x) => /^\d{1,2}:\d{1,2}$/.test(String(x)))).slice(0, 50).map((p) => p.map(String));
+  }
   if (out.scale !== undefined) out.scale = Math.max(0.2, Math.min(4, out.scale));
   if (s.keyMode === 'none') out.keyMode = 'none';
   if (s.animations) out.animations = cleanAnimations(s.animations);

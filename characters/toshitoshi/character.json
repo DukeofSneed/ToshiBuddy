@@ -36,7 +36,7 @@
         "loop": false
       },
       "surprised": {
-        "frames": "3:4",
+        "frames": "3:3",
         "loop": false
       },
       "huff": {
@@ -44,45 +44,53 @@
         "loop": false
       },
       "shrug": {
-        "frames": "3:0",
+        "frames": "3:4",
         "loop": false
       },
-      "wave": {
-        "frames": "2:9-10",
-        "fps": 3
+      "drag": {
+        "frames": "3:5"
       },
       "sleep": {
         "frames": "3:6,3:7,3:8",
         "fps": 0.7,
         "loopFrom": 2
       },
-      "drag": {
-        "frames": "3:5"
-      },
       "fall": {
         "frames": "4:5"
       },
       "land": {
-        "frames": "4:6"
+        "frames": "4:6,4:7",
+        "fps": 4,
+        "loop": false
+      },
+      "wave": {
+        "frames": "4:8",
+        "loop": false
       },
       "frost": {
-        "frames": "2:8-10",
+        "frames": "2:8,2:9,2:10",
         "fps": 4,
         "loop": false
       },
       "release": {
-        "frames": "2:0,2:5,2:6,2:7,2:9,2:10",
+        "frames": "2:2,2:4,2:5,2:6,2:7,2:10",
         "fps": 5,
         "loop": false
       },
-      "stamp": {
-        "frames": "2:10"
-      },
       "working": {
-        "frames": "2:0-4",
-        "fps": 3
+        "frames": "2:0,2:1",
+        "fps": 2
+      },
+      "stamp": {
+        "frames": "2:7"
       }
-    }
+    },
+    "moveMarks": [
+      [
+        "3:4",
+        "3:3"
+      ]
+    ]
   },
   "ultimateSheet": {
     "scale": 1.1,
@@ -147,5 +155,6 @@
         "fps": 3
       }
     }
-  }
+  },
+  "ownQuipsOnly": true
 }
