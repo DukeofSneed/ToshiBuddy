@@ -63,6 +63,16 @@
       }
     }
     g.putImageData(data, 0, 0);
+    // Diagnostics for tuning keyTolerance: how much became transparent, and
+    // whether the border (which should be all background) got cleared.
+    let cleared = 0, borderCleared = 0, border = 0;
+    for (let p = 0; p < w * h; p++) {
+      const t = px[p * 4 + 3] === 0;
+      if (t) cleared++;
+      const x = p % w, y = (p / w) | 0;
+      if (x === 0 || y === 0 || x === w - 1 || y === h - 1) { border++; if (t) borderCleared++; }
+    }
+    keyOut.lastStats = { removedPct: Math.round((cleared / (w * h)) * 100), borderPct: Math.round((borderCleared / border) * 100), key: key.join(','), tol };
     return c.toDataURL('image/png');
   }
 
@@ -70,7 +80,12 @@
     const img = await loadImage(url);
     const aspect = img.naturalWidth / img.naturalHeight;
     const wantsKey = cfg.keyColor || cfg.keyMode || /\.jpe?g(\?|$)/i.test(url);
-    return { url: wantsKey && cfg.keyMode !== 'none' ? keyOut(img, cfg) : url, aspect, config: cfg };
+    if (!(wantsKey && cfg.keyMode !== 'none')) return { url, aspect, config: cfg };
+    const keyed = keyOut(img, cfg);
+    const s = keyOut.lastStats;
+    const name = decodeURIComponent(url.split('?')[0].split('/').pop());
+    askin.log(`skin ${name}: ${img.naturalWidth}x${img.naturalHeight}, background ${s.removedPct}% removed, border ${s.borderPct}% clear (key rgb ${s.key}, tolerance ${s.tol})`);
+    return { url: keyed, aspect, config: cfg };
   }
 
   async function prepareSkin(skin) {
