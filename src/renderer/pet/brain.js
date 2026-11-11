@@ -5,8 +5,16 @@
   const PET_H = 200;
   const WALK_SPEED = 42;        // px per second
   const GRAVITY = 2400;         // px per second squared
-  const DESK_ENTER_MS = 45000;  // continuous busy time before the desk comes out
-  const DESK_EXIT_MS = 40000;   // quiet time before the desk goes away
+  // The desk comes out only after sustained typing. Every 2 s the main process
+  // reports typing 0-8 (how much of those 2 s looked like typing).
+  const DESK_WINDOW_MS = 45000;   // look back this far...
+  const DESK_MIN_TYPING = 60;     // ...for this much typing (8 per fully typed 2 s)
+  const DESK_MIN_SAMPLES = 8;     // spread over at least this many samples (sustained, not one burst)
+  const DESK_PAUSE_MS = 25000;    // a pause this long gets a 'lost your train of thought?'
+  const DESK_EXIT_MS = 120000;    // no typing this long and the desk goes away
+  const INACTIVE_S = 150;         // idle seconds before an inactivity line (once per idle stretch)
+  const READING_AFTER_MS = 8 * 60 * 1000;
+  const READING_COOLDOWN_MS = 30 * 60 * 1000;
   const PAPER_EVERY_MS = 120000;
 
   const st = {
@@ -24,8 +32,15 @@
     working: false,
     lastTs: 0,
     deskEnabled: true,
-    busySince: 0,
-    lastBusyAt: 0,
+    typingLog: [],       // [{ t, k }] recent typing samples
+    lastTypingAt: 0,
+    deskPauseSaid: false,
+    inactiveSaid: false,
+    readingSince: 0,
+    lastReadingLine: 0,
+    slackNudges: 0,      // nudges during the current leisure stretch
+    timeParts: new Set(), // time-of-day greetings already given this session
+    bubblePriority: 0,
     deskKind: 'writing',
     deskSince: 0,
     papers: 0,
@@ -67,23 +82,35 @@
   }
 
   // ---- speaking ----
-  function say(text, { animate = null, ms } = {}) {
-    if (!text) return;
+  // priority: a line never replaces a more important one still on screen
+  // (an achievement isn't cut off by a random remark). Default 2 for lines the
+  // app says directly (upgrade news, jar replies).
+  function say(text, { animate = null, ms, priority = 2 } = {}) {
+    if (!text) return false;
+    if (AskinBubble.isVisible() && st.bubblePriority > priority) {
+      if (animate) playAnimation(animate);
+      return false;
+    }
     // {name} is the active character's name; on a skin, older text that says
     // "Kori" (catalog ideas, older mods) uses the skin's name instead.
     const nm = vars().name;
     text = String(text).replace(/\{name\}/g, nm);
     if (window.AskinApp && AskinApp.skin) text = text.replace(/\bKori\b/g, nm);
+    st.bubblePriority = priority;
     AskinBubble.show(text, { ms });
     pet().classList.add('talk');
     const spoke = AskinVoice.speak(text);
     if (!spoke) setTimeout(() => pet().classList.remove('talk'), Math.min(4000, 900 + text.length * 40));
     if (animate) playAnimation(animate);
+    return true;
   }
+  // opts: fallback (false = stay quiet if the character has no line for this),
+  // priority (overrides the line's own), animate, ms.
   function quip(tags, opts = {}) {
-    const text = AskinQuips.pick(tags, vars());
-    if (text) say(text, opts);
+    const e = AskinQuips.pickEntry(tags, vars(), { fallback: opts.fallback });
     st.nextQuip = now() + rand(120000, 300000);
+    if (!e) return false;
+    return say(e.text, { ...opts, priority: opts.priority != null ? opts.priority : e.priority });
   }
   function vars() {
     return { hour: new Date().getHours(), name: (window.AskinApp && AskinApp.name) || 'Kori', level: (window.AskinApp && AskinApp.level && AskinApp.level.title) || 'Recruit' };
@@ -257,36 +284,67 @@
     st.nextDecision = now() + 3000;
     if (!quiet) quip(minutes >= 20 ? ['desk-exit-long', 'desk-exit'] : ['desk-exit'], {});
   }
-  // Called by the main process every couple of seconds.
-  function onActivity({ busy, kind, leisure }) {
+  // Called by the main process every 2 seconds.
+  //   typing: 0-8, kind: coding | lab | writing | reading | leisure | null,
+  //   leisure: a game or video app (only when slacking nudges are on).
+  function onActivity({ typing = 0, kind = null, leisure = false }) {
     const t = now();
-    // A long, uninterrupted stretch of games or videos earns one dry remark.
+    const calm = ['idle', 'walk', 'lean'].includes(st.mode) && !AskinBubble.isVisible() && !st.working;
+    // A long, uninterrupted stretch of games or videos earns a dry remark; if it
+    // keeps going, a firmer one later. Being inactive never counts as slacking.
     if (leisure) {
-      if (!st.leisureSince) st.leisureSince = t;
+      if (!st.leisureSince) { st.leisureSince = t; st.slackNudges = 0; }
       const due = t - st.leisureSince >= SLACK_AFTER_MS && t - st.lastSlackNudge >= SLACK_COOLDOWN_MS;
-      if (due && ['idle', 'walk', 'lean'].includes(st.mode) && !AskinBubble.isVisible()) {
+      if (due && calm) {
         st.lastSlackNudge = t;
         playAnimation('think');
-        quip(['slacking']);
+        quip(st.slackNudges > 0 ? ['slacking-extended', 'slacking'] : ['slacking']);
+        st.slackNudges++;
       }
     } else {
       st.leisureSince = 0;
+    }
+    // Reading for a while (a PDF or e-book in front, not typing): one remark now and then.
+    if (kind === 'reading' && typing < 2) {
+      if (!st.readingSince) st.readingSince = t;
+      if (t - st.readingSince >= READING_AFTER_MS && t - st.lastReadingLine >= READING_COOLDOWN_MS && calm) {
+        st.lastReadingLine = t;
+        quip(['reading'], { fallback: false });
+      }
+    } else {
+      st.readingSince = 0;
     }
     // At the desk for a long time: remind the user to take a break.
     if (st.mode === 'desk' && t - st.deskSince >= DESK_BREAK_MS && t - st.lastDeskBreak >= DESK_BREAK_MS && !AskinBubble.isVisible()) {
       st.lastDeskBreak = t;
       quip(['desk-break']);
     }
+    // Typing history for the desk.
+    st.typingLog.push({ t, k: typing });
+    st.typingLog = st.typingLog.filter((s) => t - s.t <= DESK_WINDOW_MS);
+    if (typing >= 2) {
+      st.lastTypingAt = t;
+      st.deskPauseSaid = false;
+      if (['coding', 'lab', 'writing'].includes(kind)) st.deskKind = kind;
+    }
     if (!st.deskEnabled) { if (st.mode === 'desk') exitDesk({ quiet: true }); return; }
-    if (busy) {
-      st.lastBusyAt = t;
-      if (!st.busySince) st.busySince = t;
-      if (kind) st.deskKind = kind;
+    if (st.mode !== 'desk') {
+      // Spawn only after sustained, fairly extensive typing (not clicking around).
+      const total = st.typingLog.reduce((s, x) => s + x.k, 0);
+      const samples = st.typingLog.filter((x) => x.k >= 2).length;
       const ready = ['idle', 'walk', 'lean'].includes(st.mode) && !st.working && !st.dragging;
-      if (ready && t - st.busySince >= DESK_ENTER_MS) enterDesk(st.deskKind);
-    } else {
-      st.busySince = 0;
-      if (st.mode === 'desk' && t - st.lastBusyAt >= DESK_EXIT_MS) exitDesk();
+      if (ready && total >= DESK_MIN_TYPING && samples >= DESK_MIN_SAMPLES && t - st.lastTypingAt < 4000) {
+        enterDesk(['coding', 'lab', 'writing'].includes(kind) ? kind : 'writing');
+      }
+      return;
+    }
+    // At the desk: short pauses are fine; a longer one gets a remark; a long
+    // stretch without typing puts the desk away.
+    const quietFor = t - st.lastTypingAt;
+    if (quietFor >= DESK_EXIT_MS) { exitDesk(); return; }
+    if (quietFor >= DESK_PAUSE_MS && !st.deskPauseSaid) {
+      st.deskPauseSaid = true;
+      if (!AskinBubble.isVisible() && Math.random() < 0.6) quip(['desk-pause'], { fallback: false });
     }
   }
 
@@ -384,7 +442,13 @@
       else if (!fire('idle', {})) quip(['idle', `time:${AskinQuips.timeTag()}`]);
     }
     const h = new Date().getHours();
-    if (h !== st.lastHour) { st.lastHour = h; if (st.mode !== 'sleep' && !fire('hour', { hour: h })) quip(['hour', `time:${AskinQuips.timeTag()}`]); }
+    if (h !== st.lastHour) { st.lastHour = h; if (st.mode !== 'sleep' && !fire('hour', { hour: h })) quip(['hour'], { fallback: false }); }
+    // A new part of the day (morning -> afternoon...): its greeting, once per session.
+    const part = AskinQuips.timeTag();
+    if (!st.timeParts.has(part) && free && st.mode !== 'sleep' && !AskinBubble.isVisible() && !st.working) {
+      st.timeParts.add(part);
+      quip(['time-change'], { fallback: false });
+    }
     requestAnimationFrame(tick);
   }
 
@@ -402,6 +466,12 @@
   // ---- sleep / wake ----
   function onIdleSeconds(sec) {
     st.idleSeconds = sec;
+    // A while without input: one remark per idle stretch (never an accusation of slacking).
+    if (sec < 8) st.inactiveSaid = false;
+    else if (sec >= INACTIVE_S && sec < 300 && !st.inactiveSaid && ['idle', 'walk', 'lean'].includes(st.mode) && !AskinBubble.isVisible() && !st.working) {
+      st.inactiveSaid = true;
+      quip(['inactive'], { fallback: false });
+    }
     if (sec >= 300 && st.mode !== 'sleep' && st.mode !== 'drag' && !st.working) {
       setMode('sleep');
       AskinVoice.stop();
@@ -436,7 +506,7 @@
         const dy = e.clientY - st.dragging.sy;
         if (!st.dragging.moved && Math.hypot(dx, dy) > 6) {
           st.dragging.moved = true;
-          st.busySince = 0; // pulled away from the desk; start the timer over
+          st.typingLog = []; // pulled away; the desk timer starts over
           setMode('drag');
           AskinSfx.play('whee');
           AskinBubble.hide();
@@ -509,6 +579,7 @@
     AskinVoice.setHandlers(() => pet().classList.add('talk'), () => pet().classList.remove('talk'));
     requestAnimationFrame(tick);
     setTimeout(blinkLoop, 1500);
+    st.timeParts.add(AskinQuips.timeTag()); // the greeting covers this part of the day
     if (!fire('wake', {})) setTimeout(() => quip(['greet']), 1200);
   }
   function resize(workArea) {

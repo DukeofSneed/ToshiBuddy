@@ -11,7 +11,7 @@ contextBridge.exposeInMainWorld('askin', {
   saveSheetIndex: (skin, kind, dataUrl) => ipcRenderer.send('overlay:sheet-index', { skin, kind, dataUrl }),
   log: (...args) => ipcRenderer.send('overlay:log', args.map(String).join(' ')),
   on: (channel, handler) => {
-    const allowed = new Set(['work-area', 'idle-seconds', 'say', 'animate', 'settings', 'reload-content', 'upgrade-event', 'sfx', 'activity', 'quips']);
+    const allowed = new Set(['work-area', 'idle-seconds', 'say', 'animate', 'settings', 'reload-content', 'upgrade-event', 'sfx', 'activity', 'quips', 'quip']);
     if (!allowed.has(channel)) return () => {};
     const wrapped = (_e, payload) => handler(payload);
     ipcRenderer.on(channel, wrapped);

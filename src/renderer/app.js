@@ -165,7 +165,13 @@
     AskinSfx.setVolume(s.sfxVolume ?? 0.5);
   });
   askin.on('sfx', ({ name }) => AskinSfx.play(name));
-  askin.on('say', ({ text, animate }) => AskinBrain.say(text, { animate }));
+  // The main process can name event tags; the character's own line for them is
+  // used when there is one, otherwise the text it sent.
+  askin.on('say', ({ text, animate, tags }) => {
+    if (Array.isArray(tags) && tags.length && AskinBrain.quip(tags, { fallback: false, animate })) return;
+    AskinBrain.say(text, { animate });
+  });
+  askin.on('quip', ({ tags }) => { if (Array.isArray(tags)) AskinBrain.quip(tags, { fallback: false }); });
   askin.on('animate', ({ name, durationMs }) => AskinBrain.playAnimation(name, durationMs));
   askin.on('reload-content', () => { try { localStorage.setItem('askin.pos', JSON.stringify({ x: AskinBrain.state.x, dir: AskinBrain.state.dir })); } catch (_) {} location.reload(); });
 
@@ -183,7 +189,9 @@
         AskinBrain.setWorking(false);
         AskinSfx.play('fanfare');
         AskinBrain.fire('upgrade', { title: ev.title });
-        AskinBrain.say(ev.announcement || `"${ev.title}" is approved and in effect.`, { animate: 'frost' });
+        AskinBrain.say(ev.announcement || `"${ev.title}" is approved and in effect.`, { animate: 'frost', priority: 3 });
+        // Then an achievement line, if the character has them.
+        setTimeout(() => { if (!AskinBubble.isVisible()) AskinBrain.quip(['upgrade'], { fallback: false }); }, 9000);
         break;
       case 'paused':
         AskinBrain.setWorking(false);
@@ -193,7 +201,13 @@
       case 'failed':
         AskinBrain.setWorking(false);
         AskinSfx.play('womp');
-        AskinBrain.say(`"${ev.title}" was rejected. ${String(ev.reason || '').slice(0, 120)}. I am writing that down.`, { animate: 'huff' });
+        // The character's own setback line when it has one; the reason goes in a toast.
+        if (AskinQuips.has(['upgrade-failed'])) {
+          AskinBrain.quip(['upgrade-failed'], { fallback: false, animate: 'huff', priority: 3 });
+          AskinBubble.toast(`"${ev.title}" failed: ${String(ev.reason || '').slice(0, 120)}`, 6000);
+        } else {
+          AskinBrain.say(`"${ev.title}" was rejected. ${String(ev.reason || '').slice(0, 120)}. I am writing that down.`, { animate: 'huff', priority: 3 });
+        }
         break;
       case 'blocked':
         AskinSfx.play('womp');

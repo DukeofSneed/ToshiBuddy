@@ -27,22 +27,50 @@ function listMods(projectRoot, disabled = []) {
   return out;
 }
 
-function readQuipPacks(projectRoot) {
+// A quip pack is an array, or { quips: [...] }. Entries are strings or
+// { id?, text, tags?, weight?, cooldown? (seconds), priority? }.
+function parseQuipList(data, pack) {
+  const list = Array.isArray(data) ? data : (data && data.quips) || [];
+  const out = [];
+  for (const q of list) {
+    if (typeof q === 'string') { out.push({ text: q, tags: ['idle'], pack }); continue; }
+    if (!q || !q.text) continue;
+    const e = { text: String(q.text), tags: Array.isArray(q.tags) && q.tags.length ? q.tags.map(String) : ['idle'], weight: Number(q.weight) || 1, pack };
+    if (q.id) e.id = String(q.id);
+    if (Number.isFinite(Number(q.cooldown))) e.cooldown = Number(q.cooldown);
+    if (Number.isFinite(Number(q.priority))) e.priority = Number(q.priority);
+    out.push(e);
+  }
+  return out;
+}
+
+// content/quips/*.json. opts.skipBase leaves out base.json (Kori's lines) when a
+// skin brings its own dialogue; upgrade packs still apply.
+function readQuipPacks(projectRoot, opts = {}) {
   const dir = path.join(projectRoot, 'content', 'quips');
   const quips = [];
   let files = [];
   try { files = fs.readdirSync(dir).filter((f) => f.endsWith('.json')); } catch (_) { return quips; }
   for (const f of files) {
-    try {
-      const data = readJson(path.join(dir, f));
-      const list = Array.isArray(data) ? data : data.quips || [];
-      for (const q of list) {
-        if (typeof q === 'string') quips.push({ text: q, tags: ['idle'], pack: f });
-        else if (q && q.text) quips.push({ text: q.text, tags: q.tags || ['idle'], weight: q.weight || 1, pack: f });
-      }
-    } catch (e) { console.error(`quips: bad pack ${f}: ${e.message}`); }
+    if (opts.skipBase && f === 'base.json') continue;
+    try { quips.push(...parseQuipList(readJson(path.join(dir, f)), f)); } catch (e) { console.error(`quips: bad pack ${f}: ${e.message}`); }
   }
   return quips;
+}
+
+// A skin's own dialogue: skins/<name>/quips.json, { quips: [...] }. Returns null
+// when the skin has none. Used only by the pet itself; never sent to upgrade runs.
+function readSkinDialogue(projectRoot, skinName) {
+  if (!skinName || skinName === 'kori' || /[\\/]/.test(skinName)) return null;
+  const file = path.join(skinsRoot(projectRoot), skinName, 'quips.json');
+  if (!fs.existsSync(file)) return null;
+  try {
+    const data = readJson(file);
+    return { quips: parseQuipList(data, `skin:${skinName}`) };
+  } catch (e) {
+    console.error(`quips: bad skin dialogue ${skinName}: ${e.message}`);
+    return null;
+  }
 }
 
 // User skins: skins/<name>/ with a primary image (skin.<ext>, or the first image
@@ -91,4 +119,4 @@ function listSkins(projectRoot) {
   return out;
 }
 
-module.exports = { listMods, readQuipPacks, listSkins, skinsRoot };
+module.exports = { listMods, readQuipPacks, readSkinDialogue, parseQuipList, listSkins, skinsRoot };

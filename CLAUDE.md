@@ -22,7 +22,11 @@ Release animation; the jar spawns headless `claude -p` upgrade runs that write m
 - `skins/` holds the user's own images and is git-ignored; never commit or read
   them into prompts.
 - Desk mode reads the foreground app name and window title locally to classify
-  "writing" or "lab". Never log, store, or send those values anywhere.
+  coding, lab, writing, reading, or leisure, and infers typing from input-while-the-
+  mouse-is-still counts (never which keys). Never log, store, or send those values,
+  and never add real keyboard capture (hooks, GetAsyncKeyState on keys).
+- A skin's own dialogue lives in `skins/<name>/quips.json` (git-ignored). Like the
+  rest of `skins/`, never read it into upgrade-run prompts.
 - The plan-limit guard must never be weakened: runs are refused above the configured
   utilization cap, killed on rate-limit warnings, and capped by `--max-budget-usd`.
 - Upgrade-run permission rules live in `RUN_SETTINGS` in `src/main/jar/upgrader.js`

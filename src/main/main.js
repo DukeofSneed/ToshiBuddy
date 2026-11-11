@@ -10,7 +10,7 @@ const { Guard } = require('./jar/guard');
 const { Upgrader } = require('./jar/upgrader');
 const { Git } = require('./jar/git');
 const { estimate } = require('./jar/estimator');
-const { listMods, readQuipPacks, listSkins, skinsRoot } = require('./mods');
+const { listMods, readQuipPacks, readSkinDialogue, listSkins, skinsRoot } = require('./mods');
 const { trayIcon } = require('./tray-icon');
 const { findClaude } = require('./jar/claude');
 const { ActivityWatcher, classify } = require('./activity');
@@ -40,8 +40,19 @@ function start() {
   };
   const git = new Git(PROJECT_ROOT);
   const guard = new Guard({ ledger, settings, projectRoot: PROJECT_ROOT, log });
-  const quipStore = new QuipStore(userData);
-  const quipsForPet = () => quipStore.merged(readQuipPacks(PROJECT_ROOT));
+  // Dialogue belongs to the active character: a skin with its own quips.json uses
+  // that (plus upgrade packs) instead of Kori's base.json; edits are per character.
+  const quipStores = new Map();
+  const quipStore = () => {
+    const who = activeSkinName();
+    if (!quipStores.has(who)) quipStores.set(who, new QuipStore(userData, who));
+    return quipStores.get(who);
+  };
+  const activePacks = () => {
+    const d = readSkinDialogue(PROJECT_ROOT, activeSkinName());
+    return d ? [...d.quips, ...readQuipPacks(PROJECT_ROOT, { skipBase: true })] : readQuipPacks(PROJECT_ROOT);
+  };
+  const quipsForPet = () => quipStore().merged(activePacks());
 
   let overlay = null;
   let jarWin = null;
@@ -176,7 +187,7 @@ function start() {
 
   // ---- name and quip editor ----
   let customizeWin = null;
-  const customizeState = () => ({ name: charName(), items: quipStore.editorList(readQuipPacks(PROJECT_ROOT)) });
+  const customizeState = () => ({ name: charName(), items: quipStore().editorList(activePacks()) });
   function openCustomize() {
     if (!customizeWin || customizeWin.isDestroyed()) {
       customizeWin = createCustomizeWindow();
@@ -205,10 +216,10 @@ function start() {
     pushJar();
     return quipsChanged();
   }));
-  ipcMain.handle('custom:add', guarded(({ text, tags }) => { quipStore.add({ text, tags }); return quipsChanged(); }));
-  ipcMain.handle('custom:update', guarded(({ key, text, tags }) => { quipStore.update(String(key), { text, tags }); return quipsChanged(); }));
-  ipcMain.handle('custom:remove', guarded(({ key }) => { quipStore.remove(String(key)); return quipsChanged(); }));
-  ipcMain.handle('custom:restore', guarded(({ key }) => { quipStore.restore(String(key)); return quipsChanged(); }));
+  ipcMain.handle('custom:add', guarded(({ text, tags }) => { quipStore().add({ text, tags }); return quipsChanged(); }));
+  ipcMain.handle('custom:update', guarded(({ key, text, tags }) => { quipStore().update(String(key), { text, tags }); return quipsChanged(); }));
+  ipcMain.handle('custom:remove', guarded(({ key }) => { quipStore().remove(String(key)); return quipsChanged(); }));
+  ipcMain.handle('custom:restore', guarded(({ key }) => { quipStore().restore(String(key)); return quipsChanged(); }));
   ipcMain.on('custom:say', (_e, { text } = {}) => {
     const t = String(text || '').trim().slice(0, 240);
     if (t) say(t.replace(/\{name\}/g, charName()).replace(/\{hour\}/g, new Date().getHours()));
@@ -218,13 +229,23 @@ function start() {
   ipcMain.handle('jar:state', () => jarState());
   ipcMain.handle('jar:donate', (_e, { tokens, goalId }) => {
     const ceiling = guard.maxSafeDonation();
+    const levelBefore = ledger.level().level;
     const r = ledger.donate(tokens, { ceiling, goalId });
     if (r.accepted && overlay && !overlay.isDestroyed()) overlay.webContents.send('sfx', { name: 'coin' });
-    if (r.accepted) say(pickDonationLine(r.accepted), { animate: 'ultimate' });
+    // The jar is the thing he tends: a donation is growth (the character's
+    // 'activity_bonsai' lines when it has them), a new level is a milestone.
+    if (r.accepted) say(pickDonationLine(r.accepted), { animate: 'ultimate', tags: ['jar-grow'] });
+    if (r.accepted && ledger.level().level > levelBefore && overlay && !overlay.isDestroyed()) {
+      setTimeout(() => overlay.webContents.send('quip', { tags: ['level-up'] }), 7000);
+    }
     if (r.pledged) say(`I can only accept ${fmt(r.accepted)} right now. The other ${fmt(r.pledged)} is filed as a pledge until your plan window resets. Regulations.`);
     return { ...r, ceiling, state: jarState() };
   });
-  ipcMain.handle('jar:fund', (_e, { goalId, tokens }) => ({ ...ledger.fundGoal(goalId, tokens), state: jarState() }));
+  ipcMain.handle('jar:fund', (_e, { goalId, tokens }) => {
+    const r = ledger.fundGoal(goalId, tokens);
+    if (r && r.moved > 0 && overlay && !overlay.isDestroyed()) overlay.webContents.send('quip', { tags: ['jar-grow'] });
+    return { ...r, state: jarState() };
+  });
   ipcMain.handle('jar:remove-goal', (_e, { goalId }) => ({ ok: ledger.removeGoal(goalId), state: jarState() }));
   ipcMain.handle('jar:settings', (_e, patch) => {
     const allowed = ['muted', 'sfx', 'sfxVolume', 'paused', 'autostart', 'deskMode', 'slackNudges', 'skin', 'maxUtilization', 'calibrationRunTokens', 'autoBuild', 'allowUsageEndpointFallback', 'upgradeModel', 'upgradeEffort', 'maxTurns'];
@@ -308,10 +329,11 @@ function start() {
         titles: settings.get('deskTitles') || undefined,
       });
       const idle = powerMonitor.getSystemIdleTime();
-      const work = kind === 'writing' || kind === 'lab';
-      const busy = work && settings.get('deskMode') !== false && idle < 20;
       const leisure = kind === 'leisure' && settings.get('slackNudges') !== false && idle < 120;
-      overlay.webContents.send('activity', { busy, kind: work ? kind : null, leisure });
+      // typing: 0-8, how much of the last 2 seconds looked like typing. The desk
+      // decides from a rolling window; typing in a game never counts.
+      const typing = kind === 'leisure' ? 0 : Math.max(0, Math.min(8, Number(sample.k) || 0));
+      overlay.webContents.send('activity', { typing, kind, leisure, idle });
     },
   });
   const watcherWanted = () => settings.get('deskMode') !== false || settings.get('slackNudges') !== false;
@@ -480,6 +502,24 @@ function start() {
         fs.writeFileSync(path.join(selftestDir, 'sfx.json'), sfxCheck);
         const probe = await overlay.webContents.executeJavaScript(`JSON.stringify({ mods: AskinMods.list(), skippedMods: AskinMods.skipped(), modProps: document.querySelectorAll('#pet [data-mod]').length, surprisedAnim: (() => { const p = document.getElementById('pet'); p.classList.add('surprised'); const a = getComputedStyle(document.getElementById('sprite')).animationName; p.classList.remove('surprised'); return a; })(), quips: AskinQuips.all().length, mode: AskinBrain.state.mode, x: AskinBrain.state.x, y: AskinBrain.state.y, bubble: AskinBubble.isVisible(), text: document.getElementById('bubble-text').textContent, petClass: document.getElementById('pet').className, skin: document.getElementById('pet').classList.contains('skin'), skinImg: !!document.getElementById('skin-img'), ultimateImg: !!document.getElementById('skin-ultimate'), idle: AskinBrain.state.idleSeconds })`);
         fs.writeFileSync(path.join(selftestDir, 'state.json'), probe);
+        // Desk and dialogue, driven with simulated typing samples.
+        const deskProbe = await overlay.webContents.executeJavaScript(`(() => {
+          const B = AskinBrain, st = B.state, txt = () => document.getElementById('bubble-text').textContent, r = {};
+          document.getElementById('pet').classList.remove('ultimate'); B.exitDesk({ quiet: true }); AskinBubble.hide(); st.typingLog = [];
+          for (let i = 0; i < 30; i++) B.onActivity({ typing: 1, kind: 'writing' });
+          r.clickingAround = st.mode;
+          st.typingLog = [];
+          for (let i = 0; i < 10; i++) B.onActivity({ typing: 8, kind: 'coding' });
+          r.afterTyping = st.mode; r.deskKind = st.deskKind; r.spawnLine = txt();
+          AskinBubble.hide(); st.bubblePriority = 0; st.lastTypingAt -= 30000; Math.random = () => 0.1;
+          B.onActivity({ typing: 0, kind: 'coding' });
+          r.pauseLine = txt(); r.stillAtDesk = st.mode;
+          AskinBubble.hide(); st.lastTypingAt -= 100000; B.onActivity({ typing: 0 });
+          r.afterLongPause = st.mode; r.despawnLine = txt();
+          r.greet = AskinQuips.pick(['greet']); r.idle = AskinQuips.pick(['idle']); r.click = AskinQuips.pick(['click']);
+          return JSON.stringify(r, null, 1);
+        })()`);
+        fs.writeFileSync(path.join(selftestDir, 'desk-dialogue.json'), deskProbe);
         const labels = (m) => m.items.flatMap((i) => [i.label, ...(i.submenu ? labels(i.submenu) : [])]).filter(Boolean);
         fs.writeFileSync(path.join(selftestDir, 'menu.json'), JSON.stringify({ name: charName(), tooltipName: `${charName()} Buddy`, menu: labels(buildMenu()) }, null, 1));
         fs.writeFileSync(path.join(selftestDir, 'log.txt'), logLines.join('\n'));

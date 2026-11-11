@@ -55,6 +55,43 @@ to whichever character is active.
    Settings section has the same picker. Changes to the files apply when you re-pick
    the skin or choose **Reload mods and quips**.
 
+## Dialogue (quips.json)
+
+A skin can bring its own lines in `quips.json`. When it does, the skin uses those
+(plus any quip packs from upgrades) instead of Kori's, and its edits in **Edit
+quips…** are kept separately from Kori's.
+
+```json
+{
+  "quips": [
+    { "id": "morning_001", "tags": ["time_morning"], "text": "Good morning.", "cooldown": 0, "priority": 2 },
+    { "id": "click_001", "tags": ["click"], "text": "Was that necessary?", "cooldown": 300, "priority": 1 }
+  ]
+}
+```
+
+- `cooldown`: seconds before the same line can play again (default 600).
+- `priority`: 0-3. A line never interrupts a more important one still on screen.
+- `{name}` in a line becomes the character's name.
+- Tags and when they play:
+
+| Tag | When |
+|---|---|
+| `time_morning`, `time_afternoon`, `time_evening`, `time_night` | the greeting at startup, then the first time each part of the day comes around (once per session) |
+| `random`, `random_sleepy` | idle remarks every few minutes (sleepy ones more often at night) |
+| `click`, `drag`, `repeated_click` | clicking him, picking him up or putting him down, clicking him again and again |
+| `inactivity` | about 2.5 minutes without any input, once per stretch |
+| `inactivity_long` | waking up after you've been away 5+ minutes |
+| `desk_spawn`, `desk_typing`, `desk_idle`, `desk_despawn` | the desk comes out after sustained typing; now and then while you type; a 25-second pause; the desk goes away after 2 minutes without typing |
+| `activity_coding`, `activity_study`, `activity_work` | at the desk in a code editor, a lab (VMs, terminals), or a writing app |
+| `activity_reading` | a PDF or e-book in front for 8+ minutes without typing |
+| `activity_break` | after about 50 minutes at the desk |
+| `activity_bonsai` | donating to the jar or funding a goal (the jar is what he tends) |
+| `slacking`, `slacking_extended` | a long stretch of games or videos (only with "Nudge me when I slack off" on), and if it keeps going |
+| `achievement`, `milestone`, `failure` | an upgrade is built, the jar reaches a new level, an upgrade fails |
+
+The older tags (`greet`, `idle`, `desk-writing`, `annoyed-1`...) work too.
+
 ## Sprite sheets (frame animation)
 
 Add `sheet.png` (and optionally `ultimate-sheet.png` for the ultimate form) to the

@@ -23,12 +23,16 @@ double-click him.
 
 ## Desk mode
 
-When you've been actively using a writing app (Word, Google Docs, VS Code, Obsidian,
-Notion...) or a lab app (VMware, VirtualBox, Wireshark, PuTTY, Windows Terminal...)
-for about 45 seconds, Kori sets up a desk, scribbles with an icicle quill, stamps
-forms, and grows a paper stack. He packs up after about 40 quiet seconds. The
-foreground app is checked locally every 2 seconds and never logged, stored, or sent
-anywhere. Turn it off from the tray menu or the jar's Settings.
+After sustained typing (roughly 15 seconds of actual typing within 45 seconds), the
+pet sets up a desk, scribbles, stamps forms, and grows a paper stack. Short pauses
+are fine; he packs up after 2 minutes without typing. Clicking around or typing in a
+game never brings it out.
+
+Typing is detected without reading the keyboard: every quarter second the app checks
+whether there was input while the mouse stayed still, and keeps only a count. The
+foreground app's name and title are also checked locally (to tell coding, labs,
+writing, and reading apart, and to skip games). None of it is logged, stored, or sent
+anywhere. Turn desk mode off from the tray menu or the jar's Settings.
 
 ## Skins
 
