@@ -91,16 +91,31 @@
   async function prepareSkin(skin) {
     if (!skin) return null;
     const base = skin.config || {};
-    const primary = await prepareImage(skin.url, base);
+    // A sprite sheet, when present, replaces the still image (frames are played
+    // by AskinSheet); a broken sheet falls back to the still image.
+    let sheet = null, ultimateSheet = null;
+    if (skin.sheet) {
+      try {
+        sheet = await AskinSheet.prepare(skin.sheet.url, skin.sheet.config, { skinName: skin.name, indexKind: 'sheet', scale: base.scale });
+      } catch (e) { askin.log(`skin "${skin.name}" sheet failed: ${e.message}`); if (!skin.url) throw e; }
+    }
+    if (skin.ultimateSheet) {
+      try {
+        ultimateSheet = await AskinSheet.prepare(skin.ultimateSheet.url, skin.ultimateSheet.config, { skinName: skin.name, indexKind: 'ultimate-sheet', scale: (base.ultimate || {}).scale });
+      } catch (e) { askin.log(`skin "${skin.name}" ultimate sheet failed: ${e.message}`); }
+    }
+    const primary = sheet ? AskinSheet.asImage(sheet, base.anchors) : await prepareImage(skin.url, base);
     let ultimate = null;
-    if (skin.ultimate) {
+    if (ultimateSheet) {
+      ultimate = AskinSheet.asImage(ultimateSheet, (base.ultimate || {}).anchors);
+    } else if (skin.ultimate) {
       try {
         // The ultimate image inherits keying settings unless it sets its own.
         const ucfg = { keyMode: base.keyMode, keyTolerance: base.keyTolerance, ...skin.ultimate.config };
         ultimate = await prepareImage(skin.ultimate.url, ucfg);
       } catch (e) { askin.log(`skin "${skin.name}" ultimate image failed: ${e.message}`); }
     }
-    return { name: skin.name, primary, ultimate, ultimateSeconds: Number(base.ultimateSeconds) || null };
+    return { name: skin.name, primary, ultimate, sheet, ultimateSheet, ultimateSeconds: Number(base.ultimateSeconds) || null };
   }
 
   const boot = await askin.getBootstrap();
@@ -112,7 +127,10 @@
   document.getElementById('pet').classList.toggle('skin', !!skin);
   document.getElementById('pet').classList.toggle('has-ultimate', !!(skin && skin.ultimate));
   document.getElementById('pet').classList.toggle('show-anchors', !!boot.settings.showAnchors);
+  document.getElementById('pet').classList.toggle('sheet', !!(skin && skin.sheet));
+  document.getElementById('pet').classList.toggle('ultimate-sheet', !!(skin && skin.ultimateSheet));
   AskinApp.skin = skin;
+  AskinApp.sheetPlayers = AskinSheet.start(skin);
   AskinApp.ultimateSeconds = (skin && skin.ultimateSeconds) || Number(boot.settings.ultimateSeconds) || 30;
 
   AskinApp.level = boot.level;

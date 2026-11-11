@@ -129,6 +129,17 @@ function start() {
     const name = activeSkinName();
     return name === 'kori' ? null : listSkins(PROJECT_ROOT).find((s) => s.name === name) || null;
   };
+  // The renderer slices sprite sheets and sends back a numbered preview
+  // (sheet-index.png / ultimate-sheet-index.png) so the user can map frames.
+  ipcMain.on('overlay:sheet-index', (_e, { skin, kind, dataUrl } = {}) => {
+    try {
+      if (!['sheet', 'ultimate-sheet'].includes(kind)) return;
+      if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image/png;base64,')) return;
+      if (!listSkins(PROJECT_ROOT).some((s) => s.name === skin)) return;
+      const file = path.join(skinsRoot(PROJECT_ROOT), skin, `${kind}-index.png`);
+      fs.writeFileSync(file, Buffer.from(dataUrl.slice(22), 'base64'));
+    } catch (e) { log(`sheet index not saved: ${e.message}`); }
+  });
   ipcMain.handle('overlay:bootstrap', () => ({
     workArea: screen.getPrimaryDisplay().workArea,
     settings: settings.all(),
@@ -349,7 +360,7 @@ function start() {
         const ov = await overlay.webContents.capturePage({ x: 0, y: wa.height - 420, width: wa.width, height: 420 });
         fs.writeFileSync(path.join(selftestDir, 'overlay.png'), ov.toPNG());
         // Plain close-up at 3x: freeze him in idle with no bubble.
-        const pos = JSON.parse(await overlay.webContents.executeJavaScript(`AskinBrain.setPaused(true); AskinBubble.hide(); AskinVoice.stop(); const p=document.getElementById('pet'); const keep=['skin','has-ultimate'].filter(c=>p.classList.contains(c)); p.className=['idle','face-right',...keep].join(' '); document.querySelectorAll('#pet *').forEach(e=>e.style.animationPlayState='paused'); JSON.stringify({x: AskinBrain.state.x, y: AskinBrain.state.y})`));
+        const pos = JSON.parse(await overlay.webContents.executeJavaScript(`AskinBrain.setPaused(true); AskinBubble.hide(); AskinVoice.stop(); const p=document.getElementById('pet'); const keep=['skin','has-ultimate','sheet','ultimate-sheet'].filter(c=>p.classList.contains(c)); p.className=['idle','face-right',...keep].join(' '); document.querySelectorAll('#pet *').forEach(e=>e.style.animationPlayState='paused'); JSON.stringify({x: AskinBrain.state.x, y: AskinBrain.state.y})`));
         await new Promise((r) => setTimeout(r, 400));
         // A blink may still be in flight; wait it out.
         await overlay.webContents.executeJavaScript(`document.getElementById('pet').classList.remove('blink'); 1`);
@@ -361,6 +372,20 @@ function start() {
         }
         const plain = await overlay.webContents.capturePage({ x: Math.max(0, Math.round(pos.x)), y: Math.max(0, Math.round(pos.y)), width: 160, height: 200 });
         fs.writeFileSync(path.join(selftestDir, 'plain.png'), plain.resize({ width: 480, quality: 'best' }).toPNG());
+        // Sprite-sheet skins: one capture per pet state, to check the frame mapping.
+        if (await overlay.webContents.executeJavaScript(`window.ASKIN_SHEET_DEBUG = true; document.getElementById('pet').classList.contains('sheet')`)) {
+          for (const [k, wait] of [['walk', 500], ['talk', 500], ['think', 300], ['surprised', 300], ['huff', 300], ['drag', 300], ['fall', 300], ['sleep', 3400], ['frost', 900]]) {
+            const mode = ['walk', 'sleep', 'drag', 'fall'].includes(k) ? k : 'idle';
+            const extra = mode === k ? '' : ` ${k}`;
+            await overlay.webContents.executeJavaScript(k === 'sleep'
+              ? `AskinBrain.onIdleSeconds(400); AskinBubble.hide(); 1` // a real nap, so the brain doesn't undo it
+              : `(() => { const p=document.getElementById('pet'); const keep=['skin','has-ultimate','sheet','ultimate-sheet'].filter(c=>p.classList.contains(c)); p.className=['${mode}${extra}','face-right',...keep].join(' '); return 1; })()`);
+            await new Promise((r) => setTimeout(r, wait));
+            const shot = await overlay.webContents.capturePage({ x: Math.max(0, Math.round(pos.x) - 40), y: Math.max(0, Math.round(pos.y) - 20), width: 240, height: 220 });
+            fs.writeFileSync(path.join(selftestDir, `state-${k}.png`), shot.toPNG());
+          }
+          await overlay.webContents.executeJavaScript(`AskinBrain.onIdleSeconds(0); (() => { const p=document.getElementById('pet'); const keep=['skin','has-ultimate','sheet','ultimate-sheet'].filter(c=>p.classList.contains(c)); p.className=['idle','face-right',...keep].join(' '); return 1; })()`);
+        }
         // Then a bubble and the ice-crystal trick, cropped wider.
         await overlay.webContents.executeJavaScript(`document.querySelectorAll('#pet *').forEach(e=>e.style.animationPlayState=''); AskinBrain.say('Do not touch the crystal. It is evidence.'); AskinBrain.playAnimation('frost'); 1`);
         await new Promise((r) => setTimeout(r, 900));

@@ -241,6 +241,11 @@ html, body {
 #pet.skin.desk #skin-img { transform: translateY(-14px); transition: transform 400ms ease; }
 @keyframes skinShrug { 0%, 100% { transform: none; } 40% { transform: translateY(-4px) rotate(-4deg); } 70% { transform: translateY(-2px) rotate(3deg); } }
 @keyframes skinHop { 0%, 100% { transform: none; } 30% { transform: scale(1.06, 0.92); } 60% { transform: translateY(-10px) scale(0.97, 1.04); } }
+/* Sprite-sheet skins draw their own walking, talking, and sleeping frames. */
+#pet.skin.sheet.walk #sprite { animation: none; }
+#pet.skin.sheet.sleep #sprite { transform: none; }
+#pet.skin.sheet.talk #skin-img, #pet.skin.ultimate-sheet.talk #skin-ultimate { animation: none; }
+#pet.skin.sheet.idle #sprite { animation: none; }
 
 /* ---- speech bubble ---- */
 #bubble {

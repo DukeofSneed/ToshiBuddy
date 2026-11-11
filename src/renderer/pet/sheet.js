@@ -1,0 +1,365 @@
+// Sprite-sheet skins.
+//
+// prepare(): loads a sheet (sheet.png / ultimate-sheet.png in a skin folder),
+// removes the background, finds every drawn figure, groups the figures into rows
+// (left to right, top to bottom), and cuts each into its own frame image.
+// Small detached bits ("?", "!", sparkles) join the nearest figure.
+//
+// start(): plays frames on the skin's <image> elements. It watches the classes
+// the brain puts on #pet (walk, sleep, talk, think, ...) and picks the
+// animation configured for the most important one.
+//
+// skin.json:
+//   "sheet": {
+//     "scale": 1.0,                 // idle height relative to the pet (1.0 = 188 units)
+//     "offsetX": 0, "offsetY": 0,
+//     "keyTolerance": 12,           // background removal (see keyFlood)
+//     "animations": {
+//       "idle": { "row": 0, "frames": "0-4", "fps": 3 },
+//       "walk": { "row": 1, "frames": "0-5", "fps": 9, "flip": true },
+//       "think": { "frames": "3:2" , "loop": false }
+//     }
+//   },
+//   "ultimateSheet": { ...same, used during the ultimate form }
+//
+// frames: "0-4", "0,1,2,1", "3:2" (row 3, frame 2), "1:0-5", or an array of
+// those. flip: the frames face left, so mirror them (the pet faces right by
+// default). loop: false holds the last frame. loopFrom: index to loop back to.
+(function () {
+  'use strict';
+
+  // Most important first. anim-* (mod animations) are checked before these.
+  const ORDER = [
+    'release', 'frost', 'shrug', 'think', 'wave', 'surprised', 'huff', 'stamp', 'land',
+    'drag', 'fall', 'sleep', 'walk', 'working', 'scribbling', 'talk', 'desk', 'lean', 'blink', 'idle',
+  ];
+
+  function loadImage(url) {
+    return new Promise((resolve, reject) => {
+      const i = new Image();
+      i.onload = () => resolve(i);
+      i.onerror = () => reject(new Error('sheet image failed to load'));
+      i.src = url;
+    });
+  }
+
+  // Background removal for sheets: flood from the border, spreading to a
+  // neighbor whose color is within `tol` of the pixel it came from. That follows
+  // gradients and vignettes in the background but stops at the line art.
+  function keyFlood(px, w, h, tol) {
+    const n = w * h;
+    const seen = new Uint8Array(n);
+    const stack = new Int32Array(n);
+    let sp = 0;
+    const near = (a, b) => Math.abs(px[a * 4] - px[b * 4]) <= tol
+      && Math.abs(px[a * 4 + 1] - px[b * 4 + 1]) <= tol
+      && Math.abs(px[a * 4 + 2] - px[b * 4 + 2]) <= tol;
+    const seed = (p) => { if (!seen[p]) { seen[p] = 1; stack[sp++] = p; } };
+    for (let x = 0; x < w; x++) { seed(x); seed((h - 1) * w + x); }
+    for (let y = 0; y < h; y++) { seed(y * w); seed(y * w + w - 1); }
+    while (sp) {
+      const p = stack[--sp];
+      const x = p % w;
+      const tryq = (q) => { if (!seen[q] && near(p, q)) { seen[q] = 1; stack[sp++] = q; } };
+      if (x > 0) tryq(p - 1);
+      if (x < w - 1) tryq(p + 1);
+      if (p >= w) tryq(p - w);
+      if (p < n - w) tryq(p + w);
+    }
+    let cleared = 0;
+    for (let p = 0; p < n; p++) if (seen[p]) { px[p * 4 + 3] = 0; cleared++; }
+    // Soften the one-pixel rim left against the cleared area.
+    for (let p = 0; p < n; p++) {
+      if (seen[p]) continue;
+      const x = p % w;
+      const edge = (x > 0 && seen[p - 1]) || (x < w - 1 && seen[p + 1]) || (p >= w && seen[p - w]) || (p < n - w && seen[p + w]);
+      if (edge) px[p * 4 + 3] = Math.min(px[p * 4 + 3], 170);
+    }
+    return cleared / n;
+  }
+
+  // Connected figures (8-neighbor) on the alpha mask.
+  function components(px, w, h) {
+    const n = w * h;
+    const label = new Int32Array(n).fill(-1);
+    const stack = new Int32Array(n);
+    const comps = [];
+    for (let s = 0; s < n; s++) {
+      if (label[s] !== -1 || px[s * 4 + 3] < 100) continue;
+      const id = comps.length;
+      const c = { id, minx: w, miny: h, maxx: 0, maxy: 0, area: 0 };
+      let sp = 0;
+      stack[sp++] = s; label[s] = id;
+      while (sp) {
+        const p = stack[--sp];
+        const x = p % w, y = (p / w) | 0;
+        c.area++;
+        if (x < c.minx) c.minx = x; if (x > c.maxx) c.maxx = x;
+        if (y < c.miny) c.miny = y; if (y > c.maxy) c.maxy = y;
+        for (let dy = -1; dy <= 1; dy++) {
+          const yy = y + dy;
+          if (yy < 0 || yy >= h) continue;
+          for (let dx = -1; dx <= 1; dx++) {
+            const xx = x + dx;
+            if (xx < 0 || xx >= w) continue;
+            const q = yy * w + xx;
+            if (label[q] === -1 && px[q * 4 + 3] >= 100) { label[q] = id; stack[sp++] = q; }
+          }
+        }
+      }
+      comps.push(c);
+    }
+    return { label, comps };
+  }
+
+  const median = (arr) => { const a = arr.slice().sort((x, y) => x - y); return a.length ? a[a.length >> 1] : 0; };
+
+  function detectFrames(px, w, h) {
+    const { label, comps } = components(px, w, h);
+    const sizable = comps.filter((c) => c.area >= w * h * 0.0015);
+    const medArea = median(sizable.map((c) => c.area));
+    const big = comps.filter((c) => c.area >= medArea * 0.3);
+    const medH = median(big.map((c) => c.maxy - c.miny + 1));
+    // Group figures into rows by vertical center.
+    big.sort((a, b) => (a.miny + a.maxy) - (b.miny + b.maxy));
+    const rows = [];
+    for (const c of big) {
+      const cy = (c.miny + c.maxy) / 2;
+      let row = rows.find((r) => Math.abs(r.cy - cy) < medH * 0.45);
+      if (!row) { row = { cy, items: [] }; rows.push(row); }
+      row.items.push(c);
+      row.cy = row.items.reduce((s, i) => s + (i.miny + i.maxy) / 2, 0) / row.items.length;
+    }
+    rows.sort((a, b) => a.cy - b.cy);
+    for (const r of rows) r.items.sort((a, b) => a.minx - b.minx);
+    // Each figure becomes a frame; small bits join the nearest figure.
+    const frames = [];
+    const frameOf = new Int32Array(comps.length).fill(-1);
+    rows.forEach((r, ri) => r.items.forEach((c, ci) => {
+      frameOf[c.id] = frames.length;
+      frames.push({ row: ri, col: ci, main: c, minx: c.minx, miny: c.miny, maxx: c.maxx, maxy: c.maxy });
+    }));
+    const maxGap = medH * 0.35;
+    for (const c of comps) {
+      if (frameOf[c.id] !== -1 || c.area < 25) continue;
+      const cx = (c.minx + c.maxx) / 2, cy = (c.miny + c.maxy) / 2;
+      let best = -1, bestD = Infinity;
+      frames.forEach((f, i) => {
+        const m = f.main;
+        const dx = Math.max(m.minx - cx, 0, cx - m.maxx);
+        const dy = Math.max(m.miny - cy, 0, cy - m.maxy);
+        const d = Math.hypot(dx, dy);
+        if (d < bestD) { bestD = d; best = i; }
+      });
+      if (best < 0 || bestD > maxGap) continue;
+      frameOf[c.id] = best;
+      const f = frames[best];
+      f.minx = Math.min(f.minx, c.minx); f.miny = Math.min(f.miny, c.miny);
+      f.maxx = Math.max(f.maxx, c.maxx); f.maxy = Math.max(f.maxy, c.maxy);
+    }
+    // Row baseline: where the feet are (median bottom of the main figures).
+    const baselines = rows.map((r) => median(r.items.map((c) => c.maxy)));
+    return { label, frameOf, frames, rows: rows.map((r) => r.items.length), baselines };
+  }
+
+  function cutFrames(px, w, det) {
+    return det.frames.map((f, i) => {
+      const fw = f.maxx - f.minx + 1, fh = f.maxy - f.miny + 1;
+      const c = document.createElement('canvas');
+      c.width = fw; c.height = fh;
+      const g = c.getContext('2d');
+      const out = g.createImageData(fw, fh);
+      for (let y = 0; y < fh; y++) {
+        for (let x = 0; x < fw; x++) {
+          const p = (f.miny + y) * w + (f.minx + x);
+          const l = det.label[p];
+          if (l < 0 || det.frameOf[l] !== i) continue;
+          const o = (y * fw + x) * 4;
+          out.data[o] = px[p * 4]; out.data[o + 1] = px[p * 4 + 1]; out.data[o + 2] = px[p * 4 + 2]; out.data[o + 3] = px[p * 4 + 3];
+        }
+      }
+      g.putImageData(out, 0, 0);
+      const base = det.baselines[f.row];
+      return {
+        row: f.row, col: f.col, url: c.toDataURL('image/png'), w: fw, h: fh,
+        ox: (f.main.minx + f.main.maxx) / 2 - f.minx, // body center, from the frame's left edge
+        top: base - f.miny,                              // baseline to the frame's top
+      };
+    });
+  }
+
+  // A numbered preview of the detected frames ("row:frame") for mapping them.
+  function indexImage(canvas, frames, det) {
+    const s = Math.min(1, 1600 / canvas.width);
+    const c = document.createElement('canvas');
+    c.width = Math.round(canvas.width * s); c.height = Math.round(canvas.height * s);
+    const g = c.getContext('2d');
+    // Checkerboard so removed background is visible.
+    for (let y = 0; y < c.height; y += 16) for (let x = 0; x < c.width; x += 16) {
+      g.fillStyle = ((x + y) / 16) % 2 ? '#d8dde6' : '#f4f6fa';
+      g.fillRect(x, y, 16, 16);
+    }
+    g.drawImage(canvas, 0, 0, c.width, c.height);
+    g.font = 'bold 15px Segoe UI, sans-serif';
+    det.frames.forEach((f, i) => {
+      g.strokeStyle = '#ff3b7a'; g.lineWidth = 1.5;
+      g.strokeRect(f.minx * s, f.miny * s, (f.maxx - f.minx + 1) * s, (f.maxy - f.miny + 1) * s);
+      const t = `${frames[i].row}:${frames[i].col}`;
+      g.fillStyle = '#ff3b7a'; g.fillRect(f.minx * s, f.miny * s, g.measureText(t).width + 8, 19);
+      g.fillStyle = '#fff'; g.fillText(t, f.minx * s + 4, f.miny * s + 15);
+    });
+    det.baselines.forEach((b) => { g.strokeStyle = 'rgba(40,120,255,0.5)'; g.setLineDash([6, 4]); g.beginPath(); g.moveTo(0, b * s); g.lineTo(c.width, b * s); g.stroke(); });
+    return c.toDataURL('image/png');
+  }
+
+  // "0-4" | "0,2,1" | "3:2" | "1:0-5" | [..] -> frame indexes into the flat list.
+  function parseFrames(spec, row, sheet) {
+    const out = [];
+    const items = Array.isArray(spec) ? spec : String(spec == null ? '' : spec).split(',');
+    for (let it of items) {
+      if (typeof it === 'number') it = String(it);
+      it = String(it).trim();
+      if (!it) continue;
+      let r = Number(row) || 0;
+      let part = it;
+      if (it.includes(':')) { const [a, b] = it.split(':'); r = Number(a); part = b; }
+      let [a, b] = part.split('-').map(Number);
+      if (!Number.isFinite(b)) b = a;
+      const step = a <= b ? 1 : -1;
+      for (let c = a; step > 0 ? c <= b : c >= b; c += step) {
+        const idx = sheet.frames.findIndex((f) => f.row === r && f.col === c);
+        if (idx >= 0) out.push(idx);
+      }
+    }
+    return out;
+  }
+
+  async function prepare(url, cfg, opts = {}) {
+    cfg = cfg || {};
+    const img = await loadImage(url);
+    const w = img.naturalWidth, h = img.naturalHeight;
+    const canvas = document.createElement('canvas');
+    canvas.width = w; canvas.height = h;
+    const g = canvas.getContext('2d', { willReadFrequently: true });
+    g.drawImage(img, 0, 0);
+    const data = g.getImageData(0, 0, w, h);
+    const px = data.data;
+    // Already transparent? Then skip background removal.
+    const corners = [0, w - 1, (h - 1) * w, h * w - 1];
+    const transparent = corners.every((p) => px[p * 4 + 3] < 20);
+    let removed = null;
+    if (!transparent && cfg.keyMode !== 'none') {
+      removed = keyFlood(px, w, h, Math.max(1, Math.min(80, Number(cfg.keyTolerance) || 12)));
+      g.putImageData(data, 0, 0);
+    }
+    const det = detectFrames(px, w, h);
+    if (!det.frames.length) throw new Error('no figures found on the sheet');
+    const frames = cutFrames(px, w, det);
+    const sheet = { frames, rows: det.rows, cfg };
+
+    const anims = {};
+    const defs = cfg.animations || { idle: { row: 0, frames: `0-${det.rows[0] - 1}`, fps: 4 } };
+    for (const [key, d] of Object.entries(defs)) {
+      if (!d) continue;
+      const list = parseFrames(d.frames == null ? `0-${(det.rows[Number(d.row) || 0] || 1) - 1}` : d.frames, d.row, sheet);
+      if (!list.length) continue;
+      anims[key] = {
+        frames: list,
+        fps: Math.max(0.2, Math.min(30, Number(d.fps) || 6)),
+        flip: !!d.flip,
+        loop: d.loop !== false,
+        loopFrom: Math.max(0, Math.min(list.length - 1, Number(d.loopFrom) || 0)),
+      };
+    }
+    if (!anims.idle) anims.idle = { frames: [0], fps: 1, flip: false, loop: true, loopFrom: 0 };
+    sheet.anims = anims;
+
+    // Size: the first idle frame is `scale` x 188 pet units tall.
+    const f0 = frames[anims.idle.frames[0]];
+    const scale = Number(cfg.scale) || Number(opts.scale) || 1;
+    sheet.u = (188 * scale) / f0.top;
+    sheet.offX = Number(cfg.offsetX) || 0;
+    sheet.offY = Number(cfg.offsetY) || 0;
+
+    const name = decodeURIComponent(url.split('?')[0].split('/').pop());
+    const animList = Object.keys(anims).join(', ');
+    askin.log(`sheet ${name}: ${w}x${h}, ${removed == null ? 'already transparent' : `background ${Math.round(removed * 100)}% removed`}, ${det.rows.length} rows [${det.rows.join(', ')}] = ${frames.length} frames; animations: ${animList}`);
+    if (opts.indexKind && opts.skinName) {
+      try { askin.saveSheetIndex(opts.skinName, opts.indexKind, indexImage(canvas, frames, det)); } catch (_) { /* preview only */ }
+    }
+    return sheet;
+  }
+
+  // Box for a frame in pet units: body centered on x=80, row baseline on y=188.
+  function frameBox(sheet, f) {
+    const u = sheet.u;
+    return { x: 80 - f.ox * u + sheet.offX, y: 188 + sheet.offY - f.top * u, w: f.w * u, h: f.h * u };
+  }
+
+  // What skinAnchors()/imageBox() expect, matching the first idle frame.
+  function asImage(sheet, anchorsCfg) {
+    const f = sheet.frames[sheet.anims.idle.frames[0]];
+    const b = frameBox(sheet, f);
+    const scale = b.h / 188;
+    return {
+      url: f.url,
+      aspect: f.w / f.h,
+      config: { scale, offsetX: b.x - (80 - b.w / 2), offsetY: b.y - (188 - b.h), anchors: anchorsCfg },
+    };
+  }
+
+  function resolveKey(pet, anims) {
+    for (const c of pet.classList) if (c.startsWith('anim-') && anims[c]) return c;
+    for (const k of ORDER) if (anims[k] && pet.classList.contains(k)) return k;
+    return 'idle';
+  }
+
+  // Drives one <image> (wrapped in a <g> for mirroring) from one sheet.
+  function player(sheet, imageId) {
+    const pet = document.getElementById('pet');
+    const img = document.getElementById(imageId);
+    const wrap = document.getElementById(`${imageId}-wrap`);
+    if (!img || !wrap) return null;
+    let key = null, i = 0, timer = null;
+    function draw() {
+      const a = sheet.anims[key];
+      const f = sheet.frames[a.frames[i]];
+      const b = frameBox(sheet, f);
+      img.setAttribute('href', f.url);
+      img.setAttribute('x', b.x.toFixed(1)); img.setAttribute('y', b.y.toFixed(1));
+      img.setAttribute('width', b.w.toFixed(1)); img.setAttribute('height', b.h.toFixed(1));
+      wrap.setAttribute('transform', a.flip ? 'translate(160 0) scale(-1 1)' : '');
+    }
+    function step() {
+      const a = sheet.anims[key];
+      timer = null;
+      if (i < a.frames.length - 1) i++;
+      else if (a.loop) i = a.loopFrom;
+      else return;
+      draw();
+      timer = setTimeout(step, 1000 / a.fps);
+    }
+    function update(force) {
+      const k = resolveKey(pet, sheet.anims);
+      if (k === key && !force) return;
+      if (window.ASKIN_SHEET_DEBUG) askin.log(`sheet ${imageId}: ${key} -> ${k} (${pet.className})`);
+      key = k; i = 0;
+      clearTimeout(timer);
+      draw();
+      const a = sheet.anims[key];
+      if (a.frames.length > 1) timer = setTimeout(step, 1000 / a.fps);
+    }
+    new MutationObserver(() => update(false)).observe(pet, { attributes: true, attributeFilter: ['class'] });
+    update(true);
+    return { update, get key() { return key; } };
+  }
+
+  function start(skin) {
+    const out = {};
+    if (skin && skin.sheet) out.base = player(skin.sheet, 'skin-img');
+    if (skin && skin.ultimateSheet) out.ultimate = player(skin.ultimateSheet, 'skin-ultimate');
+    return out;
+  }
+
+  window.AskinSheet = { prepare, asImage, start, parseFrames };
+})();

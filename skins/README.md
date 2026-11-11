@@ -52,6 +52,48 @@ to whichever character is active.
    Settings section has the same picker. Changes to the files apply when you re-pick
    the skin or choose **Reload mods and quips**.
 
+## Sprite sheets (frame animation)
+
+Add `sheet.png` (and optionally `ultimate-sheet.png` for the ultimate form) to the
+skin folder. A sheet is a grid of poses with space between them; transparent or
+plain/gradient backgrounds both work. On load the app removes the background,
+finds every figure, numbers them by row and column, and writes
+`sheet-index.png` / `ultimate-sheet-index.png` next to your sheet with a
+`row:frame` label on each pose. Use those labels to map poses to animations in
+`skin.json`:
+
+```json
+"sheet": {
+  "scale": 1.0,
+  "offsetY": 2,
+  "animations": {
+    "idle":  { "frames": "0:0-4,0:3-1", "fps": 3 },
+    "blink": { "frames": "0:5" },
+    "walk":  { "frames": "1:0-5", "fps": 9, "flip": true },
+    "talk":  { "frames": "4:0-4", "fps": 6 },
+    "sleep": { "frames": "3:6,3:7,3:8", "fps": 0.7, "loopFrom": 2 },
+    "think": { "frames": "3:2", "loop": false }
+  }
+},
+"ultimateSheet": { "scale": 1.1, "animations": { "idle": { "frames": "0:0-4" } } }
+```
+
+- `frames`: `"row:frame"`, ranges like `"1:0-5"`, comma lists, or a `row` key plus
+  `"0-5"`.
+- `fps` (default 6), `loop` (`false` holds the last frame), `loopFrom` (where a loop
+  restarts, so sleep can yawn once and then stay asleep).
+- `flip: true` when the poses face left (the pet faces right by default).
+- `scale`: height of the first idle frame relative to the pet (1.0 = 188 units).
+- Animation names: `idle`, `blink`, `walk`, `talk`, `sleep`, `drag`, `fall`, `land`,
+  `lean`, `desk`, `working` (an upgrade is running), `think`, `surprised`, `huff`,
+  `shrug`, `wave`, `frost`, `release` (the donation transformation), `stamp`, and
+  `anim-<name>` for mod animations. Anything not mapped falls back to `idle`.
+- Small marks floating near a pose ("?", "!", sparkles) are attached to the nearest
+  figure. If one lands on the wrong pose, leave a little more space around it.
+
+A sheet replaces the still `skin.<ext>` / `ultimate.<ext>` images; those are used
+again if the sheet is removed or fails to load.
+
 A skin gets whole-body motion: walking bounce, landing squash, dangling when dragged,
 leaning, napping, the desk in desk mode, and the Frost Release and ultimate aura
 around it. Limb-level animations need the built-in Kori.

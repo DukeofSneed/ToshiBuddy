@@ -268,7 +268,8 @@
   }
   function skinImage(img, id) {
     const b = imageBox(img);
-    return `<image id="${id}" href="${img.url}" x="${b.x.toFixed(1)}" y="${b.y.toFixed(1)}" width="${b.w.toFixed(1)}" height="${b.h.toFixed(1)}" preserveAspectRatio="xMidYMax meet"/>`;
+    // The wrapper lets sprite-sheet animations mirror frames that face left.
+    return `<g id="${id}-wrap"><image id="${id}" href="${img.url}" x="${b.x.toFixed(1)}" y="${b.y.toFixed(1)}" width="${b.w.toFixed(1)}" height="${b.h.toFixed(1)}" preserveAspectRatio="xMidYMax meet"/></g>`;
   }
 
   // ---- prop anchors on skins ----

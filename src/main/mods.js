@@ -69,16 +69,23 @@ function listSkins(projectRoot) {
     let files = [];
     try { files = fs.readdirSync(folder).filter((f) => IMG_RE.test(f)); } catch (_) { continue; }
     const byBase = (base) => files.find((f) => f.toLowerCase().replace(IMG_RE, '') === base);
-    const primary = byBase('skin') || files.find((f) => !/^ultimate\./i.test(f));
-    if (!primary) continue;
+    // sheet.<ext> / ultimate-sheet.<ext> are sprite sheets; *-index.png are the
+    // numbered previews the app writes next to them.
+    const special = (f) => /^ultimate\./i.test(f) || /sheet/i.test(f) || /-index\.png$/i.test(f);
+    const primary = byBase('skin') || files.find((f) => !special(f));
+    const sheet = byBase('sheet');
+    const ultimateSheet = byBase('ultimate-sheet');
+    if (!primary && !sheet) continue;
     const ultimate = byBase('ultimate');
     let config = {};
     try { config = readJson(path.join(folder, 'skin.json')); } catch (_) { /* optional */ }
     out.push({
       name: e.name,
-      url: fileUrl(path.join(folder, primary)),
+      url: primary ? fileUrl(path.join(folder, primary)) : null,
       config,
       ultimate: ultimate ? { url: fileUrl(path.join(folder, ultimate)), config: config.ultimate || {} } : null,
+      sheet: sheet ? { url: fileUrl(path.join(folder, sheet)), config: config.sheet || {} } : null,
+      ultimateSheet: ultimateSheet ? { url: fileUrl(path.join(folder, ultimateSheet)), config: config.ultimateSheet || {} } : null,
     });
   }
   return out;
