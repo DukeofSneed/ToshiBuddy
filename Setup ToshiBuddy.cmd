@@ -7,6 +7,10 @@ cd /d "%~dp0"
 echo Setting up ToshiBuddy in %CD%
 echo.
 
+rem Started from inside the zip (not extracted)? Then the project isn't here.
+if not exist "%~dp0package.json" goto :notExtracted
+if not exist "%~dp0src\main\main.js" goto :notExtracted
+
 where node >nul 2>nul
 if errorlevel 1 goto :needNode
 goto :haveNode
@@ -28,6 +32,16 @@ if exist "node_modules\electron\dist\electron.exe" goto :haveElectron
 echo Downloading the runtime (one time, about 100 MB)...
 call npm.cmd install --no-audit --no-fund
 if errorlevel 1 goto :npmFailed
+if exist "node_modules\electron\dist\electron.exe" goto :haveElectron
+
+rem The package installed but its runtime download didn't finish (network,
+rem antivirus, or install scripts turned off). Fetch it directly.
+echo The runtime download did not finish. Trying again...
+if exist "node_modules\electron\install.js" call node "node_modules\electron\install.js"
+if exist "node_modules\electron\dist\electron.exe" goto :haveElectron
+call npm.cmd rebuild electron --no-audit --no-fund
+if exist "node_modules\electron\dist\electron.exe" goto :haveElectron
+goto :electronFailed
 
 :haveElectron
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\make-shortcut.ps1"
@@ -38,6 +52,21 @@ echo Optional: jar upgrades also need Git and Claude Code signed in. See README.
 start "" "%~dp0node_modules\electron\dist\electron.exe" "%~dp0."
 timeout /t 6 >nul
 exit /b 0
+
+:notExtracted
+echo This setup is running from inside the zip file, so the project isn't here.
+echo Right-click ToshiBuddy.zip, choose "Extract All...", open the extracted
+echo ToshiBuddy folder, and double-click "Setup ToshiBuddy.cmd" in there.
+pause
+exit /b 1
+
+:electronFailed
+echo The runtime (Electron) could not be downloaded.
+echo Check the internet connection. If antivirus or a firewall blocks downloads
+echo from github.com, allow it for a moment, then run this setup again.
+echo If it keeps failing, delete the node_modules folder here and run setup again.
+pause
+exit /b 1
 
 :noWinget
 echo Install Node.js LTS from https://nodejs.org, then run this setup again.
