@@ -74,6 +74,13 @@
     $('sfx-vol').value = vol;
     $('sfx-vol-val').textContent = vol;
     $('voice-muted').checked = !!state.settings.muted;
+    $('desk-mode').checked = state.settings.deskMode !== false;
+    const skinSel = $('skin');
+    const opts = [''].concat(state.skins || []);
+    if (skinSel.options.length !== opts.length || opts.some((v, i) => skinSel.options[i].value !== v)) {
+      skinSel.innerHTML = opts.map((v) => `<option value="${esc(v)}">${v ? esc(v) : 'Kori (built-in)'}</option>`).join('');
+    }
+    skinSel.value = state.settings.skin || '';
     AskinSfx.setEnabled(sfxOn);
     AskinSfx.setVolume(vol / 100);
 
@@ -154,6 +161,8 @@
   $('sfx-vol').oninput = (e) => { $('sfx-vol-val').textContent = e.target.value; AskinSfx.setVolume(e.target.value / 100); };
   $('sfx-vol').onchange = (e) => jar.updateSettings({ sfxVolume: Number(e.target.value) / 100 }).then((s) => { render(s); AskinSfx.play('tick'); });
   $('voice-muted').onchange = (e) => jar.updateSettings({ muted: e.target.checked }).then(render);
+  $('desk-mode').onchange = (e) => jar.updateSettings({ deskMode: e.target.checked }).then(render);
+  $('skin').onchange = (e) => jar.updateSettings({ skin: e.target.value }).then(render);
   // Soft tick on every jar button.
   document.addEventListener('click', (e) => { if (e.target.closest('button')) AskinSfx.play('tick'); }, true);
 

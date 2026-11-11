@@ -93,7 +93,7 @@
       noise(t, { dur: 0.14, type: 'lowpass', freq: 900, to: 200, gain: 0.45 });
       tone(t + 0.12, { freq: 900, to: 700, dur: 0.12, type: 'triangle', gain: 0.1 });
     },
-    // Gift Ball trick (also plays on donations).
+    // Ice-crystal trick.
     shimmer(t) {
       noise(t, { dur: 0.7, freq: 700, to: 6500, q: 4, gain: 0.16, attack: 0.08 });
       [880, 1109, 1319, 1760, 2217].forEach((f, i) => tone(t + 0.05 + i * 0.075, { freq: f, dur: 0.45, gain: 0.16 }));
@@ -133,6 +133,41 @@
     // Jar buttons.
     tick(t) {
       tone(t, { freq: 1800, to: 1500, dur: 0.035, gain: 0.15 });
+    },
+    // Ice forming: a fast run of crackles over a falling sparkle.
+    freeze(t) {
+      for (let i = 0; i < 14; i++) {
+        noise(t + i * 0.028 + Math.random() * 0.01, { dur: 0.03, type: 'highpass', freq: 3000 + Math.random() * 3000, gain: 0.12 + Math.random() * 0.08 });
+      }
+      tone(t, { freq: 2600, to: 900, dur: 0.5, gain: 0.08 });
+      tone(t + 0.05, { freq: 3900, to: 1400, dur: 0.45, gain: 0.05 });
+    },
+    // Crystal bell: inharmonic partials with a long ring.
+    chime(t) {
+      const base = 1320;
+      [[1, 0.2, 1.6], [2.76, 0.09, 1.1], [5.4, 0.05, 0.7], [8.93, 0.03, 0.45]].forEach(([r, g, d]) => tone(t, { freq: base * r, dur: d, gain: g, attack: 0.002 }));
+      [[1, 0.12, 1.4], [2.76, 0.06, 0.9]].forEach(([r, g, d]) => tone(t + 0.16, { freq: base * 1.5 * r, dur: d, gain: g, attack: 0.002 }));
+    },
+    // Blizzard gust.
+    blizzard(t) {
+      noise(t, { dur: 2.4, type: 'bandpass', freq: 400, to: 1800, q: 0.8, gain: 0.22, attack: 0.5 });
+      noise(t + 0.3, { dur: 2.0, type: 'bandpass', freq: 2500, to: 700, q: 2, gain: 0.08, attack: 0.4 });
+    },
+    // Rubber stamp on paper.
+    stamp(t) {
+      tone(t, { freq: 140, to: 70, dur: 0.12, gain: 0.5 });
+      noise(t, { dur: 0.06, type: 'bandpass', freq: 1800, q: 1.5, gain: 0.3 });
+    },
+    // Quill scratching.
+    scribble(t) {
+      for (let i = 0; i < 5; i++) {
+        noise(t + i * 0.09 + Math.random() * 0.03, { dur: 0.06 + Math.random() * 0.04, type: 'bandpass', freq: 4500 + Math.random() * 2500, q: 6, gain: 0.05 });
+      }
+    },
+    // An annoyed little huff.
+    huff(t) {
+      noise(t, { dur: 0.32, type: 'bandpass', freq: 900, to: 500, q: 1.2, gain: 0.2, attack: 0.02 });
+      tone(t, { freq: 300, to: 220, dur: 0.2, type: 'triangle', gain: 0.08 });
     },
   };
 

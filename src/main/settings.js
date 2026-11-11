@@ -8,6 +8,10 @@ const DEFAULTS = {
   sfx: true,        // sound effects
   sfxVolume: 0.5,   // 0-1
   paused: false,
+  deskMode: true,   // sit at the desk while the user writes or does labs
+  deskApps: null,   // override { writing: [...process names], lab: [...] }
+  deskTitles: null, // override { writing: [...title keywords], lab: [...] }
+  skin: '',         // '' = Kori; otherwise a folder name under skins/
   autostart: false,
   // Plan-limit guard
   maxUtilization: 80,          // percent of the binding plan window the jar may use

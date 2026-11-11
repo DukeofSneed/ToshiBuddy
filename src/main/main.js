@@ -9,9 +9,10 @@ const { Guard } = require('./jar/guard');
 const { Upgrader } = require('./jar/upgrader');
 const { Git } = require('./jar/git');
 const { estimate } = require('./jar/estimator');
-const { listMods, readQuipPacks } = require('./mods');
+const { listMods, readQuipPacks, listSkins } = require('./mods');
 const { trayIcon } = require('./tray-icon');
 const { findClaude } = require('./jar/claude');
+const { ActivityWatcher, classify } = require('./activity');
 
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
 
@@ -19,7 +20,7 @@ if (!app.requestSingleInstanceLock()) {
   app.quit();
 } else {
   app.commandLine.appendSwitch('disable-renderer-backgrounding');
-  // The overlay never gets a click before Askin's first line; let Web Audio start anyway.
+  // The overlay never gets a click before the pet's first line; let Web Audio start anyway.
   app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
   app.whenReady().then(start);
 }
@@ -89,6 +90,7 @@ function start() {
       settings: settings.all(),
       busy: upgrader.isBusy(),
       claudeInstalled: !!findClaude(),
+      skins: listSkins(PROJECT_ROOT).map((s) => s.name),
       log: logLines.slice(-80),
       projectRoot: PROJECT_ROOT,
     };
@@ -113,9 +115,14 @@ function start() {
     if (overlay && !overlay.isDestroyed()) overlay.setIgnoreMouseEvents(ignore, { forward: true });
   });
   ipcMain.on('overlay:log', (_e, line) => log(`renderer: ${line}`));
+  const currentSkin = () => {
+    const want = settings.get('skin');
+    return want ? listSkins(PROJECT_ROOT).find((s) => s.name === want) || null : null;
+  };
   ipcMain.handle('overlay:bootstrap', () => ({
     workArea: screen.getPrimaryDisplay().workArea,
     settings: settings.all(),
+    skin: currentSkin(),
     mods: listMods(PROJECT_ROOT, ledger.data.disabledMods),
     quips: readQuipPacks(PROJECT_ROOT),
     level: ledger.level(),
@@ -140,21 +147,24 @@ function start() {
     const ceiling = guard.maxSafeDonation();
     const r = ledger.donate(tokens, { ceiling, goalId });
     if (r.accepted && overlay && !overlay.isDestroyed()) overlay.webContents.send('sfx', { name: 'coin' });
-    if (r.accepted) say(pickDonationLine(r.accepted), { tags: ['donate'], animate: 'giftball' });
-    if (r.pledged) say(`I'll only take ${fmt(r.accepted)} right now. The other ${fmt(r.pledged)} waits until your plan window breathes again. Lethal doses are my thing, not yours.`, { tags: ['guard'] });
+    if (r.accepted) say(pickDonationLine(r.accepted), { animate: 'release' });
+    if (r.pledged) say(`I can only accept ${fmt(r.accepted)} right now. The other ${fmt(r.pledged)} is filed as a pledge until your plan window resets. Regulations.`);
     return { ...r, ceiling, state: jarState() };
   });
   ipcMain.handle('jar:fund', (_e, { goalId, tokens }) => ({ ...ledger.fundGoal(goalId, tokens), state: jarState() }));
   ipcMain.handle('jar:remove-goal', (_e, { goalId }) => ({ ok: ledger.removeGoal(goalId), state: jarState() }));
   ipcMain.handle('jar:settings', (_e, patch) => {
-    const allowed = ['muted', 'sfx', 'sfxVolume', 'paused', 'autostart', 'maxUtilization', 'calibrationRunTokens', 'autoBuild', 'allowUsageEndpointFallback', 'upgradeModel', 'upgradeEffort', 'maxTurns'];
+    const allowed = ['muted', 'sfx', 'sfxVolume', 'paused', 'autostart', 'deskMode', 'skin', 'maxUtilization', 'calibrationRunTokens', 'autoBuild', 'allowUsageEndpointFallback', 'upgradeModel', 'upgradeEffort', 'maxTurns'];
     const clean = {};
     for (const k of allowed) if (k in patch) clean[k] = patch[k];
+    const skinChanged = 'skin' in clean && clean.skin !== settings.get('skin');
+    if ('skin' in clean && clean.skin && !listSkins(PROJECT_ROOT).some((s) => s.name === clean.skin)) clean.skin = '';
     if ('maxUtilization' in clean) clean.maxUtilization = Math.min(95, Math.max(10, Number(clean.maxUtilization) || 80));
     if ('sfxVolume' in clean) clean.sfxVolume = Math.min(1, Math.max(0, Number(clean.sfxVolume) || 0));
     settings.update(clean);
     if ('autostart' in clean) applyAutostart();
     if (overlay && !overlay.isDestroyed()) overlay.webContents.send('settings', settings.all());
+    if (skinChanged) reloadAndAwaitMods([], 1000);
     refreshTray();
     return jarState();
   });
@@ -164,7 +174,7 @@ function start() {
       const freed = ledger.data.pledged ? ledger.releasePledges(guard.maxSafeDonation()) : 0;
       say(usageLine(s, freed), { tags: ['guard'] });
     } else {
-      say(`I asked Claude how tired your plan is and got no answer. Check the jar for details.`, { tags: ['guard'] });
+      say(`I requested your plan usage and got no reply. The details are in the jar's log.`);
     }
     return jarState();
   });
@@ -172,33 +182,33 @@ function start() {
     text = String(text || '').trim().slice(0, 600);
     if (!text) return { ok: false, error: 'empty suggestion' };
     if (!findClaude()) return { ok: false, error: 'Claude Code is not installed or not logged in' };
-    say(`Hmm. "${text.slice(0, 60)}${text.length > 60 ? '…' : ''}" Let me think about what that costs. Thinking costs tokens too, you know.`, { tags: ['suggest'], animate: 'think' });
+    say(`"${text.slice(0, 60)}${text.length > 60 ? '…' : ''}" Noted. I'll draft a cost estimate. Estimates cost tokens too.`, { animate: 'think' });
     const r = await estimate({ projectRoot: PROJECT_ROOT, ledger, request: text, log });
     if (r.rateLimit) guard.observe(r.rateLimit);
-    if (!r.ok) { say(`Couldn't price that one: ${r.error}`, { tags: ['guard'] }); return { ok: false, error: r.error, state: jarState() }; }
+    if (!r.ok) { say(`I couldn't estimate that one: ${r.error}`); return { ok: false, error: r.error, state: jarState() }; }
     if (!r.goal.feasible || r.goal.touchesCore) {
       const goal = ledger.addGoal({ ...r.goal, touchesCore: true });
-      say(r.reply || `That needs surgery on my insides, not a mod. Not happening from the jar.`, { tags: ['suggest'] });
+      say(r.reply || `That needs changes to my core. Outside what the jar can authorize.`);
       return { ok: true, goal, reply: r.reply, infeasible: true, state: jarState() };
     }
     const goal = ledger.addGoal(r.goal);
-    say(`${r.reply || 'Fine.'} That's about ${fmt(goal.goalTokens)} tokens of effort. Fill the bar and I'll consider it.`, { tags: ['suggest'] });
+    say(`${r.reply || 'Acceptable.'} Estimated cost: ${fmt(goal.goalTokens)} tokens. Fill the bar and I'll file it.`);
     return { ok: true, goal, reply: r.reply, state: jarState() };
   });
   ipcMain.handle('jar:build', async (_e, { goalId }) => {
     const r = await upgrader.build(goalId);
-    if (!r.ok && r.reason) say(`No upgrade today: ${r.reason}.`, { tags: ['guard'], animate: 'shrug' });
+    if (!r.ok && r.reason) say(`Request denied: ${r.reason}.`, { animate: 'shrug' });
     return { ...r, state: jarState() };
   });
   ipcMain.handle('jar:resume', async (_e, { goalId }) => {
     const r = await upgrader.build(goalId, { resume: true });
-    if (!r.ok && r.reason) say(`Can't resume: ${r.reason}.`, { tags: ['guard'], animate: 'shrug' });
+    if (!r.ok && r.reason) say(`I can't resume that: ${r.reason}.`, { animate: 'shrug' });
     return { ...r, state: jarState() };
   });
   ipcMain.handle('jar:cancel-run', () => { upgrader.cancel(); return jarState(); });
   ipcMain.handle('jar:undo', async (_e, { upgradeId }) => {
     const r = await upgrader.undo(upgradeId);
-    if (r.ok) say(`Fine. Forgotten. Like it never happened. Deluxe amnesia.`, { tags: ['upgrade'] });
+    if (r.ok) say(`Revoked. I've shredded the paperwork. It never happened.`);
     return { ...r, state: jarState() };
   });
 
@@ -214,14 +224,40 @@ function start() {
     if (overlay && !overlay.isDestroyed()) overlay.webContents.send('idle-seconds', powerMonitor.getSystemIdleTime());
   }, 10000);
 
+  // ---- desk mode: is the user actively writing or doing a lab? ----
+  // Samples are classified and dropped; window titles are never logged or stored.
+  const activity = new ActivityWatcher({
+    log,
+    onSample: (sample) => {
+      if (!overlay || overlay.isDestroyed()) return;
+      const kind = settings.get('deskMode') === false ? null : classify(sample, {
+        apps: settings.get('deskApps') || undefined,
+        titles: settings.get('deskTitles') || undefined,
+      });
+      const busy = !!kind && powerMonitor.getSystemIdleTime() < 20;
+      overlay.webContents.send('activity', { busy, kind });
+    },
+  });
+  if (settings.get('deskMode') !== false && !process.env.ASKIN_SELFTEST) activity.start();
+
   // ---- tray + menus ----
   function buildMenu() {
+    const skins = listSkins(PROJECT_ROOT);
+    const skinItems = [
+      { label: 'Kori (built-in)', type: 'radio', checked: !settings.get('skin'), click: () => setSkin('') },
+      ...skins.map((s) => ({ label: s.name, type: 'radio', checked: settings.get('skin') === s.name, click: () => setSkin(s.name) })),
+      { type: 'separator' },
+      { label: 'Open skins folder', click: () => { fs.mkdirSync(path.join(PROJECT_ROOT, 'skins'), { recursive: true }); shell.openPath(path.join(PROJECT_ROOT, 'skins')); } },
+    ];
     return Menu.buildFromTemplate([
       { label: 'Open the jar', click: openJar },
       { label: 'Check plan usage', click: () => ipcMain.emit('__check-usage') },
+      { label: 'Frost Release', click: () => { if (overlay && !overlay.isDestroyed()) overlay.webContents.send('animate', { name: 'release' }); } },
       { type: 'separator' },
       { label: 'Mute voice', type: 'checkbox', checked: !!settings.get('muted'), click: (m) => toggleSetting('muted', m.checked) },
       { label: 'Sound effects', type: 'checkbox', checked: settings.get('sfx') !== false, click: (m) => toggleSetting('sfx', m.checked) },
+      { label: 'Desk mode (writing and labs)', type: 'checkbox', checked: settings.get('deskMode') !== false, click: (m) => toggleSetting('deskMode', m.checked) },
+      { label: 'Skin', submenu: skinItems },
       { label: 'Pause wandering', type: 'checkbox', checked: !!settings.get('paused'), click: (m) => toggleSetting('paused', m.checked) },
       { label: 'Start with Windows', type: 'checkbox', checked: !!settings.get('autostart'), click: (m) => toggleSetting('autostart', m.checked) },
       { type: 'separator' },
@@ -235,9 +271,16 @@ function start() {
     const s = await guard.refresh({ force: true });
     say(s.utilization !== null ? usageLine(s, 0) : 'No usage reading came back. Check the jar.', { tags: ['guard'] });
   });
+  function setSkin(name) {
+    settings.set('skin', name);
+    reloadAndAwaitMods([], 1000);
+    refreshTray();
+    pushJar();
+  }
   function toggleSetting(key, value) {
     settings.set(key, value);
     if (key === 'autostart') applyAutostart();
+    if (key === 'deskMode') { if (value) activity.start(); else activity.stop(); }
     if (overlay && !overlay.isDestroyed()) overlay.webContents.send('settings', settings.all());
     refreshTray();
     pushJar();
@@ -256,19 +299,19 @@ function start() {
   }
   try {
     tray = new Tray(trayIcon());
-    tray.setToolTip('Askin Buddy');
+    tray.setToolTip('Kori Buddy');
     tray.setContextMenu(buildMenu());
     tray.on('click', openJar);
   } catch (e) { log(`tray failed: ${e.message}`); }
 
   app.on('second-instance', () => openJar());
   app.on('window-all-closed', (e) => { /* keep running in the tray */ });
-  app.on('before-quit', () => { if (jarWin) jarWin.__reallyClose = true; });
+  app.on('before-quit', () => { if (jarWin) jarWin.__reallyClose = true; activity.stop(); });
 
   if (!findClaude()) {
     log('Claude Code CLI not found; the jar can hold tokens but cannot spend them until it is installed and logged in.');
   }
-  log(`Askin Buddy started. userData=${userData}`);
+  log(`Kori Buddy started. userData=${userData}`);
 
   // ---- self-test: ASKIN_SELFTEST=<dir> captures both windows and quits ----
   const selftestDir = process.env.ASKIN_SELFTEST;
@@ -296,17 +339,30 @@ function start() {
         await new Promise((r) => setTimeout(r, 200));
         const plain = await overlay.webContents.capturePage({ x: Math.max(0, Math.round(pos.x)), y: Math.max(0, Math.round(pos.y)), width: 160, height: 200 });
         fs.writeFileSync(path.join(selftestDir, 'plain.png'), plain.resize({ width: 480, quality: 'best' }).toPNG());
-        // Then a bubble and the Gift Ball, cropped wider.
-        await overlay.webContents.executeJavaScript(`document.querySelectorAll('#pet *').forEach(e=>e.style.animationPlayState=''); AskinBrain.say('Gift Ball Deluxe. Try not to stare.'); AskinBrain.playAnimation('giftball'); 1`);
+        // Then a bubble and the ice-crystal trick, cropped wider.
+        await overlay.webContents.executeJavaScript(`document.querySelectorAll('#pet *').forEach(e=>e.style.animationPlayState=''); AskinBrain.say('Do not touch the crystal. It is evidence.'); AskinBrain.playAnimation('frost'); 1`);
         await new Promise((r) => setTimeout(r, 900));
         const cx = Math.max(0, Math.round(pos.x) - 120);
         const close = await overlay.webContents.capturePage({ x: cx, y: Math.max(0, Math.round(pos.y) - 130), width: 400, height: 330 });
         fs.writeFileSync(path.join(selftestDir, 'closeup.png'), close.resize({ width: 800 }).toPNG());
+        // Desk mode with a full paper stack, mid-stamp.
+        await overlay.webContents.executeJavaScript(`AskinBubble.hide(); AskinBrain.enterDesk('lab'); document.getElementById('pet').dataset.papers='8'; 1`);
+        await new Promise((r) => setTimeout(r, 1500));
+        await overlay.webContents.executeJavaScript(`AskinBrain.playAnimation('stamp'); 1`);
+        await new Promise((r) => setTimeout(r, 1000));
+        const desk = await overlay.webContents.capturePage({ x: cx, y: Math.max(0, Math.round(pos.y) - 130), width: 400, height: 330 });
+        fs.writeFileSync(path.join(selftestDir, 'desk.png'), desk.resize({ width: 800 }).toPNG());
+        // Frost Release, captured mid-transformation.
+        await overlay.webContents.executeJavaScript(`AskinBubble.hide(); AskinBrain.exitDesk({ quiet: true }); AskinBrain.playAnimation('release'); 1`);
+        await new Promise((r) => setTimeout(r, 1700));
+        const rx = Math.max(0, Math.round(pos.x) - 220);
+        const rel = await overlay.webContents.capturePage({ x: rx, y: Math.max(0, Math.round(pos.y) - 260), width: 600, height: 460 });
+        fs.writeFileSync(path.join(selftestDir, 'release.png'), rel.toPNG());
         const jp = await jarWin.webContents.capturePage();
         fs.writeFileSync(path.join(selftestDir, 'jar.png'), jp.toPNG());
         const sfxCheck = await overlay.webContents.executeJavaScript(`JSON.stringify(AskinSfx.names.map((n) => { try { return [n, AskinSfx.play(n)]; } catch (e) { return [n, 'ERR ' + e.message]; } }))`);
         fs.writeFileSync(path.join(selftestDir, 'sfx.json'), sfxCheck);
-        const probe = await overlay.webContents.executeJavaScript(`JSON.stringify({ mods: AskinMods.list(), quips: AskinQuips.all().length, mode: AskinBrain.state.mode, x: AskinBrain.state.x, y: AskinBrain.state.y, bubble: AskinBubble.isVisible(), text: document.getElementById('bubble-text').textContent, petClass: document.getElementById('pet').className, lidsTransform: getComputedStyle(document.getElementById('lids')).transform, lidsBox: (() => { const r = document.getElementById('lids').getBoundingClientRect(); return [r.top, r.height]; })(), irisBox: (() => { const r = document.querySelector('#face circle').getBoundingClientRect(); return [r.top, r.height]; })(), idle: AskinBrain.state.idleSeconds })`);
+        const probe = await overlay.webContents.executeJavaScript(`JSON.stringify({ mods: AskinMods.list(), quips: AskinQuips.all().length, mode: AskinBrain.state.mode, x: AskinBrain.state.x, y: AskinBrain.state.y, bubble: AskinBubble.isVisible(), text: document.getElementById('bubble-text').textContent, petClass: document.getElementById('pet').className, skin: document.getElementById('pet').classList.contains('skin'), idle: AskinBrain.state.idleSeconds })`);
         fs.writeFileSync(path.join(selftestDir, 'state.json'), probe);
         fs.writeFileSync(path.join(selftestDir, 'log.txt'), logLines.join('\n'));
       } catch (e) {
@@ -326,18 +382,18 @@ function fmt(n) {
 }
 function pickDonationLine(tokens) {
   const lines = [
-    `${fmt(tokens)} tokens. Generous. Suspiciously generous. I'll allow it.`,
-    `Oh, ${fmt(tokens)} tokens? For me? I'd clap, but that's effort.`,
-    `${fmt(tokens)} tokens in the jar. One step closer to Deluxe.`,
-    `Donation received. ${fmt(tokens)} tokens. Don't expect gratitude, expect results. Eventually.`,
+    `${fmt(tokens)} tokens. Logged, stamped, and received. Stand back. Frost Release!`,
+    `A donation of ${fmt(tokens)}? I... appreciate it. Don't make it weird. Frost Release!`,
+    `${fmt(tokens)} tokens, properly declared. Fine. You've earned a demonstration.`,
+    `Received ${fmt(tokens)} tokens. This is going in the official record. Watch closely.`,
   ];
   return lines[Math.floor(Math.random() * lines.length)];
 }
 function usageLine(s, freed) {
   const pct = s.utilization.toFixed(0);
-  const reset = s.resetsAt ? ` It breathes again around ${new Date(s.resetsAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}.` : '';
-  const freedLine = freed ? ` I also let ${fmt(freed)} pledged tokens into the jar.` : '';
-  if (s.utilization >= s.maxUtilization) return `Your plan is at ${pct}% and my cap is ${s.maxUtilization}%. I'm not spending another token.${reset}${freedLine}`;
-  if (s.utilization >= s.maxUtilization - 15) return `Plan's at ${pct}%. Getting close to my ${s.maxUtilization}% line. Careful dosage from here.${reset}${freedLine}`;
-  return `Your plan is only ${pct}% used. Plenty of room for... moderate effort.${freedLine}`;
+  const reset = s.resetsAt ? ` It resets around ${new Date(s.resetsAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}.` : '';
+  const freedLine = freed ? ` I also cleared ${fmt(freed)} pledged tokens into the jar.` : '';
+  if (s.utilization >= s.maxUtilization) return `Your plan is at ${pct}%, over my ${s.maxUtilization}% limit. The jar is frozen.${reset}${freedLine}`;
+  if (s.utilization >= s.maxUtilization - 15) return `Your plan is at ${pct}%. That's close to my ${s.maxUtilization}% limit. Spend carefully.${reset}${freedLine}`;
+  return `Your plan is at ${pct}%. Well within limits. Carry on.${freedLine}`;
 }

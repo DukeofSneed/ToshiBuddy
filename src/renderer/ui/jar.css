@@ -1,12 +1,12 @@
 :root {
-  --bg: #15111c;
-  --panel: #1d1727;
-  --card: #251d33;
-  --line: #3a2e4f;
-  --text: #f1ecff;
-  --muted: #a99cc4;
-  --accent: #8b5cf6;
-  --accent2: #c084fc;
+  --bg: #0d1626;
+  --panel: #13203a;
+  --card: #1a2a48;
+  --line: #2c4268;
+  --text: #eaf6ff;
+  --muted: #9db6d6;
+  --accent: #3f8fdc;
+  --accent2: #7cc4f5;
   --good: #4ade80;
   --warn: #fbbf24;
   --bad: #f87171;
@@ -19,7 +19,7 @@ html, body { margin: 0; height: 100%; background: transparent; font-family: "Seg
 #titlebar { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; align-items: center; padding: 10px 0; background: var(--panel); -webkit-app-region: drag; }
 #titlebar button { -webkit-app-region: no-drag; }
 .brand { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px; }
-.orb { width: 14px; height: 14px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #d6a8ff, #5b1fa8 60%, #160428); box-shadow: 0 0 8px #8b5cf6; display: inline-block; }
+.orb { width: 14px; height: 14px; border-radius: 3px; transform: rotate(45deg); background: linear-gradient(135deg, #ffffff, #bfe8ff 50%, #5aa9e6); box-shadow: 0 0 8px #7cc4f5; display: inline-block; }
 #close { background: none; border: none; color: var(--muted); font-size: 22px; cursor: pointer; line-height: 1; }
 #close:hover { color: var(--text); }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin: 10px 0; }
@@ -40,7 +40,7 @@ button.danger { background: #7f1d1d; }
 
 #summary { display: flex; gap: 14px; align-items: center; margin-top: 4px; }
 .jar-art { position: relative; width: 64px; height: 80px; border: 3px solid #cfc4ea; border-top-width: 6px; border-radius: 10px 10px 18px 18px; overflow: hidden; background: rgba(255,255,255,0.04); flex-shrink: 0; }
-#jar-fill { position: absolute; left: 0; right: 0; bottom: 0; height: 0%; background: linear-gradient(180deg, #c084fc, #6d28d9); transition: height 600ms ease; }
+#jar-fill { position: absolute; left: 0; right: 0; bottom: 0; height: 0%; background: linear-gradient(180deg, #bfe8ff, #2f7fc4); transition: height 600ms ease; }
 .jar-label { position: absolute; top: 34px; width: 100%; text-align: center; font-size: 9px; font-weight: 800; letter-spacing: 1px; color: #fff; text-shadow: 0 1px 2px #000; }
 .stats { flex: 1; }
 .big { font-size: 28px; font-weight: 800; line-height: 1.1; }
@@ -58,11 +58,11 @@ button.danger { background: #7f1d1d; }
 .goal .title { font-weight: 700; }
 .goal .badge { font-size: 10px; padding: 2px 6px; border-radius: 6px; background: var(--bg); color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; height: fit-content; }
 .goal .badge.funded { background: #14532d; color: #bbf7d0; }
-.goal .badge.building { background: #4c1d95; color: #e9d5ff; }
+.goal .badge.building { background: #1e3a8a; color: #dbeafe; }
 .goal .badge.paused, .goal .badge.failed { background: #78350f; color: #fde68a; }
 .goal .summary { color: var(--muted); font-size: 12px; margin: 4px 0 6px; }
 .goal .bar { height: 12px; background: var(--bg); border-radius: 6px; overflow: hidden; }
-.goal .bar > div { height: 100%; background: linear-gradient(90deg, #6d28d9, #c084fc); transition: width 500ms ease; }
+.goal .bar > div { height: 100%; background: linear-gradient(90deg, #2f7fc4, #bfe8ff); transition: width 500ms ease; }
 .goal .meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); margin-top: 4px; }
 .goal .actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
 .goal .actions input { flex: 0 0 90px; padding: 4px 6px; }

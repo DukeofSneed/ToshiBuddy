@@ -1,49 +1,49 @@
 [
   {
-    "title": "Party hat rack",
-    "summary": "A small rack of hats (party cone, tiny crown, Quincy cap) as head props; Askin swaps hats on the hour and comments on each one.",
+    "title": "Snow globe desk ornament",
+    "summary": "A tiny snow globe prop on the desk (desk anchor) with drifting flakes, plus quips when Kori notices it during paperwork.",
     "size": "S",
-    "goalTokens": 25000
+    "goalTokens": 22000
   },
   {
-    "title": "Deathdealing RAM meter",
-    "summary": "An hourly behavior where Askin announces a made-up 'lethal dose' reading based on the time of day, with a pulsing Gift Ball animation and a pack of dosage quips.",
+    "title": "Hot cocoa break",
+    "summary": "An hourly behavior where Kori sips a steaming mug (hand prop with steam animation) and grudgingly admits it is good, with a pack of cocoa quips.",
     "size": "S",
-    "goalTokens": 30000
+    "goalTokens": 28000
   },
   {
-    "title": "Yhwach cameo at midnight",
-    "summary": "At midnight a shadowy Yhwach silhouette prop appears behind Askin for a minute while he whispers nervous quips, then fades out.",
-    "size": "M",
-    "goalTokens": 55000
-  },
-  {
-    "title": "Gift Ball Deluxe dome",
-    "summary": "A double-click trick: a translucent purple dome animation expands around Askin with a rumble of sparkles, plus three dome-themed quips.",
+    "title": "Penguin assistant",
+    "summary": "A small penguin prop that appears at the desk now and then to hand Kori more papers, with a waddle animation and complaint quips.",
     "size": "M",
     "goalTokens": 60000
   },
   {
-    "title": "Lazy stretch routine",
-    "summary": "A new idle animation where Askin stretches both arms, cracks his neck, and sighs, triggered randomly while idle with a 10 percent chance.",
-    "size": "S",
-    "goalTokens": 20000
+    "title": "Paperwork avalanche",
+    "summary": "A rare desk-mode click reaction where the paper stack topples in an animation, Kori huffs, and the stack rebuilds itself.",
+    "size": "M",
+    "goalTokens": 55000
   },
   {
-    "title": "Seasonal outfits",
-    "summary": "Scarf and earmuffs in winter months, sunglasses in summer, a tiny pumpkin in October: date-aware props with matching quips.",
+    "title": "Ice skating idle",
+    "summary": "A new idle animation where Kori glides along the taskbar on skates instead of walking, with a little spin at the end and skating quips.",
+    "size": "M",
+    "goalTokens": 65000
+  },
+  {
+    "title": "Winter weather rotation",
+    "summary": "Seasonal props by month: a scarf in winter, sunglasses in summer, a tiny pumpkin in October, with matching quips.",
     "size": "M",
     "goalTokens": 70000
   },
   {
-    "title": "Taskbar fishing",
-    "summary": "An interval behavior where Askin lowers a fishing line prop off the taskbar, waits, and reels in nonsense (a boot, a Gift Ball, a 'lethal dose of nothing') with quips.",
+    "title": "Snowball fight",
+    "summary": "An interval behavior where Kori packs a snowball and throws it off screen, then looks around innocently, with denial quips.",
     "size": "L",
-    "goalTokens": 140000
+    "goalTokens": 130000
   },
   {
-    "title": "Quincy quip pack vol. 2",
-    "summary": "Forty new quips in Askin's voice about Sternritters, Soul Reapers, and the indignity of being a desktop pet, tagged for idle, lean, drag, and night.",
+    "title": "Officer quip pack vol. 2",
+    "summary": "Forty new quips in Kori's voice about procedure, cold weather, being underestimated, and keeping you on task, tagged for idle, desk, lean, drag, and night.",
     "size": "S",
     "goalTokens": 18000
   }

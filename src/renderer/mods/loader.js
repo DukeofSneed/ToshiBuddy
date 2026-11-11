@@ -5,9 +5,10 @@
   const registry = []; // { slug, def }
   let currentSlug = null;
   let currentRegistered = false;
-  const ANCHORS = new Set(['head', 'hand-r', 'hand-l', 'back', 'front']);
-  const TRIGGERS = new Set(['idle', 'click', 'dblclick', 'drop', 'hour', 'wake', 'sleep', 'interval', 'donate', 'upgrade', 'lean']);
-  const RESERVED_ANIMS = new Set(['idle', 'walk', 'lean', 'sleep', 'drag', 'fall', 'land', 'talk', 'blink', 'face-left', 'face-right']);
+  const ANCHORS = new Set(['head', 'hand-r', 'hand-l', 'back', 'front', 'desk']);
+  const TRIGGERS = new Set(['idle', 'click', 'dblclick', 'drop', 'hour', 'wake', 'sleep', 'interval', 'donate', 'upgrade', 'lean', 'desk']);
+  const RESERVED_ANIMS = new Set(['idle', 'walk', 'lean', 'sleep', 'drag', 'fall', 'land', 'talk', 'blink', 'face-left', 'face-right',
+    'desk', 'desk-in', 'release', 'stamp', 'stamped', 'scribbling', 'skin', 'working', 'frost', 'huff', 'shrug', 'think', 'wave', 'surprised']);
 
   function fail(msg) { throw new Error(msg); }
 

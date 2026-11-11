@@ -11,13 +11,13 @@
   let endTimer = null;
   let playing = [];
 
-  // Askin: low, lazy, a little slow.
+  // Kori: young, brisk, clipped.
   const VOICE = {
-    basePitch: 175,     // Hz
-    pitchSpread: 0.35,  // fraction of base pitch letters wander over
-    letterMs: 62,       // time per letter
-    syllableMs: 72,     // length of each blip (slight overlap = smoother)
-    volume: 0.22,
+    basePitch: 255,     // Hz
+    pitchSpread: 0.28,  // fraction of base pitch letters wander over
+    letterMs: 52,       // time per letter
+    syllableMs: 60,     // length of each blip (slight overlap = smoother)
+    volume: 0.2,
     maxLetters: 140,
   };
 

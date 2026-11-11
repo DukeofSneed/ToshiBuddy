@@ -1,17 +1,25 @@
-# Askin Buddy Mod API
+# Kori Buddy Mod API
 
 A mod is one folder `mods/<slug>/` containing `mod.js` (and optionally `NOTES.md`).
 `mod.js` is plain browser JavaScript, loaded with a `<script>` tag into the pet's
 page. It has no Node, no `require`, no network. It must call
-`AskinMods.register({...})` exactly once at top level.
+`AskinMods.register({...})` exactly once at top level. (The `Askin` prefix is a
+historical name kept for compatibility.)
 
-The pet is a plush-style chibi (huge head, tiny body, stubby limbs) drawn as an SVG
-with id `askin-svg` inside `#pet > #flip > #sprite`. Part ids you can target from
-CSS: `#head`, `#face`, `#lids`, `#mouth`, `#hair-front`, `#hair-back`, `#strand`,
-`#torso`, `#arm-l`, `#arm-r`, `#leg-l`, `#leg-r`, `#orb` (the Gift Ball, hidden
-unless the `giftball` or `working` class is on `#pet`), `#shadow`, `#zzz`.
-Prop anchors are empty `<g>` elements: `#props-head`, `#props-hand-r`, `#props-hand-l`,
-`#props-back` (behind everything), `#props-front` (in front of everything).
+The pet is Kori, an original plush-style ice chibi (huge head, tiny body, stubby
+limbs) drawn as an SVG with id `pet-svg` inside `#pet > #flip > #sprite`. Part ids
+you can target from CSS: `#head`, `#face`, `#lids`, `#mouth`, `#hair-front`,
+`#hair-back`, `#cowlick`, `#clip`, `#torso`, `#pin`, `#arm-l`, `#arm-r`, `#leg-l`,
+`#leg-r`, `#orb` (an ice crystal, shown during the `frost` trick and while an
+upgrade runs), `#quill` and `#stamp` (shown at the desk), `#desk`, `#papers`,
+`#halo`, `#snow-cloak`, `#sigil`, `#shadow`, `#zzz`.
+
+Prop anchors are empty `<g>` elements: `#props-head`, `#props-hand-r`,
+`#props-hand-l`, `#props-back` (behind everything), `#props-front` (in front of
+everything), `#props-desk` (on the desk, visible only in desk mode).
+
+If the user has picked a skin (their own image), limb parts don't exist; props and
+the desk still work, and limb animations simply do nothing.
 
 ## register(def)
 
@@ -20,7 +28,7 @@ AskinMods.register({
   id: 'party-hat',                 // must equal the folder slug: a-z, 0-9, -
   name: 'Party hat',
   quips: [                         // optional, max 200
-    { text: 'A hat. On me. Deluxe.', tags: ['idle', 'hat'] },
+    { text: 'This hat is a formality.', tags: ['idle', 'hat'] },
   ],
   animations: {                    // optional; name: a-z, 0-9, -
     'hat-tip': {
@@ -31,53 +39,65 @@ AskinMods.register({
   },
   props: [                         // optional, max 20
     { id: 'cone', anchor: 'head', hidden: false,
-      svg: '<polygon points="80,-10 62,30 98,30" fill="#ff5fa2" stroke="#26262a" stroke-width="2"/>' },
+      svg: '<polygon points="80,-6 64,22 96,22" fill="#7cc4f5" stroke="#1f2a40" stroke-width="1.6"/>' },
   ],
   behaviors: [                     // optional, max 30
-    { trigger: 'click', chance: 0.3, action: { animate: 'hat-tip', say: ['Hat tip.', 'Deluxe tip.'] } },
+    { trigger: 'click', chance: 0.3, action: { animate: 'hat-tip', sound: 'chirp', say: ['Hat tip.', 'Acknowledged.'] } },
     { trigger: 'hour', action: { prop: { id: 'cone', toggle: true } } },
-    { trigger: 'interval', every: 600000, chance: 0.5, action: { say: 'Still wearing it.' } },
+    { trigger: 'interval', every: 600000, chance: 0.5, action: { say: 'Still wearing it. Officially.' } },
   ],
 });
 ```
 
 ### Rules the loader enforces
 - `id`: required, 2-40 chars of `a-z0-9-`.
-- `quips[].text` <= 240 chars; `tags` is an array. Useful tags: `idle`, `greet`, `lean`,
-  `click`, `drag`, `drop`, `wake`, `hour`, `trick`, `upgrade`, `time:morning`,
-  `time:afternoon`, `time:evening`, `time:night`. Untagged quips count as `idle`.
+- `quips[].text` <= 240 chars; `tags` is an array. Useful tags: `idle`, `greet`,
+  `lean`, `click`, `drag`, `drop`, `drop-hard`, `wake`, `hour`, `trick`, `upgrade`,
+  `desk` (any desk session), `desk-writing`, `desk-lab`, `desk-enter`, `desk-exit`,
+  `desk-click`, `time:morning`, `time:afternoon`, `time:evening`, `time:night`.
+  Untagged quips count as `idle`.
 - `animations[name].css`: full CSS text, <= 20k chars, no `@import`, no `url(`.
   Play it by adding the class `anim-<name>` to `#pet`, which the brain does for you
   when a behavior's `action.animate` names it. Scope every selector under
-  `#pet.anim-<name>` so it cannot leak. Reserved names: idle, walk, lean, sleep,
-  drag, fall, land, talk, blink, face-left, face-right.
+  `#pet.anim-<name>` so it cannot leak. Reserved names include every built-in
+  state and animation: idle, walk, lean, sleep, drag, fall, land, talk, blink,
+  desk, release, stamp, frost, huff, shrug, think, wave, surprised, working, skin.
 - `props[]`: `svg` is an SVG fragment (<= 20k chars) placed inside the anchor group;
   no `<script>`, `<foreignObject>`, event attributes, `href`, or `url(`. Coordinates
   are in the pet's 160x200 viewBox: the face spans x 38-122, y 30-108 (eyes at
-  (62, 78) and (98, 78), mouth at (80, 96)); the top of the hair is at y=8, so a hat
-  sits around y 0-20; the hands are at (53, 132) and (107, 132); the waist is at
-  y=140; the feet are at y=186. The pet faces right by default; the whole sprite
-  is mirrored when walking left. Voice is synthesized animalese, not speech.
+  (62, 82) and (98, 82), mouth at (80, 98)); the top of the hair is at y=12, so a
+  hat sits around y 0-24; the hands are at (53, 135) and (107, 135); the waist is at
+  y=148; the feet are at y=187. In desk mode the desk top runs from (29, 125) to
+  (131, 138); put desk ornaments around y 110-136 on `desk`. The pet faces right by
+  default; the whole sprite is mirrored when walking left.
   `hidden: true` starts the prop invisible; toggle it from a behavior.
 - `behaviors[]`: `trigger` is one of `idle`, `click`, `dblclick`, `drop`, `hour`,
-  `wake`, `sleep`, `lean`, `donate`, `upgrade`, `interval` (needs `every` >= 30000 ms).
-  `chance` 0-1 (default 1). `action` may combine `animate` (built-in: `giftball`,
-  `shrug`, `think`, `wave`, `surprised`, or one of your animation names), `say`
-  (string or array of strings; `{hour}` is substituted on `hour`), and
-  `prop: { id, show: true|false }` or `prop: { id, toggle: true }`, and `sound`
-  (one built-in sound effect: `pop`, `boop`, `whee`, `land`, `land-hard`, `shimmer`,
-  `coin`, `yawn`, `chirp`, `fanfare`, `womp`, `hum`, `tick`). Mods cannot add audio files.
-  When a mod handles `idle`, `click`, `dblclick`, `drop`, `wake`, or `hour`, the
-  built-in reaction for that event is skipped that time.
+  `wake`, `sleep`, `lean`, `desk` (Kori sits down at the desk), `donate`, `upgrade`,
+  `interval` (needs `every` >= 30000 ms). `chance` 0-1 (default 1). `action` may
+  combine:
+  - `animate`: built-in `frost`, `huff`, `shrug`, `think`, `wave`, `surprised`,
+    `stamp` (desk only), `release` (the full Frost Release, use sparingly), or one
+    of your animation names;
+  - `say`: a string or array of strings (`{hour}` is substituted on `hour`);
+  - `prop`: `{ id, show: true|false }` or `{ id, toggle: true }`;
+  - `sound`: one built-in sound effect: `pop`, `boop`, `whee`, `land`, `land-hard`,
+    `shimmer`, `coin`, `yawn`, `chirp`, `fanfare`, `womp`, `hum`, `tick`, `freeze`,
+    `chime`, `blizzard`, `stamp`, `scribble`, `huff`. Mods cannot add audio files.
+  When a mod handles `idle`, `click`, `dblclick`, `drop`, `wake`, `hour`, or `desk`,
+  the built-in reaction for that event is skipped that time.
 
 ### What a mod cannot do
-- Touch anything under `src/`, `docs/`, `prompts/`, `package.json`, or `.claude/`.
-  Runs that do are reverted automatically.
+- Touch anything under `src/`, `docs/`, `prompts/`, `skins/`, `package.json`, or
+  `.claude/`. Runs that do are reverted automatically.
 - Use `fetch`, `XMLHttpRequest`, `WebSocket`, `import`, `require`, `eval`, timers
   outside `interval` behaviors, or DOM access outside the API. Keep `mod.js` to
   the single `register` call plus constants.
 - Depend on other mods.
+- Reproduce copyrighted characters, artwork, dialogue, or audio. Kori and every
+  mod must be original.
 
 ### Style guide
-Askin Nakk le Vaar is lazy, dry, unbothered, quietly smug, fond of the words
-"deluxe" and "lethal dose", and never raises his voice. Short lines land best.
+Kori is a young, serious officer of the (fictional) Frost Registry: diligent,
+prickly about being called small or cute, allergic to sloppy work, a little proud,
+secretly caring. Speaks in short, clipped sentences with dry humor, procedure
+jokes, and cold puns. Never cruel. Short lines land best.

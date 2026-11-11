@@ -16,7 +16,7 @@ const RESULT_SCHEMA = {
     slug: { type: 'string', description: 'The mod folder name you created under mods/' },
     summary: { type: 'string' },
     files: { type: 'array', items: { type: 'string' } },
-    announcement: { type: 'string', description: "One short line in Askin's lazy voice announcing the new trick" },
+    announcement: { type: 'string', description: "One short line in Kori's serious, dry voice announcing the new trick" },
   },
   required: ['title', 'slug', 'summary', 'files', 'announcement'],
 };
@@ -42,6 +42,7 @@ const RUN_SETTINGS = JSON.stringify({
       'Edit(package-lock.json)', 'Write(package-lock.json)',
       'Edit(CLAUDE.md)', 'Write(CLAUDE.md)',
       'Edit(start.cmd)', 'Write(start.cmd)',
+      'Read(skins/**)', 'Edit(skins/**)', 'Write(skins/**)',
     ],
   },
 });
@@ -110,8 +111,9 @@ class Upgrader {
       '- Never create or edit anything under src/, docs/, prompts/, package.json, or any file outside mods/ and content/. Such a run is reverted automatically.',
       '- The mod must be self-contained browser JavaScript calling AskinMods.register(...). No require, no fetch, no eval, no network, no timers longer than needed.',
       `- Token budget for this run: about ${goal.goalTokens} tokens total. Be economical: read MOD_API.md and at most one existing mod, then write.`,
-      '- Keep Askin in character: lazy, dry, unbothered, fond of the words "deluxe" and "lethal dose".',
-      '- When done, reply with the JSON summary the schema asks for. The announcement is one short line Askin will say out loud.',
+      '- Keep Kori in character: young, serious, clipped, dry, procedure jokes and cold puns, hates being called small.',
+      '- Everything must be original. No copyrighted characters, art, dialogue, or audio.',
+      '- When done, reply with the JSON summary the schema asks for. The announcement is one short line Kori will say out loud.',
     ].join('\n');
   }
 
@@ -252,7 +254,7 @@ class Upgrader {
       tokens,
       usd: res.totalCostUsd,
       model,
-      announcement: out.announcement || `New trick acquired. Don't expect me to use it often.`,
+      announcement: out.announcement || `New procedure approved. Don't expect me to use it often.`,
     });
     this.ledger.updateGoal(goal.id, { status: 'done', note: `built in ${tokens} tokens`, upgradeId: upgrade.id });
     this.emit({ phase: 'done', goalId: goal.id, title: upgrade.title, announcement: upgrade.announcement, tokens });

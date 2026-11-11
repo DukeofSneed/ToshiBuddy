@@ -1,5 +1,5 @@
 'use strict';
-// Builds a 16x16 "Gift Ball" PNG at runtime so the tray needs no asset file.
+// Builds a small icy-blue crystal orb PNG at runtime so the tray needs no asset file.
 const zlib = require('zlib');
 const { nativeImage } = require('electron');
 
@@ -26,7 +26,7 @@ function chunk(type, data) {
   return Buffer.concat([len, typeBuf, data, crc]);
 }
 
-function giftBallPng(size = 16) {
+function iceOrbPng(size = 16) {
   const raw = Buffer.alloc((size * 4 + 1) * size);
   const cx = (size - 1) / 2, cy = (size - 1) / 2, r = size / 2 - 0.5;
   for (let y = 0; y < size; y++) {
@@ -37,9 +37,9 @@ function giftBallPng(size = 16) {
       if (d <= r) {
         const t = d / r;
         const hl = Math.max(0, 1 - Math.hypot(x - cx + r * 0.35, y - cy + r * 0.35) / (r * 0.8));
-        raw[o] = Math.round(70 + 90 * hl - 30 * t);       // R
-        raw[o + 1] = Math.round(20 + 40 * hl);            // G
-        raw[o + 2] = Math.round(120 + 110 * hl - 40 * t); // B
+        raw[o] = Math.round(40 + 190 * hl - 20 * t);      // R
+        raw[o + 1] = Math.round(120 + 125 * hl - 30 * t); // G
+        raw[o + 2] = Math.round(200 + 55 * hl - 30 * t);  // B
         raw[o + 3] = d > r - 1 ? Math.round(255 * (r - d + 1)) : 255;
       }
     }
@@ -56,8 +56,8 @@ function giftBallPng(size = 16) {
 }
 
 function trayIcon() {
-  const img = nativeImage.createFromBuffer(giftBallPng(32), { scaleFactor: 2 });
+  const img = nativeImage.createFromBuffer(iceOrbPng(32), { scaleFactor: 2 });
   return img.resize({ width: 16, height: 16 });
 }
 
-module.exports = { trayIcon, giftBallPng };
+module.exports = { trayIcon, iceOrbPng };

@@ -6,11 +6,11 @@ const path = require('path');
 const crypto = require('crypto');
 
 const LEVELS = [
-  { level: 1, xp: 0,        title: 'Lazy' },
-  { level: 2, xp: 50000,    title: 'Deluxe' },
-  { level: 3, xp: 200000,   title: 'Gift Ball' },
-  { level: 4, xp: 500000,   title: 'Sternritter D' },
-  { level: 5, xp: 1500000,  title: 'The Deathdealing' },
+  { level: 1, xp: 0,        title: 'Recruit' },
+  { level: 2, xp: 50000,    title: 'Clerk' },
+  { level: 3, xp: 200000,   title: 'Officer' },
+  { level: 4, xp: 500000,   title: 'Lieutenant' },
+  { level: 5, xp: 1500000,  title: 'Frost Commander' },
 ];
 
 const EMPTY = {

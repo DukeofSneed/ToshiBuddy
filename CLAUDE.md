@@ -1,19 +1,28 @@
-# Askin Buddy
+# Kori Buddy
 
-Electron desktop pet: a chibi Askin Nakk le Vaar who walks the taskbar, talks, and
-carries a "Claude token" donation jar. The jar spawns headless `claude -p` upgrade
-runs that write mods.
+Electron desktop pet: Kori, an original chibi ice officer who walks the taskbar,
+talks in synthesized animalese, does paperwork at a desk while the user writes or
+does labs, and carries a "Claude token" donation jar. Donations trigger the Frost
+Release animation; the jar spawns headless `claude -p` upgrade runs that write mods.
+(The folder and some internal identifiers still say "askin"; that's historical.)
 
 ## If you are an upgrade run (headless, spawned by the jar)
 - Read `docs/MOD_API.md`, then write exactly one mod under `mods/<slug>/`.
 - Only `mods/` and `content/` may change. Anything else is reverted automatically.
 - No Bash, no network, no dependencies. Finish within the token budget in your prompt.
+- Everything must be original: no copyrighted characters, art, dialogue, or audio.
 
 ## If you are a developer session
-- `npm start` runs the app. No build step. Zero runtime dependencies by design.
-- Main process: `src/main/` (window, tray, ledger, guard, estimator, upgrader, git).
-- Renderer: `src/renderer/` (SVG sprite, animator CSS, brain, quips, voice, mod loader).
+- `npm.cmd start` (or `start.cmd`) runs the app. No build step. Zero runtime dependencies.
+- Main process: `src/main/` (windows, tray, activity watcher for desk mode, ledger,
+  guard, estimator, upgrader, git).
+- Renderer: `src/renderer/` (SVG sprite, animation CSS, brain, quips, animalese
+  voice, synthesized sound effects, mod loader).
 - State lives in Electron's userData folder (`settings.json`, `ledger.json`), not in the repo.
+- `skins/` holds the user's own images and is git-ignored; never commit or read
+  them into prompts.
+- Desk mode reads the foreground app name and window title locally to classify
+  "writing" or "lab". Never log, store, or send those values anywhere.
 - The plan-limit guard must never be weakened: runs are refused above the configured
   utilization cap, killed on rate-limit warnings, and capped by `--max-budget-usd`.
 - Upgrade-run permission rules live in `RUN_SETTINGS` in `src/main/jar/upgrader.js`

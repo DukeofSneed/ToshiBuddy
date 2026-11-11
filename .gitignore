@@ -1,4 +1,7 @@
 node_modules/
+# The user's own skin images stay local.
+skins/*
+!skins/README.md
 dist/
 *.log
 .DS_Store

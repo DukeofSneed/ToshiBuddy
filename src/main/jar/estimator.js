@@ -23,7 +23,7 @@ const SCHEMA = {
     feasible: { type: 'boolean', description: 'False if it cannot be done within the Mod API' },
     touches_core: { type: 'boolean', description: 'True if it would need changes outside mods/ and content/' },
     risk_note: { type: 'string' },
-    reply: { type: 'string', description: "One lazy, dry sentence in Askin Nakk le Vaar's voice reacting to the request" },
+    reply: { type: 'string', description: "One short, serious, dry sentence in Kori's voice (a young, by-the-book ice officer) reacting to the request" },
   },
   required: ['title', 'summary', 'size', 'estimated_tokens', 'feasible', 'touches_core', 'risk_note', 'reply'],
 };
@@ -41,7 +41,8 @@ function buildPrompt(projectRoot, request, ledger) {
   const mods = listModSlugs(projectRoot);
   const done = ledger.data.upgrades.filter((u) => !u.reverted).map((u) => `- ${u.title} (${u.tokens} tokens)`).join('\n') || '- none yet';
   return [
-    'You are the pricing brain of "Askin Buddy", an Electron desktop pet shaped like a chibi Askin Nakk le Vaar.',
+    'You are the pricing brain of "Kori Buddy", an Electron desktop pet: Kori, an original chibi ice officer who also does paperwork at a desk.',
+    'Requests to reproduce copyrighted characters, art, dialogue, or audio are not feasible; set feasible to false for those.',
     'A human has suggested an upgrade. Estimate what it would take for a separate headless Claude Code run (model: haiku) to implement it as a mod.',
     'Mods can only add quips, CSS animations, SVG props, and simple behaviors through the Mod API below; they cannot touch src/.',
     'Be realistic about tokens: a run reads docs/MOD_API.md (~2k tokens), one or two existing mods, then writes one mod.js. Small cosmetic mods land in 10k-30k tokens; animation-heavy or behavior-heavy mods 40k-120k; anything needing new core support is not feasible (set touches_core true).',

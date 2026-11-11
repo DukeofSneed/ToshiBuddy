@@ -40,4 +40,26 @@ function readQuipPacks(projectRoot) {
   return quips;
 }
 
-module.exports = { listMods, readQuipPacks };
+// User skins: skins/<name>/ with an image (skin.png, or the first .png/.webp/.gif)
+// and an optional skin.json { scale, offsetX, offsetY, keyColor, keyTolerance }.
+function listSkins(projectRoot) {
+  const dir = path.join(projectRoot, 'skins');
+  let entries = [];
+  try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch (_) { return []; }
+  const out = [];
+  for (const e of entries) {
+    if (!e.isDirectory()) continue;
+    const folder = path.join(dir, e.name);
+    let files = [];
+    try { files = fs.readdirSync(folder); } catch (_) { continue; }
+    const img = files.includes('skin.png') ? 'skin.png' : files.find((f) => /\.(png|webp|gif)$/i.test(f));
+    if (!img) continue;
+    let config = {};
+    try { config = JSON.parse(fs.readFileSync(path.join(folder, 'skin.json'), 'utf8')); } catch (_) { /* optional */ }
+    const file = path.join(folder, img);
+    out.push({ name: e.name, url: pathToFileURL(file).href + `?v=${fs.statSync(file).mtimeMs}`, config });
+  }
+  return out;
+}
+
+module.exports = { listMods, readQuipPacks, listSkins };
