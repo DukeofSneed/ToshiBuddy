@@ -742,6 +742,24 @@ function start() {
           return JSON.stringify(r, null, 1);
         })()`);
         fs.writeFileSync(path.join(selftestDir, 'desk-dialogue.json'), deskProbe);
+        // Walk check: let the brain walk him for 3 s and record each frame shown.
+        const walkProbe = await overlay.webContents.executeJavaScript(`(async () => {
+          const B = BuddyBrain, st = B.state, p = document.getElementById('pet');
+          B.exitDesk({ quiet: true }); BuddyBubble.hide(); B.setPaused(false);
+          st.x = 300; st.nextDecision = performance.now() + 60000;
+          for (const m of ['idle', 'walk', 'lean', 'sleep', 'drag', 'fall', 'desk']) p.classList.remove(m);
+          p.classList.add('walk'); st.mode = 'walk';
+          const pl = BuddyApp.sheetPlayers && BuddyApp.sheetPlayers.base;
+          const seq = []; const t0 = performance.now(); const x0 = st.x;
+          while (performance.now() - t0 < 3000) {
+            const fr = pl ? pl.frame : -1;
+            if (!seq.length || seq[seq.length - 1].f !== fr) seq.push({ f: fr, t: Math.round(performance.now() - t0), key: pl && pl.key });
+            await new Promise((r) => setTimeout(r, 40));
+          }
+          B.setPaused(true);
+          return JSON.stringify({ moved: Math.round(st.x - x0), speed: BuddyApp.walkSpeed, seq });
+        })()`);
+        fs.writeFileSync(path.join(selftestDir, 'walk-probe.json'), walkProbe);
         // The jar on screen: where it sits, and (only with a throwaway data
         // folder) that a double-click donates the quick amount.
         const jarRect = JSON.parse(await overlay.webContents.executeJavaScript(`JSON.stringify((() => { const r = document.getElementById('jar-prop').getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height, stageW: innerWidth, stageH: innerHeight, label: document.getElementById('jar-label').textContent, zone: BuddyApp.jarZone }; })())`));

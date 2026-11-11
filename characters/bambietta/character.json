@@ -14,8 +14,8 @@
         "frames": "0:4"
       },
       "walk": {
-        "frames": "1:0-5",
-        "fps": 6,
+        "frames": "0:6-10,1:0-5",
+        "fps": 9,
         "speed": 85
       },
       "talk": {

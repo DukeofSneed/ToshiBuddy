@@ -373,7 +373,7 @@
     }
     new MutationObserver(() => update(false)).observe(pet, { attributes: true, attributeFilter: ['class'] });
     update(true);
-    return { update, get key() { return key; } };
+    return { update, get key() { return key; }, get frame() { return key && sheet.anims[key] ? sheet.anims[key].frames[i] : -1; } };
   }
 
   function start(skin) {
