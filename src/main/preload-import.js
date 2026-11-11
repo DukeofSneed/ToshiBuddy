@@ -8,9 +8,11 @@ contextBridge.exposeInMainWorld('chars', {
   importFiles: (args) => ipcRenderer.invoke('import:files', args),
   importPack: (source) => ipcRenderer.invoke('import:pack', { source }),
   list: () => ipcRenderer.invoke('import:characters'),
+  theme: () => ipcRenderer.invoke('app:theme'),
   details: (id) => ipcRenderer.invoke('import:details', { id }),
   save: (id, patch) => ipcRenderer.invoke('import:save', { id, patch }),
   switchTo: (id) => ipcRenderer.invoke('import:switch', { id }),
+  choose: (id) => ipcRenderer.invoke('import:choose', { id }),
   exportPack: (id) => ipcRenderer.invoke('import:export', { id }),
   onGoto: (fn) => ipcRenderer.on('import:goto', (_e, hash) => fn(hash)),
 });

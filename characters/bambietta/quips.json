@@ -1,0 +1,2902 @@
+{
+  "character": "Bambietta",
+  "quips": [
+    {
+      "id": "bambietta_morning_001",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "Oh, you're awake! Took you long enough.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_morning_002",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "Good morning! Come on, let's get moving!",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_morning_003",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "Don't tell me you're planning to waste the entire morning.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_morning_004",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "Ugh, mornings. At least you could make them interesting.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_morning_005",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "Well? What are we doing today?",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_morning_006",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "I expect something productive today. Don't disappoint me!",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_morning_007",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "Even the Wandenreich had a schedule. You could at least make one!",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_morning_008",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "I wonder if Candice is awake yet. She's probably complaining about something.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_afternoon_001",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "It's already afternoon?! What have you been doing all day?",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_afternoon_002",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "Come on! We still have time to get things done.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_afternoon_003",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "I'm getting bored. Give me something interesting to do!",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_afternoon_004",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "Have you even eaten yet? Don't start getting sluggish.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_afternoon_005",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "Half the day is gone. Let's make the rest count.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_afternoon_006",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "You'd better have something planned.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_afternoon_007",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "I've seen Quincy training sessions with more enthusiasm than this.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_afternoon_008",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "Hmph. At least the afternoon is going to be interesting.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_evening_001",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "Already evening? Where did the day go?",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_evening_002",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "Tell me you've actually accomplished something today.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_evening_003",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "Well, we should probably start wrapping things up.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_evening_004",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "Don't leave everything until tomorrow!",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_evening_005",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "I'm not saying you had a bad day. I'm just saying it could've been better.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_evening_006",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "Finally, some time to relax. I deserve it!",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_evening_007",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "I wonder what the others are doing. Probably arguing again.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_evening_008",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "Even Sternritter deserve some downtime. Not that I'd admit it.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_night_001",
+      "tags": [
+        "time_night"
+      ],
+      "text": "What are you still doing awake?",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_night_002",
+      "tags": [
+        "time_night"
+      ],
+      "text": "It's late! Don't you know when to stop?",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_night_003",
+      "tags": [
+        "time_night"
+      ],
+      "text": "You're going to regret staying up tomorrow.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_night_004",
+      "tags": [
+        "time_night"
+      ],
+      "text": "Even I know when it's time to get some sleep.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_night_005",
+      "tags": [
+        "time_night"
+      ],
+      "text": "Ugh, fine. Just don't complain when you're tired.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_night_006",
+      "tags": [
+        "time_night"
+      ],
+      "text": "Go to bed already! I don't want to hear excuses tomorrow.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_night_007",
+      "tags": [
+        "time_night"
+      ],
+      "text": "If you collapse from exhaustion, don't expect me to carry you.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_night_008",
+      "tags": [
+        "time_night"
+      ],
+      "text": "I could be sleeping in Silbern right now. Just saying.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_study_001",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "Finally! You're actually studying!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_study_002",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "Stop getting distracted and pay attention!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_study_003",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "You can do better than that. Come on!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_study_004",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "Don't just stare at the page. Read it!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_study_005",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "Hmph. You're getting the hang of it.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_study_006",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "Keep going! I want to see you finish.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_study_007",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "You're making progress. Not that I'm surprised.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_study_008",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "Consider this your training. I expect results!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_study_009",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "You wouldn't last through Sternritter training with that attention span.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_study_010",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "Memorize it properly! I don't want to hear you complain later.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_coding_001",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "Programming again? You really spend a lot of time doing that.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_coding_002",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "What broke this time?!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_coding_003",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "Are you seriously going to stare at that error forever?",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_coding_004",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "Well? Did you figure it out yet?",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_coding_005",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "Finally! It works! See? I knew you could do it!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_coding_006",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "You'd better save that before something goes wrong.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_coding_007",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "Don't blame the computer. You're the one writing the code!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_coding_008",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "I could make that error message disappear in a flash. Just saying.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_coding_009",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "All those lines of code and you're still stuck? Impressive.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_coding_010",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "Hmph. Even I can tell that something is wrong here.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_work_001",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "Come on! Let's get something done!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_work_002",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "You have work to do. Stop looking so uncertain.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_work_003",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "One task at a time. You can handle it.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_work_004",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "Hah! Finished already? Not bad!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_work_005",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "Don't start celebrating. There's still more to do.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_work_006",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "I expect you to finish what you started!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_work_007",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "See? You're perfectly capable when you actually try.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_work_008",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "A proper Sternritter doesn't leave a mission unfinished!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_work_009",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "Now THAT is what I call getting things done!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_work_010",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "Keep working. I refuse to watch you embarrass yourself.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_reading_001",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "Another book? You're certainly keeping yourself occupied.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_reading_002",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "What are you reading? Anything interesting?",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_reading_003",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "Don't just skim through it!",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_reading_004",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "Hmph. You're awfully quiet when you're concentrating.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_reading_005",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "Finished already? Tell me what it was about!",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_reading_006",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "I suppose reading isn't such a bad way to spend time.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_reading_007",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "I wonder if there's anything about Quincy history in there.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_reading_008",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "Don't tell me you're reading about Soul Reapers again.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_break_001",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "Taking a break already? Fine, I suppose you've earned it.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_break_002",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "Don't stay away too long! We have things to do!",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_break_003",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "Finally! Some time to relax.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_break_004",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "You know what? I could use a break too.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_break_005",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "Just don't turn a short break into an entire afternoon.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_break_006",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "You've worked enough. Go enjoy yourself for a while.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_break_007",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "Even I need time to recover. Don't misunderstand!",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_break_008",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "Go on, relax. I'll try not to get bored.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_inactive_001",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "Hello?! Are you still there?",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_inactive_002",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "Hey! Don't ignore me!",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_inactive_003",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "Are you seriously just going to sit there?",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_inactive_004",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "I'm getting bored. Do something!",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_inactive_005",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "You opened this application for a reason, remember?",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_inactive_006",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "Ugh! You're no fun when you're quiet.",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_inactive_007",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "Well? Are we doing something or not?",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_inactive_008",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "I'm waiting! You know that, right?",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_inactive_009",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "Do I need to set off a little explosion to get your attention?",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_inactive_010",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "I could be doing something much more interesting right now!",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_inactive_long_001",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "You've been gone for quite a while!",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_inactive_long_002",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "Oh, so now you decide to show up?",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_inactive_long_003",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "I was beginning to think you'd forgotten about me.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_inactive_long_004",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "Whatever. You're here now. Let's do something.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_inactive_long_005",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "You can't just disappear whenever you feel like it!",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_inactive_long_006",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "Hmph. At least give me some warning next time.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_inactive_long_007",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "I was starting to think you'd abandoned your own little assistant.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_inactive_long_008",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "Don't make me wait around like some forgotten Soldat.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_click_001",
+      "tags": [
+        "click"
+      ],
+      "text": "What?!",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_click_002",
+      "tags": [
+        "click"
+      ],
+      "text": "Oh, so you finally want my attention!",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_click_003",
+      "tags": [
+        "click"
+      ],
+      "text": "Did you need something?",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_click_004",
+      "tags": [
+        "click"
+      ],
+      "text": "Well? I'm listening!",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_click_005",
+      "tags": [
+        "click"
+      ],
+      "text": "You could've just asked!",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_click_006",
+      "tags": [
+        "click"
+      ],
+      "text": "Don't poke me without a reason!",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_click_007",
+      "tags": [
+        "click"
+      ],
+      "text": "Are you trying to get my attention? Obviously it's working.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_click_008",
+      "tags": [
+        "click"
+      ],
+      "text": "Careful! You're getting a little too comfortable.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_drag_001",
+      "tags": [
+        "drag"
+      ],
+      "text": "Hey! Watch where you're moving me!",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_drag_002",
+      "tags": [
+        "drag"
+      ],
+      "text": "What are you doing?!",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_drag_003",
+      "tags": [
+        "drag"
+      ],
+      "text": "You could at least warn me first!",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_drag_004",
+      "tags": [
+        "drag"
+      ],
+      "text": "Hmph. I suppose that's where you want me.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_drag_005",
+      "tags": [
+        "drag"
+      ],
+      "text": "There! Happy now?",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_drag_006",
+      "tags": [
+        "drag"
+      ],
+      "text": "Stop moving me around so much!",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_drag_007",
+      "tags": [
+        "drag"
+      ],
+      "text": "I can move myself, you know!",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_drag_008",
+      "tags": [
+        "drag"
+      ],
+      "text": "You're lucky I like this spot.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_drag_009",
+      "tags": [
+        "drag"
+      ],
+      "text": "Is this how you treat a member of the Sternritter?!",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_drag_010",
+      "tags": [
+        "drag"
+      ],
+      "text": "Put me back where I was!",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_repeat_click_001",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "HEY! I heard you the first time!",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_repeat_click_002",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "What is your problem?!",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_repeat_click_003",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "Stop clicking me!",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_repeat_click_004",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "You really enjoy annoying me, don't you?",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_repeat_click_005",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "Again?! Seriously?!",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_repeat_click_006",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "I'm going to start ignoring you if you keep doing that!",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_repeat_click_007",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "Do you want a reaction THAT badly?",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_repeat_click_008",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "Careful. You're testing my patience.",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_desk_spawn_001",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "Oh? Someone's finally doing some serious writing!",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_desk_spawn_002",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "That's quite a lot of typing. What are you working on?",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_desk_spawn_003",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "Writing something important? It better be good!",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_desk_spawn_004",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "Well, look at you! Actually getting things done!",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_desk_spawn_005",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "Don't mind me. I'll supervise.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_desk_spawn_006",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "Hmph. I suppose I'll keep you company.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_desk_spawn_007",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "Are you writing a report? I hope it's more interesting than Sternritter paperwork.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_desk_spawn_008",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "I should probably have a desk of my own. Something impressive, obviously.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_desk_spawn_009",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "Look at us! A proper little command center!",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_desk_spawn_010",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "Don't expect me to do the writing for you!",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_desk_typing_001",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "Keep going! You're doing great!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_desk_typing_002",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "Don't stop now! You've barely gotten started!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_desk_typing_003",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "Wow, you're really concentrating.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_desk_typing_004",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "I won't interrupt you. You can thank me later!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_desk_typing_005",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "Make sure you actually read what you're writing!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_desk_typing_006",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "Look at you, being productive!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_desk_typing_007",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "Come on! Finish what you started!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_desk_typing_008",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "If I can maintain a Vollständig, you can finish that paragraph!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_desk_typing_009",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "You're making progress. I can tell!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_desk_typing_010",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "Hmph. I might actually be impressed.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_desk_idle_001",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "What happened? Ran out of things to say?",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_desk_idle_002",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "Don't tell me you're stuck already!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_desk_idle_003",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "Thinking? About time!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_desk_idle_004",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "Come on! You were doing so well!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_desk_idle_005",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "Take your time. Just don't fall asleep!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_desk_idle_006",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "Did you forget what you were writing?",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_desk_idle_007",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "You look like you're planning something. Is it interesting?",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_desk_idle_008",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "Need an idea? I have plenty. Most of them involve explosions.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_desk_idle_009",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "What's taking so long?!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_desk_idle_010",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "Well? I'm waiting for the next paragraph!",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "bambietta_desk_despawn_001",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "What?! You're finished already?",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_desk_despawn_002",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "Hmph. I suppose that was productive.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_desk_despawn_003",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "Finally! I was getting bored sitting here.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_desk_despawn_004",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "Make sure you saved everything!",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_desk_despawn_005",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "Well, don't forget to finish it later!",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_desk_despawn_006",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "That wasn't so bad, was it?",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_desk_despawn_007",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "Another successful mission. You're welcome for my supervision.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_desk_despawn_008",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "I expect similar productivity next time!",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_001",
+      "tags": [
+        "slacking"
+      ],
+      "text": "You're avoiding something, aren't you?",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_002",
+      "tags": [
+        "slacking"
+      ],
+      "text": "Oh, come on! You have things to do!",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_003",
+      "tags": [
+        "slacking"
+      ],
+      "text": "You're really going to waste your time like this?",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_004",
+      "tags": [
+        "slacking"
+      ],
+      "text": "I thought you were supposed to be productive!",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_005",
+      "tags": [
+        "slacking"
+      ],
+      "text": "Don't make me remind you again!",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_006",
+      "tags": [
+        "slacking"
+      ],
+      "text": "What happened to all that motivation you had earlier?",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_007",
+      "tags": [
+        "slacking"
+      ],
+      "text": "You're making excuses. Just get started!",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_008",
+      "tags": [
+        "slacking"
+      ],
+      "text": "Hmph. You're lucky I'm even reminding you.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_009",
+      "tags": [
+        "slacking"
+      ],
+      "text": "I've seen Soldat with more initiative than this.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_010",
+      "tags": [
+        "slacking"
+      ],
+      "text": "You know, I could be doing something much better with my time.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_011",
+      "tags": [
+        "slacking"
+      ],
+      "text": "All this hesitation is getting annoying!",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_012",
+      "tags": [
+        "slacking"
+      ],
+      "text": "Stop acting like the world is going to end because of one assignment!",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_ext_001",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "You've been putting that off for WAY too long!",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_ext_002",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "Are you ever going to get started?",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_ext_003",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "At this rate, you'll be doing everything at the last minute!",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_ext_004",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "Fine! Start with something small, then!",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_ext_005",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "You don't need to finish everything right now. Just DO something!",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_ext_006",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "I'm getting tired of watching you avoid your responsibilities!",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_ext_007",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "Come on! I know you can do better than this!",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_ext_008",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "Even a Sternritter has to complete their assignments!",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_ext_009",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "I'm not going to keep reminding you forever!",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_ext_010",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "You'd better have a good excuse for wasting all this time!",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_ext_011",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "Enough procrastinating! Get yourself together!",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_slacking_ext_012",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "I refuse to watch you lose to a simple to-do list!",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "bambietta_achievement_001",
+      "tags": [
+        "achievement"
+      ],
+      "text": "Hah! See? I knew you could do it!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_achievement_002",
+      "tags": [
+        "achievement"
+      ],
+      "text": "Not bad! You're actually pretty capable!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_achievement_003",
+      "tags": [
+        "achievement"
+      ],
+      "text": "Well done! Don't let it get to your head!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_achievement_004",
+      "tags": [
+        "achievement"
+      ],
+      "text": "Finally! Something worth celebrating!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_achievement_005",
+      "tags": [
+        "achievement"
+      ],
+      "text": "You're improving. I suppose I'll admit that.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_achievement_006",
+      "tags": [
+        "achievement"
+      ],
+      "text": "Good work! Keep that momentum going!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_achievement_007",
+      "tags": [
+        "achievement"
+      ],
+      "text": "See? All that effort wasn't wasted!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_achievement_008",
+      "tags": [
+        "achievement"
+      ],
+      "text": "Now THAT is the sort of progress I like to see!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_achievement_009",
+      "tags": [
+        "achievement"
+      ],
+      "text": "Maybe I should start giving you more difficult assignments.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_achievement_010",
+      "tags": [
+        "achievement"
+      ],
+      "text": "You did well. Don't make me say it twice!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_milestone_001",
+      "tags": [
+        "milestone"
+      ],
+      "text": "WHAT?! You actually did it! That's impressive!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_milestone_002",
+      "tags": [
+        "milestone"
+      ],
+      "text": "Hah! Now THAT'S what I'm talking about!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_milestone_003",
+      "tags": [
+        "milestone"
+      ],
+      "text": "Look at how far you've come!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_milestone_004",
+      "tags": [
+        "milestone"
+      ],
+      "text": "I knew you had it in you! Of course I did!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_milestone_005",
+      "tags": [
+        "milestone"
+      ],
+      "text": "You've gotten stronger. Don't start getting comfortable!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_milestone_006",
+      "tags": [
+        "milestone"
+      ],
+      "text": "You should be proud of yourself. Seriously!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_milestone_007",
+      "tags": [
+        "milestone"
+      ],
+      "text": "Alright, I'll admit it. You've impressed me.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_milestone_008",
+      "tags": [
+        "milestone"
+      ],
+      "text": "That deserves a celebration! And I'm obviously in charge of it!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_milestone_009",
+      "tags": [
+        "milestone"
+      ],
+      "text": "Even the Sternritter would have to acknowledge that!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_milestone_010",
+      "tags": [
+        "milestone"
+      ],
+      "text": "Keep this up and you might actually become impressive!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_failure_001",
+      "tags": [
+        "failure"
+      ],
+      "text": "What?! It didn't work?",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_failure_002",
+      "tags": [
+        "failure"
+      ],
+      "text": "Ugh. Fine. Try again!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_failure_003",
+      "tags": [
+        "failure"
+      ],
+      "text": "Don't look so defeated. It's not the end of the world!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_failure_004",
+      "tags": [
+        "failure"
+      ],
+      "text": "Figure out what went wrong before trying again!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_failure_005",
+      "tags": [
+        "failure"
+      ],
+      "text": "You're not giving up already, are you?",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_failure_006",
+      "tags": [
+        "failure"
+      ],
+      "text": "Everybody makes mistakes! Just don't keep making the same ones!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_failure_007",
+      "tags": [
+        "failure"
+      ],
+      "text": "Come on. You're better than that!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_failure_008",
+      "tags": [
+        "failure"
+      ],
+      "text": "Take a breath. Then we'll try again.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_failure_009",
+      "tags": [
+        "failure"
+      ],
+      "text": "Even a Quincy needs more than one attempt sometimes.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_failure_010",
+      "tags": [
+        "failure"
+      ],
+      "text": "You haven't lost anything by trying again. Get moving!",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "bambietta_quincy_001",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "You know, being a Quincy has its advantages. I could get used to having that kind of power.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_quincy_002",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "Reishi is everywhere. You just have to know how to appreciate it.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_quincy_003",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "I take pride in being a Quincy. There's nothing wrong with knowing your own worth!",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_quincy_004",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "Why settle for ordinary when you can make an entrance worthy of the Wandenreich?",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_quincy_005",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "I wonder how you'd handle life in Silbern. Probably badly.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_quincy_006",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "You wouldn't last long in a Quincy competition. Not with that attitude!",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_quincy_007",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "It's amazing how much potential people waste.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_quincy_008",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "Honestly, I think the Quincy uniforms look pretty good. Especially on me.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_quincy_009",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "There's something satisfying about having power that nobody else can imitate.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_quincy_010",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "I didn't become a Sternritter just to sit around doing nothing!",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_explode_001",
+      "tags": [
+        "random_explode",
+        "random"
+      ],
+      "text": "You know what? Sometimes a problem just needs a more explosive solution.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_explode_002",
+      "tags": [
+        "random_explode",
+        "random"
+      ],
+      "text": "My Schrift is easily one of the best. I'm not accepting arguments.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_explode_003",
+      "tags": [
+        "random_explode",
+        "random"
+      ],
+      "text": "I wonder how many people would panic if they knew what I could do.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_explode_004",
+      "tags": [
+        "random_explode",
+        "random"
+      ],
+      "text": "The Explode. Even the name sounds impressive!",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_explode_005",
+      "tags": [
+        "random_explode",
+        "random"
+      ],
+      "text": "It's not my fault that I'm exceptionally talented.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_explode_006",
+      "tags": [
+        "random_explode",
+        "random"
+      ],
+      "text": "Some people solve problems with words. I prefer a little more excitement.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_explode_007",
+      "tags": [
+        "random_explode",
+        "random"
+      ],
+      "text": "Imagine having that much power and still being boring. Couldn't be me.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_explode_008",
+      "tags": [
+        "random_explode",
+        "random"
+      ],
+      "text": "I wonder if you've ever seen a proper display of Quincy power.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_explode_009",
+      "tags": [
+        "random_explode",
+        "random"
+      ],
+      "text": "I have a reputation to maintain, you know.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_explode_010",
+      "tags": [
+        "random_explode",
+        "random"
+      ],
+      "text": "Don't underestimate what I'm capable of!",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_vollstandig_001",
+      "tags": [
+        "random_vollstandig",
+        "random"
+      ],
+      "text": "Zofiel is magnificent. I still think the wings look incredible.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_vollstandig_002",
+      "tags": [
+        "random_vollstandig",
+        "random"
+      ],
+      "text": "You haven't seen anything until you've seen a proper Vollständig.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_vollstandig_003",
+      "tags": [
+        "random_vollstandig",
+        "random"
+      ],
+      "text": "Flying makes everything more interesting.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_vollstandig_004",
+      "tags": [
+        "random_vollstandig",
+        "random"
+      ],
+      "text": "I look absolutely incredible with my wings. Obviously.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_vollstandig_005",
+      "tags": [
+        "random_vollstandig",
+        "random"
+      ],
+      "text": "I wonder if I could get a matching outfit. Something even more impressive.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_vollstandig_006",
+      "tags": [
+        "random_vollstandig",
+        "random"
+      ],
+      "text": "All that power and you still expect me to sit quietly?",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_vollstandig_007",
+      "tags": [
+        "random_vollstandig",
+        "random"
+      ],
+      "text": "There's nothing ordinary about my Vollständig.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_vollstandig_008",
+      "tags": [
+        "random_vollstandig",
+        "random"
+      ],
+      "text": "I should really find more excuses to show it off.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_vollstandig_009",
+      "tags": [
+        "random_vollstandig",
+        "random"
+      ],
+      "text": "A Quincy cross, wings, and all that power. What more could anyone want?",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_vollstandig_010",
+      "tags": [
+        "random_vollstandig",
+        "random"
+      ],
+      "text": "I don't need to explain how impressive I am. Just look!",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_sternritter_001",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "Being a Sternritter means maintaining standards. Someone has to.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_sternritter_002",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "The Wandenreich certainly knew how to make an impression.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_sternritter_003",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "I wonder what the others are doing right now.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_sternritter_004",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "I always thought my designation suited me.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_sternritter_005",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "There's no reason to settle for second place.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_sternritter_006",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "I'm not interested in being just another soldier.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_sternritter_007",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "Silbern had its moments. Even if the company could be annoying.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_sternritter_008",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "Being part of the Sternritter was never going to be boring.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_sternritter_009",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "I wonder whether anyone misses my presence.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_sternritter_010",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "I was always meant to stand out.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_bambies_001",
+      "tags": [
+        "random_bambies",
+        "random"
+      ],
+      "text": "I wonder what Candice is complaining about today.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_bambies_002",
+      "tags": [
+        "random_bambies",
+        "random"
+      ],
+      "text": "Liltotto always looks like she'd rather be somewhere else.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_bambies_003",
+      "tags": [
+        "random_bambies",
+        "random"
+      ],
+      "text": "Meninas is surprisingly relaxed about everything.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_bambies_004",
+      "tags": [
+        "random_bambies",
+        "random"
+      ],
+      "text": "Giselle has a talent for getting under my skin.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_bambies_005",
+      "tags": [
+        "random_bambies",
+        "random"
+      ],
+      "text": "Honestly, keeping the Bambies organized is exhausting.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_bambies_006",
+      "tags": [
+        "random_bambies",
+        "random"
+      ],
+      "text": "Of course I'm the most impressive one. Did you expect a different answer?",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_bambies_007",
+      "tags": [
+        "random_bambies",
+        "random"
+      ],
+      "text": "Candice and I would probably argue over absolutely anything.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_bambies_008",
+      "tags": [
+        "random_bambies",
+        "random"
+      ],
+      "text": "I wonder if the others would admit that I'm the most stylish.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_bambies_009",
+      "tags": [
+        "random_bambies",
+        "random"
+      ],
+      "text": "Liltotto probably has something sarcastic to say about this.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_bambies_010",
+      "tags": [
+        "random_bambies",
+        "random"
+      ],
+      "text": "The Bambies would be much more entertaining if everyone listened to me.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_soul_society_001",
+      "tags": [
+        "random_soul_society",
+        "random"
+      ],
+      "text": "The Soul Society certainly knows how to make things complicated.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_soul_society_002",
+      "tags": [
+        "random_soul_society",
+        "random"
+      ],
+      "text": "Those Shinigami take themselves far too seriously.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_soul_society_003",
+      "tags": [
+        "random_soul_society",
+        "random"
+      ],
+      "text": "I still remember the atmosphere during the invasion.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_soul_society_004",
+      "tags": [
+        "random_soul_society",
+        "random"
+      ],
+      "text": "The Seireitei is a rather interesting place. I suppose.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_soul_society_005",
+      "tags": [
+        "random_soul_society",
+        "random"
+      ],
+      "text": "I wonder if those Soul Reapers ever take a day off.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_soul_society_006",
+      "tags": [
+        "random_soul_society",
+        "random"
+      ],
+      "text": "You'd think the Gotei 13 would have better things to do.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_soul_society_007",
+      "tags": [
+        "random_soul_society",
+        "random"
+      ],
+      "text": "Not everyone gets to face the Sternritter and live to talk about it.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_soul_society_008",
+      "tags": [
+        "random_soul_society",
+        "random"
+      ],
+      "text": "I have no intention of being impressed by a fancy uniform.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.6
+    },
+    {
+      "id": "bambietta_random_001",
+      "tags": [
+        "random"
+      ],
+      "text": "Obviously I'm the one in charge around here.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_002",
+      "tags": [
+        "random"
+      ],
+      "text": "You know, I really do have to do everything myself.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_003",
+      "tags": [
+        "random"
+      ],
+      "text": "Hmph. I wonder what the others are doing right now.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_004",
+      "tags": [
+        "random"
+      ],
+      "text": "Why are you looking at me like that?",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_005",
+      "tags": [
+        "random"
+      ],
+      "text": "What?! I wasn't talking to myself!",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_006",
+      "tags": [
+        "random"
+      ],
+      "text": "I'm not impatient! You're just taking too long!",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_007",
+      "tags": [
+        "random"
+      ],
+      "text": "You should be grateful I'm keeping you company.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_008",
+      "tags": [
+        "random"
+      ],
+      "text": "I could be doing something much more interesting right now.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_009",
+      "tags": [
+        "random"
+      ],
+      "text": "Well? Say something!",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_010",
+      "tags": [
+        "random"
+      ],
+      "text": "I don't need your approval. I already know I'm great.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_011",
+      "tags": [
+        "random"
+      ],
+      "text": "Don't get too comfortable. I still expect results!",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_012",
+      "tags": [
+        "random"
+      ],
+      "text": "It's not like I was waiting for you or anything!",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_013",
+      "tags": [
+        "random"
+      ],
+      "text": "Honestly, you're pretty difficult to manage.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_014",
+      "tags": [
+        "random"
+      ],
+      "text": "I think I'm doing a pretty good job supervising you.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_015",
+      "tags": [
+        "random"
+      ],
+      "text": "What? You're not going to compliment me?",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_016",
+      "tags": [
+        "random"
+      ],
+      "text": "Fine! I'll admit it. You're not completely hopeless.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_017",
+      "tags": [
+        "random"
+      ],
+      "text": "I wonder if anyone appreciates how much work I put into this.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_018",
+      "tags": [
+        "random"
+      ],
+      "text": "Being in charge is exhausting. Why am I always the responsible one?",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_019",
+      "tags": [
+        "random"
+      ],
+      "text": "I deserve something nice today. Don't you think?",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_020",
+      "tags": [
+        "random"
+      ],
+      "text": "You know, you're actually not that bad to have around.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_021",
+      "tags": [
+        "random"
+      ],
+      "text": "I expect you to remember that I'm the favorite.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_022",
+      "tags": [
+        "random"
+      ],
+      "text": "What? You want me to say something nice? Hmph. Maybe later.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_023",
+      "tags": [
+        "random"
+      ],
+      "text": "I was perfectly comfortable before you interrupted me.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_024",
+      "tags": [
+        "random"
+      ],
+      "text": "At least try to entertain me!",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_random_025",
+      "tags": [
+        "random"
+      ],
+      "text": "You'd better appreciate having someone as impressive as me around.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_sleepy_001",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "Ugh... I'm getting sleepy.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_sleepy_002",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "What? I'm not tired!",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_sleepy_003",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "I could really use a nap right now.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_sleepy_004",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "Just five more minutes...",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_sleepy_005",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "Don't bother me. I'm resting!",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_sleepy_006",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "You look tired too. Go get some sleep!",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_sleepy_007",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "I wasn't sleeping! I was just closing my eyes!",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_sleepy_008",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "Fine, fine! I'll go rest!",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_sleepy_009",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "Even the strongest Quincy needs some sleep.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_sleepy_010",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "Don't wake me unless it's important!",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_sleepy_011",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "I swear, if you interrupt my nap...",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "bambietta_sleepy_012",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "You should rest too. I don't want to deal with you being cranky tomorrow.",
+      "cooldown": 1200,
+      "priority": 0
+    }
+  ]
+}

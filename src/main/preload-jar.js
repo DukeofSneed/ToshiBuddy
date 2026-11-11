@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('jar', {
   state: () => ipcRenderer.invoke('jar:state'),
+  theme: () => ipcRenderer.invoke('app:theme'),
   donate: (tokens, goalId) => ipcRenderer.invoke('jar:donate', { tokens, goalId }),
   suggest: (text) => ipcRenderer.invoke('jar:suggest', { text }),
   fund: (goalId, tokens) => ipcRenderer.invoke('jar:fund', { goalId, tokens }),

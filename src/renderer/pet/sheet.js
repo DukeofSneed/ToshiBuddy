@@ -46,14 +46,23 @@
   // Background removal for sheets: flood from the border, spreading to a
   // neighbor whose color is within `tol` of the pixel it came from. That follows
   // gradients and vignettes in the background but stops at the line art.
-  function keyFlood(px, w, h, tol) {
+  // keyMax (optional): a pixel must also be within keyMax of the background
+  // color (the corner average). Use it when the character has colors close to
+  // the background, like dark hair on black, so the fill can't creep into them.
+  function keyFlood(px, w, h, tol, keyMax) {
     const n = w * h;
     const seen = new Uint8Array(n);
     const stack = new Int32Array(n);
     let sp = 0;
+    const corners = [0, w - 1, (h - 1) * w, n - 1];
+    const key = [0, 1, 2].map((c) => corners.reduce((s, p) => s + px[p * 4 + c], 0) / 4);
+    const capped = Number(keyMax) > 0;
+    const nearKey = (b) => !capped || (Math.abs(px[b * 4] - key[0]) <= keyMax
+      && Math.abs(px[b * 4 + 1] - key[1]) <= keyMax && Math.abs(px[b * 4 + 2] - key[2]) <= keyMax);
     const near = (a, b) => Math.abs(px[a * 4] - px[b * 4]) <= tol
       && Math.abs(px[a * 4 + 1] - px[b * 4 + 1]) <= tol
-      && Math.abs(px[a * 4 + 2] - px[b * 4 + 2]) <= tol;
+      && Math.abs(px[a * 4 + 2] - px[b * 4 + 2]) <= tol
+      && nearKey(b);
     const seed = (p) => { if (!seen[p]) { seen[p] = 1; stack[sp++] = p; } };
     for (let x = 0; x < w; x++) { seed(x); seed((h - 1) * w + x); }
     for (let y = 0; y < h; y++) { seed(y * w); seed(y * w + w - 1); }
@@ -261,7 +270,7 @@
     const transparent = corners.every((p) => px[p * 4 + 3] < 20);
     let removed = null;
     if (!transparent && cfg.keyMode !== 'none') {
-      removed = keyFlood(px, w, h, Math.max(1, Math.min(80, Number(cfg.keyTolerance) || 12)));
+      removed = keyFlood(px, w, h, Math.max(1, Math.min(80, Number(cfg.keyTolerance) || 12)), Math.max(0, Math.min(255, Number(cfg.keyMax) || 0)));
       g.putImageData(data, 0, 0);
     }
     const det = detectFrames(px, w, h);

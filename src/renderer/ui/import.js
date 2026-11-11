@@ -23,12 +23,40 @@
   // ---- tabs ----
   function showTab(name) {
     document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
+    $('tab-choose').classList.toggle('hidden', name !== 'choose');
     $('tab-import').classList.toggle('hidden', name !== 'import');
     $('tab-edit').classList.toggle('hidden', name !== 'edit');
     if (name === 'edit') loadCharacters();
+    if (name === 'choose') loadChooser();
   }
   document.querySelectorAll('.tab').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
-  chars.onGoto((hash) => showTab(hash === 'edit' ? 'edit' : 'import'));
+  const tabFor = (hash) => (['edit', 'choose'].includes(String(hash).replace('#', '')) ? String(hash).replace('#', '') : 'import');
+  chars.onGoto((hash) => showTab(tabFor(hash)));
+
+  // ---- choose your buddy (first run, or any time) ----
+  async function loadChooser() {
+    const r = await chars.list();
+    const list = r.characters.filter((c) => !c.test).concat(r.characters.filter((c) => c.test));
+    $('choose-list').innerHTML = list.map((c) => `
+      <button class="buddy ${c.id === r.active ? 'active' : ''}" data-id="${esc(c.id)}">
+        <div class="pic ${c.cover && c.cover.kind === 'sheet' ? 'sheet' : ''}" data-cover="${c.cover ? esc(c.cover.url) : ''}"></div>
+        <div class="nm">${esc(c.name)}</div>
+        ${c.test ? '<span class="tag">test character</span>' : ''}
+        <div class="ps">${esc(c.personality || '')}</div>
+      </button>`).join('');
+    // Set through the DOM: the page's security policy blocks inline style attributes.
+    document.querySelectorAll('#choose-list .pic').forEach((p) => {
+      if (p.dataset.cover) p.style.backgroundImage = 'url("' + p.dataset.cover.replace(/"/g, '%22') + '")';
+    });
+  }
+  $('choose-list').addEventListener('click', async (e) => {
+    const b = e.target.closest('.buddy');
+    if (!b) return;
+    const r = await chars.choose(b.dataset.id);
+    if (r.error) { note('choose-msg', r.error, true); return; }
+    note('choose-msg', 'Done. Your buddy is on the desktop now.');
+    loadChooser();
+  });
 
   // ---- quick import ----
   const chosen = {};
@@ -205,5 +233,5 @@
     setTimeout(() => loadDetails(current.id), 1500);
   });
 
-  showTab(location.hash === '#edit' ? 'edit' : 'import');
+  showTab(tabFor(location.hash));
 })();

@@ -20,6 +20,7 @@
   const nm = (s) => (ON_SKIN ? String(s == null ? '' : s).replace(/\bKori\b/g, NAME) : String(s == null ? '' : s));
 
   function render(state) {
+    if (window.BuddyTheme) BuddyTheme.apply(state.theme);
     S = state;
     NAME = state.settings.characterName || 'Kori';
     const active = (state.characters || []).find((c) => c.id === state.activeCharacter);

@@ -98,6 +98,16 @@
       noise(t, { dur: 0.7, freq: 700, to: 6500, q: 4, gain: 0.16, attack: 0.08 });
       [880, 1109, 1319, 1760, 2217].forEach((f, i) => tone(t + 0.05 + i * 0.075, { freq: f, dur: 0.45, gain: 0.16 }));
     },
+    // A small explosion (for characters with explosion effects).
+    boom(t) {
+      tone(t, { freq: 120, to: 38, dur: 0.45, gain: 0.85, attack: 0.003 });
+      noise(t, { dur: 0.5, type: 'lowpass', freq: 2400, to: 160, q: 0.7, gain: 0.6, attack: 0.003 });
+      noise(t + 0.02, { dur: 0.18, type: 'bandpass', freq: 3200, to: 900, q: 1.2, gain: 0.18 });
+    },
+    // Sparks and debris after a blast.
+    crackle(t) {
+      for (let i = 0; i < 9; i++) noise(t + i * 0.045 + Math.random() * 0.03, { dur: 0.04, type: 'bandpass', freq: 2500 + Math.random() * 3500, q: 6, gain: 0.12 });
+    },
     // Tokens into the jar.
     coin(t) {
       tone(t, { freq: 988, dur: 0.09, type: 'square', gain: 0.12, filter: { freq: 3500 } });

@@ -11,9 +11,20 @@
 <body>
   <main id="page">
     <nav class="tabs">
+      <button data-tab="choose" class="tab">Choose your buddy</button>
       <button data-tab="import" class="tab active">Import a character</button>
       <button data-tab="edit" class="tab">Animations and personality</button>
     </nav>
+
+    <!-- ===== choose ===== -->
+    <section id="tab-choose" class="hidden">
+      <div class="card">
+        <h2>Choose your buddy</h2>
+        <div class="muted small-note">Pick who walks your desktop. You can switch any time from <b>Character</b> in the right-click menu.</div>
+      </div>
+      <div id="choose-list" class="choose-grid"></div>
+      <div id="choose-msg" class="note"></div>
+    </section>
 
     <!-- ===== import ===== -->
     <section id="tab-import">
@@ -95,6 +106,7 @@
       </div>
     </section>
   </main>
+  <script src="ui/theme.js"></script>
   <script src="ui/import.js"></script>
 </body>
 </html>

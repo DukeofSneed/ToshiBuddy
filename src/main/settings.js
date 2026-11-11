@@ -13,7 +13,8 @@ const DEFAULTS = {
   deskApps: null,   // override { writing: [...process names], lab: [...] }
   deskTitles: null, // override { writing: [...title keywords], lab: [...] }
   characterNames: {}, // the user's rename per character id: { toshitoshi: 'ToshiToshi' }
-  character: '',       // id of a pack under characters/; '' = ToshiToshi, else the first one
+  character: '',
+  firstRunDone: false, // the "choose your buddy" screen was shown       // id of a pack under characters/; '' = ToshiToshi, else the first one
   showAnchors: false, // draw markers where props attach (for tuning a character's anchors)
   ultimateSeconds: 30, // how long the ultimate form lasts after a donation (a skin can override)
   autostart: false,

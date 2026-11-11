@@ -152,6 +152,7 @@ function start() {
       level: lv.level,
       quick: Number(settings.get('quickDonateTokens')) || 1000,
       show: settings.get('showJarProp') !== false,
+      theme: characterStyle().theme,
     };
   }
   function jarState() {
@@ -164,6 +165,7 @@ function start() {
       characters: listCharacters(PROJECT_ROOT).map((c) => ({ id: c.name, name: displayNameOf(c), test: c.test })),
       activeCharacter: activeCharacterId(),
       log: logLines.slice(-80),
+      theme: characterStyle().theme,
       projectRoot: PROJECT_ROOT,
     };
   }
@@ -211,6 +213,18 @@ function start() {
     return { name: charName(), isSkin: !isBuiltinActive(), personality };
   };
   const publicSettings = () => ({ ...settings.all(), characterName: charName() });
+  // Look and feel from character.json: theme accent, effect style, ultimate form.
+  const characterStyle = () => {
+    const c = activeCharacter();
+    const cfg = (c && c.config) || {};
+    const accent = cfg.theme && /^#[0-9a-f]{6}$/i.test(cfg.theme.accent || '') ? cfg.theme.accent : null;
+    return {
+      theme: accent ? { accent } : null,
+      effects: cfg.effects === 'explosion' ? 'explosion' : 'ice',
+      ultimateForm: cfg.ultimateForm !== false,
+    };
+  };
+  ipcMain.handle('app:theme', () => characterStyle().theme);
   const currentSkin = () => (isBuiltinActive() ? null : activeCharacter());
   // The renderer slices sprite sheets and sends back a numbered preview
   // (sheet-index.png / ultimate-sheet-index.png) so the user can map frames.
@@ -229,6 +243,7 @@ function start() {
     workArea: screen.getPrimaryDisplay().workArea,
     settings: publicSettings(),
     skin: currentSkin(),
+    style: characterStyle(),
     jar: jarPropState(),
     mods: listMods(PROJECT_ROOT, ledger.data.disabledMods),
     quips: quipsForPet(),
@@ -335,7 +350,31 @@ function start() {
   }));
   ipcMain.handle('import:characters', () => ({
     active: activeCharacterId(),
-    characters: listCharacters(PROJECT_ROOT).map((c) => ({ id: c.name, name: displayNameOf(c), test: c.test, builtin: c.builtin })),
+    characters: listCharacters(PROJECT_ROOT).map((c) => ({
+      id: c.name, name: displayNameOf(c), test: c.test, builtin: c.builtin,
+      personality: c.config.personality || '', cover: coverOf(c),
+    })),
+  }));
+  // A picture for the chooser: the still image, else the sheet itself (the page
+  // crops to its first pose), else the drawn test character's preview.
+  function coverOf(c) {
+    const dir = path.join(charactersRoot(PROJECT_ROOT), c.name);
+    const url = (f) => `${require('url').pathToFileURL(f).href}?v=${fs.statSync(f).mtimeMs}`;
+    if (c.builtin) {
+      const f = path.join(PROJECT_ROOT, 'assets', 'kori-test', 'kori-preview.png');
+      return fs.existsSync(f) ? { url: url(f), kind: 'still' } : null;
+    }
+    const files = fs.readdirSync(dir);
+    const still = files.find((f) => /^skin\.(png|webp|gif|jpe?g)$/i.test(f));
+    if (still) return { url: url(path.join(dir, still)), kind: 'still' };
+    const sheet = files.find((f) => /^sheet\.(png|webp|gif|jpe?g)$/i.test(f));
+    return sheet ? { url: url(path.join(dir, sheet)), kind: 'sheet' } : null;
+  }
+  ipcMain.handle('import:choose', guarded(({ id }) => {
+    if (!listCharacters(PROJECT_ROOT).some((c) => c.name === id)) throw new Error('Unknown character.');
+    settings.set('firstRunDone', true);
+    switchCharacter(id);
+    return { ok: true };
   }));
   ipcMain.handle('import:details', (_e, { id } = {}) => {
     const c = listCharacters(PROJECT_ROOT).find((x) => x.name === id);
@@ -526,7 +565,7 @@ function start() {
       { type: 'separator' },
       { label: 'Open the jar', click: openJar },
       { label: 'Check plan usage', click: () => ipcMain.emit('__check-usage') },
-      { label: 'Frost Release (ultimate form)', click: () => { if (overlay && !overlay.isDestroyed()) overlay.webContents.send('animate', { name: 'ultimate' }); } },
+      { label: characterStyle().effects === 'explosion' ? (characterStyle().ultimateForm ? 'Explode (ultimate form)' : 'Explode!') : 'Frost Release (ultimate form)', click: () => { if (overlay && !overlay.isDestroyed()) overlay.webContents.send('animate', { name: 'ultimate' }); } },
       { type: 'separator' },
       { label: 'Mute voice', type: 'checkbox', checked: !!settings.get('muted'), click: (m) => toggleSetting('muted', m.checked) },
       { label: 'Sound effects', type: 'checkbox', checked: settings.get('sfx') !== false, click: (m) => toggleSetting('sfx', m.checked) },
@@ -585,6 +624,12 @@ function start() {
   const openFromArgs = (argv) => { if (argv.includes('--import')) { openImport('import'); return true; } if (argv.includes('--edit')) { openImport('edit'); return true; } return false; };
   app.on('second-instance', (_e, argv) => { if (!openFromArgs(argv)) openJar(); });
   if (!process.env.TOSHI_SELFTEST) setTimeout(() => openFromArgs(process.argv), 2500);
+  const firstRun = !settings.get('firstRunDone') && !settings.get('character');
+  if (firstRun && !process.env.TOSHI_SELFTEST && listCharacters(PROJECT_ROOT).filter((c) => !c.test).length > 1) {
+    setTimeout(() => openImport('choose'), 3000);
+  } else if (!settings.get('firstRunDone')) {
+    settings.set('firstRunDone', true);
+  }
   app.on('window-all-closed', (e) => { /* keep running in the tray */ });
   app.on('before-quit', () => { if (jarWin) jarWin.__reallyClose = true; activity.stop(); });
 
@@ -674,7 +719,7 @@ function start() {
         fs.writeFileSync(path.join(selftestDir, 'customize.png'), cp.toPNG());
         openImport('edit');
         await new Promise((r) => setTimeout(r, 3500));
-        if (importWin) { const ip = await importWin.webContents.capturePage(); fs.writeFileSync(path.join(selftestDir, 'characters-edit.png'), ip.toPNG()); await importWin.webContents.executeJavaScript("document.querySelector('.tab[data-tab=import]').click(); 1"); await new Promise((r) => setTimeout(r, 400)); const ip2 = await importWin.webContents.capturePage(); fs.writeFileSync(path.join(selftestDir, 'characters-import.png'), ip2.toPNG()); }
+        if (importWin) { const ip = await importWin.webContents.capturePage(); fs.writeFileSync(path.join(selftestDir, 'characters-edit.png'), ip.toPNG()); await importWin.webContents.executeJavaScript("document.querySelector('.tab[data-tab=import]').click(); 1"); await new Promise((r) => setTimeout(r, 400)); const ip2 = await importWin.webContents.capturePage(); fs.writeFileSync(path.join(selftestDir, 'characters-import.png'), ip2.toPNG()); await importWin.webContents.executeJavaScript("document.querySelector('.tab[data-tab=choose]').click(); 1"); await new Promise((r) => setTimeout(r, 1200)); const ip3 = await importWin.webContents.capturePage(); fs.writeFileSync(path.join(selftestDir, 'characters-choose.png'), ip3.toPNG()); }
         const sfxCheck = await overlay.webContents.executeJavaScript(`JSON.stringify(BuddySfx.names.map((n) => { try { return [n, BuddySfx.play(n)]; } catch (e) { return [n, 'ERR ' + e.message]; } }))`);
         fs.writeFileSync(path.join(selftestDir, 'sfx.json'), sfxCheck);
         const probe = await overlay.webContents.executeJavaScript(`JSON.stringify({ mods: BuddyMods.list(), skippedMods: BuddyMods.skipped(), modProps: document.querySelectorAll('#pet [data-mod]').length, surprisedAnim: (() => { const p = document.getElementById('pet'); p.classList.add('surprised'); const a = getComputedStyle(document.getElementById('sprite')).animationName; p.classList.remove('surprised'); return a; })(), quips: BuddyQuips.all().length, mode: BuddyBrain.state.mode, x: BuddyBrain.state.x, y: BuddyBrain.state.y, bubble: BuddyBubble.isVisible(), text: document.getElementById('bubble-text').textContent, petClass: document.getElementById('pet').className, skin: document.getElementById('pet').classList.contains('skin'), skinImg: !!document.getElementById('skin-img'), ultimateImg: !!document.getElementById('skin-ultimate'), idle: BuddyBrain.state.idleSeconds })`);

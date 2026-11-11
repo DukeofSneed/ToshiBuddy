@@ -130,6 +130,11 @@
   document.getElementById('pet').classList.toggle('sheet', !!(skin && skin.sheet));
   document.getElementById('pet').classList.toggle('ultimate-sheet', !!(skin && skin.ultimateSheet));
   BuddyApp.skin = skin;
+  // Character style: theme colors, ice or explosion effects, ultimate form on/off.
+  const style = boot.style || {};
+  BuddyApp.effects = style.effects || 'ice';
+  BuddyApp.noUltimate = style.ultimateForm === false;
+  BuddyTheme.apply(style.theme);
   BuddyApp.sheetPlayers = BuddySheet.start(skin);
   // A sheet's walk can set its own ground speed so the feet match the stride.
   BuddyApp.walkSpeed = (skin && skin.sheet && skin.sheet.anims.walk && skin.sheet.anims.walk.speed) || null;

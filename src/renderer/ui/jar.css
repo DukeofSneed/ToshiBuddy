@@ -19,7 +19,7 @@ html, body { margin: 0; height: 100%; background: transparent; font-family: "Seg
 #titlebar { position: sticky; top: 0; z-index: 2; display: flex; justify-content: space-between; align-items: center; padding: 10px 0; background: var(--panel); -webkit-app-region: drag; }
 #titlebar button { -webkit-app-region: no-drag; }
 .brand { font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 8px; }
-.orb { width: 14px; height: 14px; border-radius: 3px; transform: rotate(45deg); background: linear-gradient(135deg, #ffffff, #bfe8ff 50%, #5aa9e6); box-shadow: 0 0 8px #7cc4f5; display: inline-block; }
+.orb { width: 14px; height: 14px; border-radius: 3px; transform: rotate(45deg); background: linear-gradient(135deg, #ffffff, var(--accent2) 50%, var(--accent)); box-shadow: 0 0 8px var(--accent2); display: inline-block; }
 #close { background: none; border: none; color: var(--muted); font-size: 22px; cursor: pointer; line-height: 1; }
 #close:hover { color: var(--text); }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin: 10px 0; }

@@ -93,6 +93,9 @@ function cleanConfig(cfg) {
   set('keyColor', /^#?[0-9a-f]{6}$/i.test(cfg.keyColor || '') ? cfg.keyColor : undefined);
   set('keyTolerance', num(cfg.keyTolerance, 0, 255));
   set('ultimateSeconds', num(cfg.ultimateSeconds, 5, 600));
+  if (cfg.theme && /^#[0-9a-f]{6}$/i.test(cfg.theme.accent || '')) out.theme = { accent: cfg.theme.accent };
+  if (cfg.effects === 'explosion' || cfg.effects === 'ice') out.effects = cfg.effects;
+  if (cfg.ultimateForm === false) out.ultimateForm = false;
   if (cfg.mods === false || Array.isArray(cfg.mods)) out.mods = cfg.mods === false ? false : cfg.mods.map(String).filter((m) => /^[a-z0-9-]{2,40}$/.test(m)).slice(0, 50);
   if (cfg.anchors && typeof cfg.anchors === 'object') out.anchors = cleanAnchors(cfg.anchors);
   if (cfg.ultimate && typeof cfg.ultimate === 'object') {
@@ -136,7 +139,7 @@ function cleanAnimations(anims) {
 
 function cleanSheet(s) {
   const out = {};
-  for (const k of ['scale', 'offsetX', 'offsetY', 'keyTolerance']) if (Number.isFinite(Number(s[k]))) out[k] = Number(s[k]);
+  for (const k of ['scale', 'offsetX', 'offsetY', 'keyTolerance', 'keyMax']) if (Number.isFinite(Number(s[k]))) out[k] = Number(s[k]);
   if (out.scale !== undefined) out.scale = Math.max(0.2, Math.min(4, out.scale));
   if (s.keyMode === 'none') out.keyMode = 'none';
   if (s.animations) out.animations = cleanAnimations(s.animations);

@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('custom', {
   state: () => ipcRenderer.invoke('custom:state'),
+  theme: () => ipcRenderer.invoke('app:theme'),
   setName: (name) => ipcRenderer.invoke('custom:set-name', { name }),
   add: (text, tags) => ipcRenderer.invoke('custom:add', { text, tags }),
   update: (key, text, tags) => ipcRenderer.invoke('custom:update', { key, text, tags }),

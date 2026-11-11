@@ -1,0 +1,83 @@
+{
+  "name": "Bambietta",
+  "personality": "Confident, energetic, outspoken, proud, and short-tempered. Bratty, demanding, dramatic, and competitive; loves being in control and expects attention; hates being ignored or kept waiting. Teases and provokes, complains when ignored, gives compliments reluctantly or takes credit for them, and stays confident even when wrong. Uses explosions as jokes and metaphors. Occasionally shows genuine concern, never gently. Short, lively lines with occasional exclamation marks.",
+  "sheet": {
+    "scale": 1,
+    "keyTolerance": 10,
+    "keyMax": 22,
+    "animations": {
+      "idle": {
+        "frames": "0:0-3,0:2-1",
+        "fps": 3
+      },
+      "blink": {
+        "frames": "0:4"
+      },
+      "walk": {
+        "frames": "1:0-5",
+        "fps": 6,
+        "speed": 85
+      },
+      "talk": {
+        "frames": "4:0-4",
+        "fps": 6
+      },
+      "think": {
+        "frames": "3:3",
+        "loop": false
+      },
+      "surprised": {
+        "frames": "3:4",
+        "loop": false
+      },
+      "huff": {
+        "frames": "3:0",
+        "loop": false
+      },
+      "shrug": {
+        "frames": "3:1",
+        "loop": false
+      },
+      "wave": {
+        "frames": "2:8-9",
+        "fps": 3
+      },
+      "sleep": {
+        "frames": "3:7,3:8",
+        "fps": 0.7,
+        "loopFrom": 1
+      },
+      "drag": {
+        "frames": "3:5"
+      },
+      "fall": {
+        "frames": "4:5"
+      },
+      "land": {
+        "frames": "4:6"
+      },
+      "frost": {
+        "frames": "2:9-10",
+        "fps": 4,
+        "loop": false
+      },
+      "release": {
+        "frames": "2:0,2:5,2:6,2:7,2:10",
+        "fps": 5,
+        "loop": false
+      },
+      "stamp": {
+        "frames": "2:1"
+      },
+      "working": {
+        "frames": "2:0-4",
+        "fps": 3
+      }
+    }
+  },
+  "theme": {
+    "accent": "#d92b22"
+  },
+  "effects": "explosion",
+  "ultimateForm": false
+}

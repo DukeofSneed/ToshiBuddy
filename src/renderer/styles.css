@@ -1,3 +1,14 @@
+/* Theme colors; a character's "theme" in character.json overrides them (ui/theme.js). */
+:root {
+  --tb-accent: #7cc4f5;
+  --tb-accent-deep: #3f8fdc;
+  --tb-bubble-bg: rgba(12, 22, 40, 0.94);
+  --tb-bubble-text: #eaf6ff;
+  --tb-glow: rgba(124, 196, 245, 0.55);
+  --tb-glow-strong: rgba(124, 196, 245, 0.9);
+  --tb-fill-top: #9fe0ff;
+  --tb-fill-bottom: #3f8fdc;
+}
 html, body {
   margin: 0;
   padding: 0;
@@ -254,9 +265,9 @@ html, body {
 #bubble {
   position: absolute;
   max-width: 300px;
-  background: rgba(12, 22, 40, 0.94);
-  color: #eaf6ff;
-  border: 2px solid #7cc4f5;
+  background: var(--tb-bubble-bg);
+  color: var(--tb-bubble-text);
+  border: 2px solid var(--tb-accent);
   border-radius: 14px;
   padding: 10px 14px;
   font-size: 14px;
@@ -273,7 +284,7 @@ html, body {
   margin-left: -9px;
   border-left: 9px solid transparent;
   border-right: 9px solid transparent;
-  border-top: 11px solid #7cc4f5;
+  border-top: 11px solid var(--tb-accent);
 }
 #bubble.pop { animation: pop 220ms ease-out; }
 @keyframes pop { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
@@ -283,9 +294,9 @@ html, body {
   left: 50%;
   bottom: 24px;
   transform: translateX(-50%);
-  background: rgba(12, 22, 40, 0.92);
-  color: #cfeaff;
-  border: 1px solid #7cc4f5;
+  background: var(--tb-bubble-bg);
+  color: var(--tb-bubble-text);
+  border: 1px solid var(--tb-accent);
   border-radius: 10px;
   padding: 8px 14px;
   font-size: 13px;
@@ -304,12 +315,12 @@ html, body {
   height: 104px;
   cursor: pointer;
   z-index: 3;
-  filter: drop-shadow(0 0 6px rgba(124, 196, 245, 0.55));
+  filter: drop-shadow(0 0 6px var(--tb-glow));
   transform-origin: 50% 100%;
 }
 #jar-prop.hidden { display: none; }
 #jar-prop svg { width: 100%; height: 100%; display: block; overflow: visible; }
-#jar-prop:hover { filter: drop-shadow(0 0 10px rgba(124, 196, 245, 0.9)); }
+#jar-prop:hover { filter: drop-shadow(0 0 10px var(--tb-glow-strong)); }
 #jar-prop #jar-fill, #jar-prop #jar-coins { transition: all 600ms ease; }
 #jar-prop.jar-bump { animation: jarBump 450ms ease-out; }
 @keyframes jarBump { 0%, 100% { transform: none; } 30% { transform: scale(1.08, 0.92); } 60% { transform: scale(0.96, 1.05) translateY(-4px); } }
@@ -317,8 +328,27 @@ html, body {
   position: absolute; left: 50%; top: -6px;
   transform: translateX(-50%);
   font: 700 14px "Segoe UI", sans-serif; color: #eaf6ff;
-  text-shadow: 0 0 6px #3f8fdc, 0 1px 2px #0d1626;
+  text-shadow: 0 0 6px var(--tb-accent-deep), 0 1px 2px #0d1626;
   pointer-events: none; white-space: nowrap;
   animation: jarFloat 1400ms ease-out forwards;
 }
 @keyframes jarFloat { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, -46px); } }
+
+/* ---- explosion effects (characters with "effects": "explosion") ---- */
+.blast {
+  position: absolute; width: 60px; height: 60px; margin: -30px 0 0 -30px;
+  border-radius: 50%; pointer-events: none; z-index: 4;
+  background: radial-gradient(circle, #fff6c8 0%, #ffd23f 25%, #ff7a1a 50%, rgba(217, 43, 34, 0.85) 68%, rgba(60, 20, 20, 0) 72%);
+  animation: blast 650ms ease-out forwards;
+}
+@keyframes blast {
+  0% { transform: scale(calc(0.2 * var(--s, 1))); opacity: 1; filter: brightness(1.6); }
+  45% { transform: scale(calc(1.2 * var(--s, 1))); opacity: 1; }
+  100% { transform: scale(calc(1.6 * var(--s, 1))); opacity: 0; filter: brightness(0.7) blur(2px); }
+}
+.spark {
+  position: absolute; width: 5px; height: 5px; margin: -2px 0 0 -2px; border-radius: 50%;
+  background: #ffe27a; box-shadow: 0 0 6px #ff9a2a; pointer-events: none; z-index: 4;
+  animation: spark var(--dur) ease-out forwards;
+}
+@keyframes spark { from { transform: translate(0, 0); opacity: 1; } to { transform: translate(var(--dx), calc(var(--dy) + 30px)); opacity: 0; } }

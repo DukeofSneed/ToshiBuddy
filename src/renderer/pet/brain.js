@@ -128,7 +128,7 @@
     const dur = durationMs || BUILTIN_ANIMS[name] || (modAnims[name] && modAnims[name].durationMs);
     if (!dur) return false;
     const cls = BUILTIN_ANIMS[name] ? name : `anim-${name}`;
-    if (name === 'frost') BuddySfx.play('shimmer');
+    if (name === 'frost') { if (explosive()) { BuddySfx.play('boom'); const c = petCenter(); miniBlast(c.x + rand(-40, 40), c.y - rand(10, 50), 0.7); } else BuddySfx.play('shimmer'); }
     if (name === 'huff') BuddySfx.play('huff');
     if (name === 'release') releaseFx();
     const el = pet();
@@ -144,7 +144,43 @@
   function petCenter() {
     return { x: st.x + PET_W / 2, y: st.y + PET_H * 0.55 };
   }
+  // Characters with "effects": "explosion" in character.json get blasts and
+  // sparks instead of ice.
+  const explosive = () => !!(window.BuddyApp && BuddyApp.effects === 'explosion');
+  function miniBlast(x, y, scale = 1) {
+    const stage = document.getElementById('stage');
+    const b = document.createElement('div');
+    b.className = 'blast';
+    b.style.left = `${x}px`;
+    b.style.top = `${y}px`;
+    b.style.setProperty('--s', String(scale));
+    stage.appendChild(b);
+    setTimeout(() => b.remove(), 700);
+    const n = Math.round(10 * scale);
+    for (let i = 0; i < n; i++) {
+      const s = document.createElement('div');
+      s.className = 'spark';
+      const ang = rand(0, Math.PI * 2);
+      const dist = rand(40, 120) * scale;
+      s.style.left = `${x}px`;
+      s.style.top = `${y}px`;
+      s.style.setProperty('--dx', `${Math.cos(ang) * dist}px`);
+      s.style.setProperty('--dy', `${Math.sin(ang) * dist - 20}px`);
+      s.style.setProperty('--dur', `${rand(450, 800)}ms`);
+      stage.appendChild(s);
+      setTimeout(() => s.remove(), 900);
+    }
+  }
+  function explosionFx() {
+    const c = petCenter();
+    const spots = [[0, 0, 1.4], [-70, -40, 0.8], [80, -20, 0.9], [-30, -90, 0.7], [50, -100, 0.8], [0, -30, 1.8]];
+    spots.forEach(([dx, dy, s], i) => setTimeout(() => {
+      miniBlast(c.x + dx + rand(-12, 12), c.y + dy + rand(-12, 12), s);
+      BuddySfx.play(i === spots.length - 1 ? 'boom' : (i % 2 ? 'crackle' : 'boom'));
+    }, 250 + i * 380));
+  }
   function releaseFx() {
+    if (explosive()) return explosionFx();
     const stage = document.getElementById('stage');
     const c = petCenter();
     BuddySfx.play('freeze');
@@ -188,6 +224,9 @@
   let ultimateTimer = null;
   function enterUltimate(seconds) {
     const el = pet();
+    // Characters with "ultimateForm": false just show off (the release animation
+    // and effects) without changing form.
+    if (window.BuddyApp && BuddyApp.noUltimate) { playAnimation('release'); return true; }
     const ms = Math.max(5, Math.min(600, seconds || (window.BuddyApp && BuddyApp.ultimateSeconds) || 30)) * 1000;
     const already = el.classList.contains('ultimate');
     if (!already) {

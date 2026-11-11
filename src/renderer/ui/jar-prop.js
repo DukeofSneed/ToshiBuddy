@@ -17,20 +17,20 @@
       <stop offset="1" stop-color="#bfe3ff" stop-opacity="0.5"/>
     </linearGradient>
     <linearGradient id="jar-tokens" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#9fe0ff"/>
-      <stop offset="1" stop-color="#3f8fdc"/>
+      <stop offset="0" style="stop-color: var(--tb-fill-top)"/>
+      <stop offset="1" style="stop-color: var(--tb-fill-bottom)"/>
     </linearGradient>
   </defs>
   <ellipse cx="42" cy="100" rx="30" ry="3.5" fill="rgba(0,0,0,0.28)"/>
   <g clip-path="url(#jar-inside)">
     <rect id="jar-fill" x="8" y="98" width="68" height="0" fill="url(#jar-tokens)"/>
-    <g id="jar-coins" fill="#e9f8ff" stroke="#3f8fdc" stroke-width="0.8">
+    <g id="jar-coins" fill="#fff8f0" style="stroke: var(--tb-accent-deep)" stroke-width="0.8">
       <circle cx="24" cy="92" r="4"/><circle cx="38" cy="94" r="4"/><circle cx="54" cy="91" r="4"/><circle cx="64" cy="94" r="4"/>
     </g>
   </g>
   <path d="M14,30 Q10,34 10,44 L10,88 Q10,98 22,98 L62,98 Q74,98 74,88 L74,44 Q74,34 70,30 Z" fill="url(#jar-glass)" stroke="#1f2a40" stroke-width="1.8"/>
   <path d="M18,40 Q16,60 18,84" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.7"/>
-  <rect x="16" y="20" width="52" height="11" rx="3" fill="#33508e" stroke="#1f2a40" stroke-width="1.6"/>
+  <rect x="16" y="20" width="52" height="11" rx="3" style="fill: var(--tb-accent-deep)" stroke="#1f2a40" stroke-width="1.6"/>
   <rect x="34" y="16" width="16" height="5" rx="1.5" fill="#1f2a40"/>
   <rect id="jar-label-bg" x="22" y="56" width="40" height="15" rx="4" fill="#0d1626" opacity="0.82"/>
   <text id="jar-label" x="42" y="67" text-anchor="middle" font-size="10" font-weight="700" fill="#eaf6ff" font-family="Segoe UI, sans-serif">0</text>
@@ -93,6 +93,7 @@
 
   function update(s) {
     state = { ...state, ...(s || {}) };
+    if (s && 'theme' in s && window.BuddyTheme) BuddyTheme.apply(s.theme);
     render();
   }
 
