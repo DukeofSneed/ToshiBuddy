@@ -24,11 +24,13 @@
       },
       "think": {
         "frames": "3:2",
-        "loop": false
+        "loop": false,
+        "flip": true
       },
       "surprised": {
         "frames": "3:3",
-        "loop": false
+        "loop": false,
+        "flip": true
       },
       "huff": {
         "frames": "3:0",
@@ -39,7 +41,8 @@
         "loop": false
       },
       "drag": {
-        "frames": "3:5"
+        "frames": "3:5",
+        "flip": true
       },
       "sleep": {
         "frames": "3:8"
