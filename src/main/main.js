@@ -634,7 +634,26 @@ function start() {
   } catch (e) { log(`tray failed: ${e.message}`); }
 
   // Launching again with --import (or --edit) opens the Characters window; otherwise the jar.
-  const openFromArgs = (argv) => { if (argv.includes('--import')) { openImport('import'); return true; } if (argv.includes('--edit')) { openImport('edit'); return true; } return false; };
+  // --demo-poses: hold the confused, surprised, and dizzy poses for 5 s each on
+  // ToshiToshi and then Bambietta (with a label), then switch back.
+  async function demoPoses() {
+    const original = activeCharacterId();
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    for (const id of ['toshitoshi', 'bambietta'].filter((x) => listCharacters(PROJECT_ROOT).some((c) => c.name === x))) {
+      settings.set('character', id);
+      await reloadAndAwaitMods([], 1500);
+      await wait(3500);
+      for (const pose of ['think', 'surprised', 'drag']) {
+        const label = { think: 'confused (row 4, spot 3)', surprised: 'surprised (row 4, spot 4)', drag: 'dizzy (row 4, spot 6)' }[pose];
+        await overlay.webContents.executeJavaScript(`(() => { BuddyBrain.setPaused(true); BuddyBubble.hide(); const p = document.getElementById('pet'); for (const m of ['idle','walk','lean','sleep','drag','fall','desk','think','surprised']) p.classList.remove(m); p.classList.add(${JSON.stringify(pose === 'drag' ? 'drag' : 'idle')}); ${pose === 'drag' ? '' : `p.classList.add('${pose}');`} BuddyBubble.toast(${JSON.stringify(id + ': ' + label)}, 5000); return 1; })()`);
+        await wait(5000);
+      }
+      await overlay.webContents.executeJavaScript(`(() => { const p = document.getElementById('pet'); for (const m of ['drag','think','surprised']) p.classList.remove(m); p.classList.add('idle'); BuddyBrain.setPaused(false); return 1; })()`);
+    }
+    settings.set('character', original);
+    await reloadAndAwaitMods([], 1500);
+  }
+  const openFromArgs = (argv) => { if (argv.includes('--import')) { openImport('import'); return true; } if (argv.includes('--edit')) { openImport('edit'); return true; } if (argv.includes('--demo-poses')) { demoPoses(); return true; } return false; };
   app.on('second-instance', (_e, argv) => { if (!openFromArgs(argv)) openJar(); });
   if (!process.env.TOSHI_SELFTEST) setTimeout(() => openFromArgs(process.argv), 2500);
   const firstRun = !settings.get('firstRunDone') && !settings.get('character');
