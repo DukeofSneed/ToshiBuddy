@@ -81,7 +81,7 @@
     st.nextQuip = now() + rand(120000, 300000);
   }
   function vars() {
-    return { hour: new Date().getHours(), level: (window.AskinApp && AskinApp.level && AskinApp.level.title) || 'Recruit' };
+    return { hour: new Date().getHours(), name: (window.AskinApp && AskinApp.name) || 'Kori', level: (window.AskinApp && AskinApp.level && AskinApp.level.title) || 'Recruit' };
   }
 
   // ---- one-shot animations (built-in or from mods) ----

@@ -1,0 +1,23 @@
+html, body { background: var(--panel); }
+#page { padding: 6px 16px 16px; max-width: 760px; margin: 0 auto; }
+h2 { font-size: 14px; margin: 2px 0 4px; }
+textarea { width: 100%; resize: vertical; background: var(--bg); border: 1px solid var(--line); color: var(--text); border-radius: 8px; padding: 7px 9px; font: inherit; margin-top: 4px; }
+textarea:focus { outline: 1px solid var(--accent); }
+code { background: var(--bg); border-radius: 4px; padding: 0 4px; }
+.small-note { font-size: 12px; margin-top: 6px; }
+.note { font-size: 12px; min-height: 16px; margin-top: 4px; color: var(--good); }
+.note.err { color: var(--bad); }
+#list { list-style: none; margin: 8px 0 0; padding: 0; }
+#list li { border-top: 1px solid var(--line); padding: 8px 0; }
+#list li:first-child { border-top: none; }
+.q-text { line-height: 1.4; word-break: break-word; }
+.q-meta { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: 4px; }
+.tag { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 1px 7px; font-size: 11px; color: var(--muted); }
+.src { font-size: 11px; color: var(--accent2); margin-right: 4px; }
+.src.yours { color: var(--good); }
+.flag { font-size: 11px; color: var(--warn); }
+.q-actions { margin-left: auto; display: flex; gap: 4px; }
+li.removed .q-text { text-decoration: line-through; color: var(--muted); }
+.tag-help ul { margin: 6px 0 0; padding-left: 18px; color: var(--muted); font-size: 12px; columns: 2; }
+.tag-help summary { cursor: pointer; color: var(--muted); font-size: 12px; margin-top: 6px; }
+.empty { color: var(--muted); padding: 10px 0; }

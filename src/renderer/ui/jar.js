@@ -55,6 +55,10 @@
     // Goals
     const goals = L.goals || [];
     $('goals').innerHTML = goals.length ? goals.map(goalHtml).join('') : '<div class="muted">No goals. Suggest something.</div>';
+    const charName = state.settings.characterName || 'Kori';
+    $('jar-title').textContent = `${charName}'s Donation Jar`;
+    document.title = `${charName}'s Jar`;
+    document.querySelectorAll('.char-name').forEach((el) => { el.textContent = charName; });
     $('auto-build').checked = !!state.settings.autoBuild;
 
     // Upgrades

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'" />
+  <title>Name and quips</title>
+  <link rel="stylesheet" href="ui/jar.css" />
+  <link rel="stylesheet" href="ui/customize.css" />
+</head>
+<body>
+  <main id="page">
+    <section class="card">
+      <h2>Character name</h2>
+      <div class="row">
+        <input type="text" id="name" maxlength="40" placeholder="Kori" />
+        <button id="save-name">Save name</button>
+      </div>
+      <div class="muted small-note">Used in the tray menu, the jar, and anywhere a quip says <code>{name}</code>.</div>
+      <div id="name-msg" class="note"></div>
+    </section>
+
+    <section class="card">
+      <h2>Add a quip</h2>
+      <textarea id="new-text" maxlength="240" rows="2" placeholder="Something he'd say. {name} becomes the character's name, {hour} the hour."></textarea>
+      <div class="row">
+        <input type="text" id="new-tags" list="tag-list" placeholder="Tags, comma separated (default: idle)" />
+        <button class="ghost" id="new-say" title="Hear it from the pet">Preview</button>
+        <button id="new-add">Add</button>
+      </div>
+      <div id="add-msg" class="note"></div>
+      <details class="tag-help">
+        <summary>When each tag plays</summary>
+        <ul id="tag-help-list"></ul>
+      </details>
+    </section>
+
+    <section class="card">
+      <div class="row between">
+        <h2 id="count">Quips</h2>
+      </div>
+      <div class="row">
+        <input type="text" id="search" placeholder="Search text or tag" />
+        <select id="filter">
+          <option value="active">Active</option>
+          <option value="yours">Yours</option>
+          <option value="edited">Edited</option>
+          <option value="removed">Removed</option>
+          <option value="all">All</option>
+        </select>
+      </div>
+      <ul id="list"></ul>
+      <div class="muted small-note">Quips added by upgrade mods live in the mod itself and aren't listed here.</div>
+    </section>
+  </main>
+  <datalist id="tag-list"></datalist>
+  <script src="ui/customize.js"></script>
+</body>
+</html>

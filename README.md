@@ -35,7 +35,18 @@ anywhere. Turn it off from the tray menu or the jar's Settings.
 Drop your own image into `skins/<name>/` and pick it under **Skin** in the tray
 menu. Add an `ultimate` image too, and every donation switches to it for 30 seconds
 after the Frost Release. JPGs work: the background is removed automatically. See
-[skins/README.md](skins/README.md). Skins stay on your PC.
+[skins/README.md](skins/README.md). Skins stay on your PC. A `sheet.png` sprite sheet
+animates the skin frame by frame (walking, talking, napping, and more).
+
+## Name and quips
+
+Right-click the pet or the tray icon and choose **Rename character…** or
+**Edit quips…**. The window lets you rename the character (shown in the menus, the
+jar, and wherever a quip says `{name}`), add your own quips with tags that decide
+when they play, edit or remove built-in ones (removed ones can be restored), and
+preview any line out loud. Changes apply immediately. They're saved in
+`quips-custom.json` in the app's data folder, so the repo's quip files stay
+untouched.
 
 ## The jar
 

@@ -2,7 +2,8 @@
 const { app, Menu, Tray, ipcMain, powerMonitor, screen, shell, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { createOverlay, createJarWindow } = require('./overlay');
+const { createOverlay, createJarWindow, createCustomizeWindow } = require('./overlay');
+const { QuipStore } = require('./quip-store');
 const { Settings } = require('./settings');
 const { Ledger } = require('./jar/ledger');
 const { Guard } = require('./jar/guard');
@@ -39,6 +40,9 @@ function start() {
   };
   const git = new Git(PROJECT_ROOT);
   const guard = new Guard({ ledger, settings, projectRoot: PROJECT_ROOT, log });
+  const quipStore = new QuipStore(userData);
+  const quipsForPet = () => quipStore.merged(readQuipPacks(PROJECT_ROOT));
+  const charName = () => String(settings.get('characterName') || '').trim() || 'Kori';
 
   let overlay = null;
   let jarWin = null;
@@ -145,13 +149,13 @@ function start() {
     settings: settings.all(),
     skin: currentSkin(),
     mods: listMods(PROJECT_ROOT, ledger.data.disabledMods),
-    quips: readQuipPacks(PROJECT_ROOT),
+    quips: quipsForPet(),
     level: ledger.level(),
     balance: ledger.data.balance,
   }));
   ipcMain.handle('overlay:content', () => ({
     mods: listMods(PROJECT_ROOT, ledger.data.disabledMods),
-    quips: readQuipPacks(PROJECT_ROOT),
+    quips: quipsForPet(),
     level: ledger.level(),
     balance: ledger.data.balance,
   }));
@@ -161,6 +165,46 @@ function start() {
   ipcMain.on('jar:open', () => openJar());
   ipcMain.on('jar:close', () => { if (jarWin && !jarWin.isDestroyed()) jarWin.hide(); });
   ipcMain.on('jar:open-external', (_e, url) => { if (/^https:\/\//.test(url)) shell.openExternal(url); });
+
+  // ---- name and quip editor ----
+  let customizeWin = null;
+  const customizeState = () => ({ name: charName(), items: quipStore.editorList(readQuipPacks(PROJECT_ROOT)) });
+  function openCustomize() {
+    if (!customizeWin || customizeWin.isDestroyed()) {
+      customizeWin = createCustomizeWindow();
+      customizeWin.on('closed', () => { customizeWin = null; });
+    } else {
+      customizeWin.show();
+      customizeWin.focus();
+    }
+  }
+  function quipsChanged() {
+    if (overlay && !overlay.isDestroyed()) overlay.webContents.send('quips', quipsForPet());
+    const s = customizeState();
+    if (customizeWin && !customizeWin.isDestroyed()) customizeWin.webContents.send('custom:changed', s);
+    return { state: s };
+  }
+  const guarded = (fn) => (_e, args) => {
+    try { return fn(args || {}); } catch (e) { return { error: e.message }; }
+  };
+  ipcMain.handle('custom:state', () => customizeState());
+  ipcMain.handle('custom:set-name', guarded(({ name }) => {
+    const clean = String(name || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40);
+    if (!clean) throw new Error('The name can\'t be empty.');
+    settings.set('characterName', clean);
+    if (overlay && !overlay.isDestroyed()) overlay.webContents.send('settings', settings.all());
+    refreshTray();
+    pushJar();
+    return quipsChanged();
+  }));
+  ipcMain.handle('custom:add', guarded(({ text, tags }) => { quipStore.add({ text, tags }); return quipsChanged(); }));
+  ipcMain.handle('custom:update', guarded(({ key, text, tags }) => { quipStore.update(String(key), { text, tags }); return quipsChanged(); }));
+  ipcMain.handle('custom:remove', guarded(({ key }) => { quipStore.remove(String(key)); return quipsChanged(); }));
+  ipcMain.handle('custom:restore', guarded(({ key }) => { quipStore.restore(String(key)); return quipsChanged(); }));
+  ipcMain.on('custom:say', (_e, { text } = {}) => {
+    const t = String(text || '').trim().slice(0, 240);
+    if (t) say(t.replace(/\{name\}/g, charName()).replace(/\{hour\}/g, new Date().getHours()));
+  });
 
   // ---- jar IPC ----
   ipcMain.handle('jar:state', () => jarState());
@@ -276,6 +320,10 @@ function start() {
       { label: 'Open skins folder', click: () => { const d = skinsRoot(PROJECT_ROOT); fs.mkdirSync(d, { recursive: true }); shell.openPath(d); } },
     ];
     return Menu.buildFromTemplate([
+      { label: `${charName()} Buddy`, enabled: false },
+      { label: 'Rename character…', click: openCustomize },
+      { label: 'Edit quips…', click: openCustomize },
+      { type: 'separator' },
       { label: 'Open the jar', click: openJar },
       { label: 'Check plan usage', click: () => ipcMain.emit('__check-usage') },
       { label: 'Frost Release (ultimate form)', click: () => { if (overlay && !overlay.isDestroyed()) overlay.webContents.send('animate', { name: 'ultimate' }); } },
@@ -313,7 +361,7 @@ function start() {
     refreshTray();
     pushJar();
   }
-  function refreshTray() { if (tray) tray.setContextMenu(buildMenu()); }
+  function refreshTray() { if (tray) { tray.setContextMenu(buildMenu()); tray.setToolTip(`${charName()} Buddy`); } }
   function applyAutostart() {
     try {
       app.setLoginItemSettings({ openAtLogin: !!settings.get('autostart'), path: process.execPath, args: [app.getAppPath()] });
@@ -327,7 +375,7 @@ function start() {
   }
   try {
     tray = new Tray(trayIcon());
-    tray.setToolTip('Kori Buddy');
+    tray.setToolTip(`${charName()} Buddy`);
     tray.setContextMenu(buildMenu());
     tray.on('click', openJar);
   } catch (e) { log(`tray failed: ${e.message}`); }
@@ -415,6 +463,10 @@ function start() {
         fs.writeFileSync(path.join(selftestDir, 'ultimate.json'), ultState);
         const jp = await jarWin.webContents.capturePage();
         fs.writeFileSync(path.join(selftestDir, 'jar.png'), jp.toPNG());
+        openCustomize();
+        await new Promise((r) => setTimeout(r, 1500));
+        const cp = await customizeWin.webContents.capturePage();
+        fs.writeFileSync(path.join(selftestDir, 'customize.png'), cp.toPNG());
         const sfxCheck = await overlay.webContents.executeJavaScript(`JSON.stringify(AskinSfx.names.map((n) => { try { return [n, AskinSfx.play(n)]; } catch (e) { return [n, 'ERR ' + e.message]; } }))`);
         fs.writeFileSync(path.join(selftestDir, 'sfx.json'), sfxCheck);
         const probe = await overlay.webContents.executeJavaScript(`JSON.stringify({ mods: AskinMods.list(), quips: AskinQuips.all().length, mode: AskinBrain.state.mode, x: AskinBrain.state.x, y: AskinBrain.state.y, bubble: AskinBubble.isVisible(), text: document.getElementById('bubble-text').textContent, petClass: document.getElementById('pet').className, skin: document.getElementById('pet').classList.contains('skin'), skinImg: !!document.getElementById('skin-img'), ultimateImg: !!document.getElementById('skin-ultimate'), idle: AskinBrain.state.idleSeconds })`);

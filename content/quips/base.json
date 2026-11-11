@@ -1,6 +1,6 @@
 {
   "quips": [
-    { "text": "Officer Kori of the Frost Registry, reporting. Try to keep your desktop orderly.", "tags": ["greet"] },
+    { "text": "Officer {name} of the Frost Registry, reporting. Try to keep your desktop orderly.", "tags": ["greet"] },
     { "text": "You're late. I've already reviewed three folders and reorganized your taskbar. Mentally.", "tags": ["greet"] },
     { "text": "Good morning. Hydrate, prioritize, and do not open forty tabs.", "tags": ["greet", "time:morning"] },
     { "text": "You're back. Good. There is work to do.", "tags": ["greet"] },

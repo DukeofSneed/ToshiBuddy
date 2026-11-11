@@ -133,6 +133,7 @@
   AskinApp.sheetPlayers = AskinSheet.start(skin);
   AskinApp.ultimateSeconds = (skin && skin.ultimateSeconds) || Number(boot.settings.ultimateSeconds) || 30;
 
+  AskinApp.name = boot.settings.characterName || 'Kori';
   AskinApp.level = boot.level;
   AskinApp.balance = boot.balance;
   AskinQuips.setBase(boot.quips);
@@ -150,7 +151,9 @@
   askin.on('work-area', (wa) => AskinBrain.resize(wa));
   askin.on('idle-seconds', (sec) => AskinBrain.onIdleSeconds(sec));
   askin.on('activity', (a) => AskinBrain.onActivity(a));
+  askin.on('quips', (list) => AskinQuips.setBase(list));
   askin.on('settings', (s) => {
+    AskinApp.name = s.characterName || 'Kori';
     AskinVoice.setMuted(!!s.muted);
     AskinBrain.setPaused(!!s.paused);
     AskinBrain.setDeskEnabled(s.deskMode !== false);
