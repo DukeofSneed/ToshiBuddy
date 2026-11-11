@@ -82,6 +82,7 @@
   function playAnimation(name, durationMs) {
     if (name === 'giftball') name = 'frost'; // old name from before the character change
     if (name === 'stamp') return stamp();
+    if (name === 'ultimate') return enterUltimate();
     const modAnims = AskinMods.animations();
     const dur = durationMs || BUILTIN_ANIMS[name] || (modAnims[name] && modAnims[name].durationMs);
     if (!dur) return false;
@@ -139,6 +140,40 @@
         setTimeout(() => f.remove(), 3600);
       }
     }, 550);
+  }
+
+  // ---- ultimate form: Frost Release, then a held powered-up state ----
+  // With a skin that has an ultimate image, the image swaps for the duration.
+  let ultimateTimer = null;
+  function enterUltimate(seconds) {
+    const el = pet();
+    const ms = Math.max(5, Math.min(600, seconds || (window.AskinApp && AskinApp.ultimateSeconds) || 30)) * 1000;
+    const already = el.classList.contains('ultimate');
+    if (!already) {
+      playAnimation('release');
+      setTimeout(() => {
+        el.classList.add('ultimate', 'ultimate-in');
+        setTimeout(() => el.classList.remove('ultimate-in'), 650);
+        fire('ultimate', {});
+      }, 550);
+    } else {
+      // Another donation mid-form: a smaller flourish and a fresh timer.
+      AskinSfx.play('chime');
+    }
+    clearTimeout(ultimateTimer);
+    ultimateTimer = setTimeout(exitUltimate, ms + (already ? 0 : 550));
+    return true;
+  }
+  function exitUltimate() {
+    const el = pet();
+    if (!el.classList.contains('ultimate')) return;
+    el.classList.add('ultimate-out');
+    AskinSfx.play('freeze');
+    setTimeout(() => {
+      el.classList.remove('ultimate', 'ultimate-out');
+      AskinSfx.play('shimmer');
+      if (st.mode !== 'sleep') quip(['ultimate-end']);
+    }, 350);
   }
 
   // ---- desk mode: paperwork while the user writes or does labs ----
@@ -453,6 +488,6 @@
 
   window.AskinBrain = {
     start, resize, say, quip, playAnimation, fire, setPaused, setWorking, setDeskEnabled,
-    onIdleSeconds, onActivity, enterDesk, exitDesk, armIntervals, state: st,
+    onIdleSeconds, onActivity, enterDesk, exitDesk, enterUltimate, exitUltimate, armIntervals, state: st,
   };
 })();

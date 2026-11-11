@@ -33,7 +33,9 @@ anywhere. Turn it off from the tray menu or the jar's Settings.
 ## Skins
 
 Drop your own image into `skins/<name>/` and pick it under **Skin** in the tray
-menu. See [skins/README.md](skins/README.md). Skins stay on your PC.
+menu. Add an `ultimate` image too, and every donation switches to it for 30 seconds
+after the Frost Release. JPGs work: the background is removed automatically. See
+[skins/README.md](skins/README.md). Skins stay on your PC.
 
 ## The jar
 

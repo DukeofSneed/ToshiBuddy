@@ -83,6 +83,11 @@
     { "text": "I'm busy. Unless this is about the paperwork, it can wait.", "tags": ["desk-click"] },
     { "text": "Paperwork filed. You stopped, so I'm stopping. That's fair.", "tags": ["desk-exit"] },
     { "text": "Done for now. That stack isn't going anywhere, unfortunately.", "tags": ["desk-exit"] },
-    { "text": "That was a long session. Good work. Don't tell anyone I said that.", "tags": ["desk-exit-long"] }
+    { "text": "That was a long session. Good work. Don't tell anyone I said that.", "tags": ["desk-exit-long"] },
+
+    { "text": "Release complete. Back to regulation form.", "tags": ["ultimate-end"] },
+    { "text": "That's enough showing off for one day. Mostly.", "tags": ["ultimate-end"] },
+    { "text": "Power returned to storage. The paperwork for that will be extensive.", "tags": ["ultimate-end"] },
+    { "text": "Thirty seconds of full power. Logged and filed.", "tags": ["ultimate-end"] }
   ]
 }

@@ -9,7 +9,8 @@
 // snow boots. Props: an ice crystal (tricks), an icicle quill and a stamp (desk).
 //
 // A user skin (skins/<name>/) swaps the drawn body for the user's own image while
-// keeping the desk, Frost Release effects, props, and shadow.
+// keeping the desk, Frost Release effects, props, and shadow. A skin may also have
+// an ultimate image that replaces the primary one during the ultimate form.
 (function () {
   const SKIN = '#fbeee6';
   const LINE = '#1f2a40';
@@ -253,13 +254,17 @@
     <g id="props-head"></g>
   </g>`;
 
-  function skinImage(skin) {
-    const c = skin.config || {};
+  // A prepared skin image is { url, aspect, config }. It is sized by height (188
+  // pet units x scale), keeps its own proportions, stands on the ground line, and
+  // may overflow the pet box (wide images with wings, for example).
+  function skinImage(img, id) {
+    const c = img.config || {};
     const scale = Number(c.scale) || 1;
-    const w = 160 * scale, h = 188 * scale;
-    const x = (160 - w) / 2 + (Number(c.offsetX) || 0);
+    const h = 188 * scale;
+    const w = h * (img.aspect || 160 / 188);
+    const x = 80 - w / 2 + (Number(c.offsetX) || 0);
     const y = 188 - h + (Number(c.offsetY) || 0);
-    return `<image id="skin-img" href="${skin.url}" x="${x}" y="${y}" width="${w}" height="${h}" preserveAspectRatio="xMidYMax meet"/>`;
+    return `<image id="${id}" href="${img.url}" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" preserveAspectRatio="xMidYMax meet"/>`;
   }
 
   // In skin mode the anchors float at fixed spots instead of riding on limbs.
@@ -269,7 +274,7 @@
 
   function svg(skin) {
     const body = skin
-      ? `${skinImage(skin)}${DESK}${SKIN_ANCHORS}`
+      ? `${skinImage(skin.primary, 'skin-img')}${skin.ultimate ? skinImage(skin.ultimate, 'skin-ultimate') : ''}${DESK}${SKIN_ANCHORS}`
       : `${HAIR_BACK}${LEGS}${TORSO}${DESK}${ARMS}${HEAD}`;
     return `
 <svg id="pet-svg" viewBox="0 0 160 200" xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round">

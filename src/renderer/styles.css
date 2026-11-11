@@ -159,6 +159,27 @@ html, body {
 #pet.desk-in #desk { animation: deskIn 500ms cubic-bezier(.2,1.4,.5,1); transform-origin: 80px 189px; }
 @keyframes deskIn { from { transform: scaleY(0.2) translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
 
+/* ---- ultimate form: held for ~30 s after a donation (rules placed before
+   .release so the release keyframes win while both classes are on) ---- */
+#skin-ultimate { display: none; }
+#pet.ultimate.has-ultimate #skin-img { display: none; }
+#pet.ultimate.has-ultimate #skin-ultimate { display: inline; }
+#pet.ultimate #release-back, #pet.ultimate #halo { display: block; }
+#pet.ultimate #sprite { filter: drop-shadow(0 0 7px #9fd8ff) drop-shadow(0 0 2px #e9f8ff); }
+#pet.ultimate #halo { animation: haloFloat 3s ease-in-out infinite; transform-origin: 80px 4px; }
+#pet.ultimate #snow-cloak { animation: cloakBreathe 2.6s ease-in-out infinite; transform-origin: 80px 104px; }
+#pet.ultimate #sigil { animation: sigilPulse 2s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+#pet.ultimate.has-ultimate #snow-cloak { display: none; }
+@keyframes haloFloat { 0%, 100% { transform: translateY(0); opacity: 0.95; } 50% { transform: translateY(-4px); opacity: 0.75; } }
+@keyframes cloakBreathe { 0%, 100% { transform: scaleY(1); opacity: 0.9; } 50% { transform: scaleY(1.03); opacity: 1; } }
+@keyframes sigilPulse { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+#pet.ultimate-in #sprite { animation: ultimateIn 600ms ease-out; }
+#pet.ultimate-out #sprite { animation: ultimateOut 700ms ease-in-out; }
+@keyframes ultimateIn { 0% { transform: scale(0.85); filter: brightness(2.2); } 60% { transform: scale(1.06); filter: brightness(1.3); } 100% { transform: none; } }
+@keyframes ultimateOut { 0% { filter: brightness(1); } 40% { transform: scale(1.05); filter: brightness(2.4); } 100% { transform: none; filter: brightness(1); } }
+#pet.skin.desk #skin-ultimate { transform: translateY(-14px); transition: transform 400ms ease; }
+#pet.skin.talk #skin-ultimate { animation: skinTalk 0.3s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: 50% 100%; }
+
 /* ---- Frost Release (donation transformation) ---- */
 #pet.release #release-back, #pet.release #halo, #pet.release #orb { display: block; }
 #pet.release #sprite { animation: releaseBody 4.2s ease-in-out; filter: drop-shadow(0 0 6px #9fd8ff); }

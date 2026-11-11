@@ -6,9 +6,10 @@
   let currentSlug = null;
   let currentRegistered = false;
   const ANCHORS = new Set(['head', 'hand-r', 'hand-l', 'back', 'front', 'desk']);
-  const TRIGGERS = new Set(['idle', 'click', 'dblclick', 'drop', 'hour', 'wake', 'sleep', 'interval', 'donate', 'upgrade', 'lean', 'desk']);
+  const TRIGGERS = new Set(['idle', 'click', 'dblclick', 'drop', 'hour', 'wake', 'sleep', 'interval', 'donate', 'upgrade', 'lean', 'desk', 'ultimate']);
   const RESERVED_ANIMS = new Set(['idle', 'walk', 'lean', 'sleep', 'drag', 'fall', 'land', 'talk', 'blink', 'face-left', 'face-right',
-    'desk', 'desk-in', 'release', 'stamp', 'stamped', 'scribbling', 'skin', 'working', 'frost', 'huff', 'shrug', 'think', 'wave', 'surprised']);
+    'desk', 'desk-in', 'release', 'stamp', 'stamped', 'scribbling', 'skin', 'working', 'frost', 'huff', 'shrug', 'think', 'wave', 'surprised',
+    'ultimate', 'ultimate-in', 'ultimate-out', 'has-ultimate']);
 
   function fail(msg) { throw new Error(msg); }
 

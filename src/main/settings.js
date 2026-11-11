@@ -12,6 +12,7 @@ const DEFAULTS = {
   deskApps: null,   // override { writing: [...process names], lab: [...] }
   deskTitles: null, // override { writing: [...title keywords], lab: [...] }
   skin: '',         // '' = Kori; otherwise a folder name under skins/
+  ultimateSeconds: 30, // how long the ultimate form lasts after a donation (a skin can override)
   autostart: false,
   // Plan-limit guard
   maxUtilization: 80,          // percent of the binding plan window the jar may use

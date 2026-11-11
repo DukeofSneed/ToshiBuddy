@@ -40,10 +40,21 @@ function readQuipPacks(projectRoot) {
   return quips;
 }
 
-// User skins: skins/<name>/ with an image (skin.png, or the first .png/.webp/.gif)
-// and an optional skin.json { scale, offsetX, offsetY, keyColor, keyTolerance }.
+// User skins: skins/<name>/ with a primary image (skin.<ext>, or the first image
+// not named ultimate.<ext>), an optional ultimate.<ext> shown for a while after a
+// donation, and an optional skin.json (see skins/README.md).
+const IMG_RE = /\.(png|webp|gif|jpe?g)$/i;
+
+function fileUrl(file) {
+  return pathToFileURL(file).href + `?v=${fs.statSync(file).mtimeMs}`;
+}
+
+function skinsRoot(projectRoot) {
+  return process.env.ASKIN_SKINS_DIR || path.join(projectRoot, 'skins');
+}
+
 function listSkins(projectRoot) {
-  const dir = path.join(projectRoot, 'skins');
+  const dir = skinsRoot(projectRoot);
   let entries = [];
   try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch (_) { return []; }
   const out = [];
@@ -51,15 +62,21 @@ function listSkins(projectRoot) {
     if (!e.isDirectory()) continue;
     const folder = path.join(dir, e.name);
     let files = [];
-    try { files = fs.readdirSync(folder); } catch (_) { continue; }
-    const img = files.includes('skin.png') ? 'skin.png' : files.find((f) => /\.(png|webp|gif)$/i.test(f));
-    if (!img) continue;
+    try { files = fs.readdirSync(folder).filter((f) => IMG_RE.test(f)); } catch (_) { continue; }
+    const byBase = (base) => files.find((f) => f.toLowerCase().replace(IMG_RE, '') === base);
+    const primary = byBase('skin') || files.find((f) => !/^ultimate\./i.test(f));
+    if (!primary) continue;
+    const ultimate = byBase('ultimate');
     let config = {};
     try { config = JSON.parse(fs.readFileSync(path.join(folder, 'skin.json'), 'utf8')); } catch (_) { /* optional */ }
-    const file = path.join(folder, img);
-    out.push({ name: e.name, url: pathToFileURL(file).href + `?v=${fs.statSync(file).mtimeMs}`, config });
+    out.push({
+      name: e.name,
+      url: fileUrl(path.join(folder, primary)),
+      config,
+      ultimate: ultimate ? { url: fileUrl(path.join(folder, ultimate)), config: config.ultimate || {} } : null,
+    });
   }
   return out;
 }
 
-module.exports = { listMods, readQuipPacks, listSkins };
+module.exports = { listMods, readQuipPacks, listSkins, skinsRoot };

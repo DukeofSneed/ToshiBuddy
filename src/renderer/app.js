@@ -3,34 +3,89 @@
 (async function () {
   window.AskinApp = { level: null, balance: 0 };
 
-  // Optional background keying for user skins: pixels near keyColor become
-  // transparent, so an image on a solid background stands on the taskbar cleanly.
-  async function prepareSkin(skin) {
-    if (!skin || !skin.config || !skin.config.keyColor) return skin;
-    const hex = String(skin.config.keyColor).replace('#', '');
-    if (!/^[0-9a-f]{6}$/i.test(hex)) return skin;
-    const key = [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16));
-    const tol = Math.max(0, Math.min(255, Number(skin.config.keyTolerance) || 48));
-    const img = await new Promise((resolve, reject) => {
+  // ---- user skin images ----
+  function loadImage(url) {
+    return new Promise((resolve, reject) => {
       const i = new Image();
       i.onload = () => resolve(i);
       i.onerror = () => reject(new Error('skin image failed to load'));
-      i.src = skin.url;
+      i.src = url;
     });
+  }
+  function parseHex(hex) {
+    hex = String(hex || '').replace('#', '');
+    return /^[0-9a-f]{6}$/i.test(hex) ? [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16)) : null;
+  }
+
+  // Background removal for an image without transparency.
+  //  keyMode "edges" (default when keying): flood-fills from the image border and
+  //    clears only background connected to it, so light areas inside the line art stay.
+  //  keyMode "color": clears every pixel near keyColor, anywhere.
+  //  keyColor: the background color; for "edges" it defaults to the corner color.
+  function keyOut(img, cfg) {
+    const w = img.naturalWidth, h = img.naturalHeight;
     const c = document.createElement('canvas');
-    c.width = img.naturalWidth;
-    c.height = img.naturalHeight;
-    const g = c.getContext('2d');
+    c.width = w; c.height = h;
+    const g = c.getContext('2d', { willReadFrequently: true });
     g.drawImage(img, 0, 0);
-    const data = g.getImageData(0, 0, c.width, c.height);
+    const data = g.getImageData(0, 0, w, h);
     const px = data.data;
-    for (let i = 0; i < px.length; i += 4) {
-      const d = Math.max(Math.abs(px[i] - key[0]), Math.abs(px[i + 1] - key[1]), Math.abs(px[i + 2] - key[2]));
-      if (d <= tol) px[i + 3] = 0;
-      else if (d <= tol * 1.5) px[i + 3] = Math.round(px[i + 3] * ((d - tol) / (tol * 0.5)));
+    const tol = Math.max(0, Math.min(255, Number(cfg.keyTolerance) || 40));
+    let key = parseHex(cfg.keyColor);
+    if (!key) {
+      // Average the four corners.
+      const corners = [0, w - 1, (h - 1) * w, h * w - 1];
+      key = [0, 1, 2].map((ch) => Math.round(corners.reduce((s, p) => s + px[p * 4 + ch], 0) / 4));
+    }
+    const dist = (p) => Math.max(Math.abs(px[p * 4] - key[0]), Math.abs(px[p * 4 + 1] - key[1]), Math.abs(px[p * 4 + 2] - key[2]));
+    const clear = (p) => {
+      const d = dist(p);
+      if (d <= tol) px[p * 4 + 3] = 0;
+      else if (d <= tol * 1.5) px[p * 4 + 3] = Math.round(px[p * 4 + 3] * ((d - tol) / (tol * 0.5)));
+    };
+    if ((cfg.keyMode || 'edges') === 'color') {
+      for (let p = 0; p < w * h; p++) clear(p);
+    } else {
+      const seen = new Uint8Array(w * h);
+      const stack = [];
+      const push = (p) => { if (!seen[p] && dist(p) <= tol * 1.5) { seen[p] = 1; stack.push(p); } };
+      for (let x = 0; x < w; x++) { push(x); push((h - 1) * w + x); }
+      for (let y = 0; y < h; y++) { push(y * w); push(y * w + w - 1); }
+      while (stack.length) {
+        const p = stack.pop();
+        clear(p);
+        if (dist(p) > tol) continue; // soft edge pixel: fade it, but don't spread through it
+        const x = p % w;
+        if (x > 0) push(p - 1);
+        if (x < w - 1) push(p + 1);
+        if (p >= w) push(p - w);
+        if (p < (h - 1) * w) push(p + w);
+      }
     }
     g.putImageData(data, 0, 0);
-    return { ...skin, url: c.toDataURL('image/png') };
+    return c.toDataURL('image/png');
+  }
+
+  async function prepareImage(url, cfg) {
+    const img = await loadImage(url);
+    const aspect = img.naturalWidth / img.naturalHeight;
+    const wantsKey = cfg.keyColor || cfg.keyMode || /\.jpe?g(\?|$)/i.test(url);
+    return { url: wantsKey && cfg.keyMode !== 'none' ? keyOut(img, cfg) : url, aspect, config: cfg };
+  }
+
+  async function prepareSkin(skin) {
+    if (!skin) return null;
+    const base = skin.config || {};
+    const primary = await prepareImage(skin.url, base);
+    let ultimate = null;
+    if (skin.ultimate) {
+      try {
+        // The ultimate image inherits keying settings unless it sets its own.
+        const ucfg = { keyMode: base.keyMode, keyTolerance: base.keyTolerance, ...skin.ultimate.config };
+        ultimate = await prepareImage(skin.ultimate.url, ucfg);
+      } catch (e) { askin.log(`skin "${skin.name}" ultimate image failed: ${e.message}`); }
+    }
+    return { name: skin.name, primary, ultimate, ultimateSeconds: Number(base.ultimateSeconds) || null };
   }
 
   const boot = await askin.getBootstrap();
@@ -40,6 +95,8 @@
   }
   document.getElementById('sprite').innerHTML = PetSprite.svg(skin);
   document.getElementById('pet').classList.toggle('skin', !!skin);
+  document.getElementById('pet').classList.toggle('has-ultimate', !!(skin && skin.ultimate));
+  AskinApp.ultimateSeconds = (skin && skin.ultimateSeconds) || Number(boot.settings.ultimateSeconds) || 30;
 
   AskinApp.level = boot.level;
   AskinApp.balance = boot.balance;

@@ -21,6 +21,11 @@ everything), `#props-desk` (on the desk, visible only in desk mode).
 If the user has picked a skin (their own image), limb parts don't exist; props and
 the desk still work, and limb animations simply do nothing.
 
+After a donation the pet enters the **ultimate form** for about 30 seconds: the
+`ultimate` class is on `#pet` (plus `has-ultimate` when the skin has its own
+ultimate image), with the halo, snow cloak, and sigil held up. Mods can react with
+the `ultimate` trigger or style `#pet.ultimate ...`.
+
 ## register(def)
 
 ```js
@@ -72,8 +77,8 @@ AskinMods.register({
   default; the whole sprite is mirrored when walking left.
   `hidden: true` starts the prop invisible; toggle it from a behavior.
 - `behaviors[]`: `trigger` is one of `idle`, `click`, `dblclick`, `drop`, `hour`,
-  `wake`, `sleep`, `lean`, `desk` (Kori sits down at the desk), `donate`, `upgrade`,
-  `interval` (needs `every` >= 30000 ms). `chance` 0-1 (default 1). `action` may
+  `wake`, `sleep`, `lean`, `desk` (Kori sits down at the desk), `ultimate` (the
+  ultimate form begins), `donate`, `upgrade`, `interval` (needs `every` >= 30000 ms). `chance` 0-1 (default 1). `action` may
   combine:
   - `animate`: built-in `frost`, `huff`, `shrug`, `think`, `wave`, `surprised`,
     `stamp` (desk only), `release` (the full Frost Release, use sparingly), or one

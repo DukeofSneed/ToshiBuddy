@@ -9,7 +9,7 @@ const { Guard } = require('./jar/guard');
 const { Upgrader } = require('./jar/upgrader');
 const { Git } = require('./jar/git');
 const { estimate } = require('./jar/estimator');
-const { listMods, readQuipPacks, listSkins } = require('./mods');
+const { listMods, readQuipPacks, listSkins, skinsRoot } = require('./mods');
 const { trayIcon } = require('./tray-icon');
 const { findClaude } = require('./jar/claude');
 const { ActivityWatcher, classify } = require('./activity');
@@ -116,7 +116,7 @@ function start() {
   });
   ipcMain.on('overlay:log', (_e, line) => log(`renderer: ${line}`));
   const currentSkin = () => {
-    const want = settings.get('skin');
+    const want = process.env.ASKIN_SKIN || settings.get('skin');
     return want ? listSkins(PROJECT_ROOT).find((s) => s.name === want) || null : null;
   };
   ipcMain.handle('overlay:bootstrap', () => ({
@@ -147,7 +147,7 @@ function start() {
     const ceiling = guard.maxSafeDonation();
     const r = ledger.donate(tokens, { ceiling, goalId });
     if (r.accepted && overlay && !overlay.isDestroyed()) overlay.webContents.send('sfx', { name: 'coin' });
-    if (r.accepted) say(pickDonationLine(r.accepted), { animate: 'release' });
+    if (r.accepted) say(pickDonationLine(r.accepted), { animate: 'ultimate' });
     if (r.pledged) say(`I can only accept ${fmt(r.accepted)} right now. The other ${fmt(r.pledged)} is filed as a pledge until your plan window resets. Regulations.`);
     return { ...r, ceiling, state: jarState() };
   });
@@ -247,12 +247,12 @@ function start() {
       { label: 'Kori (built-in)', type: 'radio', checked: !settings.get('skin'), click: () => setSkin('') },
       ...skins.map((s) => ({ label: s.name, type: 'radio', checked: settings.get('skin') === s.name, click: () => setSkin(s.name) })),
       { type: 'separator' },
-      { label: 'Open skins folder', click: () => { fs.mkdirSync(path.join(PROJECT_ROOT, 'skins'), { recursive: true }); shell.openPath(path.join(PROJECT_ROOT, 'skins')); } },
+      { label: 'Open skins folder', click: () => { const d = skinsRoot(PROJECT_ROOT); fs.mkdirSync(d, { recursive: true }); shell.openPath(d); } },
     ];
     return Menu.buildFromTemplate([
       { label: 'Open the jar', click: openJar },
       { label: 'Check plan usage', click: () => ipcMain.emit('__check-usage') },
-      { label: 'Frost Release', click: () => { if (overlay && !overlay.isDestroyed()) overlay.webContents.send('animate', { name: 'release' }); } },
+      { label: 'Frost Release (ultimate form)', click: () => { if (overlay && !overlay.isDestroyed()) overlay.webContents.send('animate', { name: 'ultimate' }); } },
       { type: 'separator' },
       { label: 'Mute voice', type: 'checkbox', checked: !!settings.get('muted'), click: (m) => toggleSetting('muted', m.checked) },
       { label: 'Sound effects', type: 'checkbox', checked: settings.get('sfx') !== false, click: (m) => toggleSetting('sfx', m.checked) },
@@ -332,7 +332,7 @@ function start() {
         const ov = await overlay.webContents.capturePage({ x: 0, y: wa.height - 420, width: wa.width, height: 420 });
         fs.writeFileSync(path.join(selftestDir, 'overlay.png'), ov.toPNG());
         // Plain close-up at 3x: freeze him in idle with no bubble.
-        const pos = JSON.parse(await overlay.webContents.executeJavaScript(`AskinBrain.setPaused(true); AskinBubble.hide(); AskinVoice.stop(); const p=document.getElementById('pet'); p.className='idle face-right'; p.style.setProperty('--x',0); document.querySelectorAll('#pet *').forEach(e=>e.style.animationPlayState='paused'); JSON.stringify({x: AskinBrain.state.x, y: AskinBrain.state.y})`));
+        const pos = JSON.parse(await overlay.webContents.executeJavaScript(`AskinBrain.setPaused(true); AskinBubble.hide(); AskinVoice.stop(); const p=document.getElementById('pet'); const keep=['skin','has-ultimate'].filter(c=>p.classList.contains(c)); p.className=['idle','face-right',...keep].join(' '); document.querySelectorAll('#pet *').forEach(e=>e.style.animationPlayState='paused'); JSON.stringify({x: AskinBrain.state.x, y: AskinBrain.state.y})`));
         await new Promise((r) => setTimeout(r, 400));
         // A blink may still be in flight; wait it out.
         await overlay.webContents.executeJavaScript(`document.getElementById('pet').classList.remove('blink'); 1`);
@@ -358,11 +358,19 @@ function start() {
         const rx = Math.max(0, Math.round(pos.x) - 220);
         const rel = await overlay.webContents.capturePage({ x: rx, y: Math.max(0, Math.round(pos.y) - 260), width: 600, height: 460 });
         fs.writeFileSync(path.join(selftestDir, 'release.png'), rel.toPNG());
+        // Ultimate form, captured while held after the release finishes.
+        await new Promise((r) => setTimeout(r, 3000));
+        await overlay.webContents.executeJavaScript(`AskinBubble.hide(); AskinBrain.enterUltimate(12); 1`);
+        await new Promise((r) => setTimeout(r, 5200));
+        const ult = await overlay.webContents.capturePage({ x: rx, y: Math.max(0, Math.round(pos.y) - 260), width: 600, height: 460 });
+        fs.writeFileSync(path.join(selftestDir, 'ultimate.png'), ult.toPNG());
+        const ultState = await overlay.webContents.executeJavaScript(`JSON.stringify({ classes: document.getElementById('pet').className, primaryShown: (() => { const e = document.getElementById('skin-img'); return e ? getComputedStyle(e).display : 'n/a'; })(), ultimateShown: (() => { const e = document.getElementById('skin-ultimate'); return e ? getComputedStyle(e).display : 'n/a'; })() })`);
+        fs.writeFileSync(path.join(selftestDir, 'ultimate.json'), ultState);
         const jp = await jarWin.webContents.capturePage();
         fs.writeFileSync(path.join(selftestDir, 'jar.png'), jp.toPNG());
         const sfxCheck = await overlay.webContents.executeJavaScript(`JSON.stringify(AskinSfx.names.map((n) => { try { return [n, AskinSfx.play(n)]; } catch (e) { return [n, 'ERR ' + e.message]; } }))`);
         fs.writeFileSync(path.join(selftestDir, 'sfx.json'), sfxCheck);
-        const probe = await overlay.webContents.executeJavaScript(`JSON.stringify({ mods: AskinMods.list(), quips: AskinQuips.all().length, mode: AskinBrain.state.mode, x: AskinBrain.state.x, y: AskinBrain.state.y, bubble: AskinBubble.isVisible(), text: document.getElementById('bubble-text').textContent, petClass: document.getElementById('pet').className, skin: document.getElementById('pet').classList.contains('skin'), idle: AskinBrain.state.idleSeconds })`);
+        const probe = await overlay.webContents.executeJavaScript(`JSON.stringify({ mods: AskinMods.list(), quips: AskinQuips.all().length, mode: AskinBrain.state.mode, x: AskinBrain.state.x, y: AskinBrain.state.y, bubble: AskinBubble.isVisible(), text: document.getElementById('bubble-text').textContent, petClass: document.getElementById('pet').className, skin: document.getElementById('pet').classList.contains('skin'), skinImg: !!document.getElementById('skin-img'), ultimateImg: !!document.getElementById('skin-ultimate'), idle: AskinBrain.state.idleSeconds })`);
         fs.writeFileSync(path.join(selftestDir, 'state.json'), probe);
         fs.writeFileSync(path.join(selftestDir, 'log.txt'), logLines.join('\n'));
       } catch (e) {
