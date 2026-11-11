@@ -40,6 +40,8 @@ class Ledger {
         this.data = { ...JSON.parse(JSON.stringify(EMPTY)), ...loaded };
       }
     } catch (e) { console.error('ledger: failed to load', e); }
+    // Older versions let fees push the balance below zero; that was a bug.
+    if (!(this.data.balance >= 0)) this.data.balance = 0;
   }
 
   onChange(fn) { this.listeners.add(fn); return () => this.listeners.delete(fn); }
@@ -174,13 +176,14 @@ class Ledger {
     this.save();
     return entry;
   }
-  // Fees (probe, estimate) come out of the jar balance; they can push it negative,
-  // in which case Askin nags until it is topped up.
+  // Fees (usage checks, estimates) come out of whatever is in the jar, never
+  // below zero; the full amount is still logged as a spend.
   chargeFee(tokens, kind) {
     tokens = Math.max(0, Math.floor(tokens || 0));
     if (!tokens) return;
-    this.data.balance -= tokens;
-    this.recordSpend({ kind, tokens, goalId: null });
+    const paid = Math.min(tokens, Math.max(0, this.data.balance));
+    this.data.balance -= paid;
+    this.recordSpend({ kind, tokens, paid, goalId: null });
   }
   recordUpgrade(up) {
     const entry = { id: id(), at: Date.now(), reverted: false, ...up };
