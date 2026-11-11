@@ -9,7 +9,7 @@ contextBridge.exposeInMainWorld('buddy', {
   getBootstrap: () => ipcRenderer.invoke('overlay:bootstrap'),
   getContent: () => ipcRenderer.invoke('overlay:content'),
   reportMod: (status) => ipcRenderer.send('overlay:mod-status', status),
-  saveSheetIndex: (skin, kind, dataUrl) => ipcRenderer.send('overlay:sheet-index', { skin, kind, dataUrl }),
+  saveSheetIndex: (skin, kind, dataUrl, rows) => ipcRenderer.send('overlay:sheet-index', { skin, kind, dataUrl, rows }),
   log: (...args) => ipcRenderer.send('overlay:log', args.map(String).join(' ')),
   on: (channel, handler) => {
     const allowed = new Set(['work-area', 'idle-seconds', 'say', 'animate', 'settings', 'reload-content', 'upgrade-event', 'sfx', 'activity', 'quips', 'quip', 'jar-state']);

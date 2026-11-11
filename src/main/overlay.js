@@ -122,4 +122,29 @@ function createCustomizeWindow() {
   return win;
 }
 
-module.exports = { createOverlay, createJarWindow, createCustomizeWindow };
+// Import a character / map its animations.
+function createImportWindow(hash) {
+  const win = new BrowserWindow({
+    icon: ICON,
+    width: 760,
+    height: 820,
+    minWidth: 560,
+    minHeight: 480,
+    title: 'Characters',
+    backgroundColor: '#13203a',
+    autoHideMenuBar: true,
+    show: false,
+    webPreferences: {
+      preload: path.join(__dirname, 'preload-import.js'),
+      contextIsolation: true,
+      nodeIntegration: false,
+      sandbox: false,
+    },
+  });
+  win.setMenu(null);
+  win.loadFile(path.join(RENDERER, 'import.html'), hash ? { hash } : undefined);
+  win.once('ready-to-show', () => win.show());
+  return win;
+}
+
+module.exports = { createOverlay, createJarWindow, createCustomizeWindow, createImportWindow };

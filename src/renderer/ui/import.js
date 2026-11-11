@@ -1,0 +1,209 @@
+// Characters window: quick import, pack import, and the animation mapper.
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const base = (p) => String(p || '').split(/[\\/]/).pop();
+  const IMG = /\.(png|webp|gif|jpe?g)$/i;
+
+  const HELP = {
+    idle: 'standing around', blink: 'a quick blink while idle', walk: 'walking (frames should face right, or tick Flip)',
+    talk: 'while a speech bubble is up', sleep: 'napping (use Loop from the last frame to stay asleep)', drag: 'picked up by the mouse',
+    fall: 'falling after being dropped', land: 'landing', lean: 'leaning on a screen edge', desk: 'at the desk',
+    working: 'while an upgrade runs', scribbling: 'writing at the desk', think: 'thinking ("?")', surprised: 'surprised ("!")',
+    huff: 'annoyed (repeated clicks)', shrug: 'shrugging', wave: 'waving', frost: 'double-click trick',
+    release: 'the donation transformation', stamp: 'stamping a form at the desk',
+  };
+
+  function note(id, text, err) {
+    const el = $(id);
+    el.textContent = text || '';
+    el.classList.toggle('err', !!err);
+  }
+
+  // ---- tabs ----
+  function showTab(name) {
+    document.querySelectorAll('.tab').forEach((b) => b.classList.toggle('active', b.dataset.tab === name));
+    $('tab-import').classList.toggle('hidden', name !== 'import');
+    $('tab-edit').classList.toggle('hidden', name !== 'edit');
+    if (name === 'edit') loadCharacters();
+  }
+  document.querySelectorAll('.tab').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
+  chars.onGoto((hash) => showTab(hash === 'edit' ? 'edit' : 'import'));
+
+  // ---- quick import ----
+  const chosen = {};
+  function setSlot(slot, file) {
+    chosen[slot] = file;
+    const row = document.querySelector(`.file[data-slot="${slot}"]`);
+    row.classList.toggle('set', !!file);
+    row.querySelector('.val').textContent = file ? base(file) : 'none';
+    if (slot === 'sheet' && file && !$('imp-name').value) {
+      $('imp-name').value = base(file).replace(/\.[^.]+$/, '').replace(/[-_]+/g, ' ').replace(/sprite ?sheet|spritesheet|sheet/ig, '').trim().slice(0, 40);
+    }
+  }
+  document.querySelectorAll('.file button[data-pick]').forEach((btn) => btn.addEventListener('click', async () => {
+    const slot = btn.closest('.file').dataset.slot;
+    const p = await chars.pick(btn.dataset.pick);
+    if (p) setSlot(slot, p);
+  }));
+  // Dropped files go to the first fitting empty slot (or by name: "ultimate", "quips").
+  function placeDropped(paths) {
+    for (const p of paths) {
+      const n = base(p).toLowerCase();
+      if (/\.(json|txt)$/.test(n)) { setSlot('quips', p); continue; }
+      if (!IMG.test(n)) continue;
+      const ult = /ult/.test(n);
+      const sheet = /sheet|sprite/.test(n);
+      const order = ult ? (sheet ? ['ultimate-sheet', 'ultimate'] : ['ultimate', 'ultimate-sheet'])
+        : (sheet ? ['sheet', 'skin'] : ['sheet', 'skin', 'ultimate-sheet', 'ultimate']);
+      const slot = order.find((s) => !chosen[s]) || order[0];
+      setSlot(slot, p);
+    }
+  }
+  function dropZone(el, onPaths) {
+    el.addEventListener('dragover', (e) => { e.preventDefault(); el.classList.add('drag'); });
+    el.addEventListener('dragleave', () => el.classList.remove('drag'));
+    el.addEventListener('drop', (e) => {
+      e.preventDefault();
+      el.classList.remove('drag');
+      const paths = [...e.dataTransfer.files].map((f) => chars.pathFor(f)).filter(Boolean);
+      if (paths.length) onPaths(paths);
+    });
+  }
+  dropZone($('drop-files'), placeDropped);
+  document.addEventListener('dragover', (e) => e.preventDefault());
+  document.addEventListener('drop', (e) => e.preventDefault());
+
+  $('imp-go').addEventListener('click', async () => {
+    note('imp-msg', 'Importing…');
+    $('imp-go').disabled = true;
+    try {
+      const r = await chars.importFiles({
+        name: $('imp-name').value,
+        personality: $('imp-personality').value,
+        scale: Number($('imp-scale').value) || 1,
+        files: { ...chosen },
+      });
+      if (r.error) { note('imp-msg', r.error, true); return; }
+      note('imp-msg', 'Imported. He is on screen now; next, choose his animations.');
+      for (const k of Object.keys(chosen)) setSlot(k, null);
+      $('imp-name').value = ''; $('imp-personality').value = '';
+      openEditor(r.id);
+    } finally { $('imp-go').disabled = false; }
+  });
+
+  // ---- pack import ----
+  async function importPack(source) {
+    if (!source) return;
+    note('pack-msg', 'Importing pack…');
+    const r = await chars.importPack(source);
+    if (r.error) { note('pack-msg', r.error, true); return; }
+    note('pack-msg', `Imported "${r.id}".`);
+    openEditor(r.id);
+  }
+  $('pack-zip').addEventListener('click', async () => importPack(await chars.pick('zip')));
+  $('pack-folder').addEventListener('click', async () => importPack(await chars.pick('folder')));
+  dropZone($('drop-pack'), (paths) => importPack(paths[0]));
+
+  // ---- animation mapper ----
+  let current = null; // details for the selected character
+  let kind = 'sheet';
+
+  async function loadCharacters(selectId) {
+    const r = await chars.list();
+    const sel = $('ed-char');
+    sel.innerHTML = r.characters.map((c) => `<option value="${esc(c.id)}">${esc(c.name)}${c.test ? ' (test)' : ''}</option>`).join('');
+    sel.value = selectId || (current && current.id) || r.active;
+    await loadDetails(sel.value);
+  }
+
+  async function loadDetails(id, { waitForPreview = false } = {}) {
+    let d = await chars.details(id);
+    // A freshly imported sheet is sliced by the pet window; wait for its preview.
+    for (let i = 0; waitForPreview && i < 20 && !d.error && d.hasSheet && !(d.sheet.rows && d.sheet.preview); i++) {
+      note('ed-msg', 'Slicing the sprite sheet…');
+      await new Promise((r) => setTimeout(r, 500));
+      d = await chars.details(id);
+    }
+    if (d.error) { note('ed-msg', d.error, true); return; }
+    current = d;
+    note('ed-msg', d.builtin ? 'The built-in test character is drawn in code, so it has no sheet to map.' : '');
+    $('ed-body').classList.toggle('hidden', !!d.builtin);
+    $('ed-personality').value = d.personality || '';
+    $('ed-kind').querySelector('option[value="ultimateSheet"]').disabled = !d.hasUltimateSheet;
+    if (kind === 'ultimateSheet' && !d.hasUltimateSheet) kind = 'sheet';
+    $('ed-kind').value = kind;
+    renderSheet();
+  }
+
+  function renderSheet() {
+    const s = current[kind];
+    const has = kind === 'sheet' ? current.hasSheet : current.hasUltimateSheet;
+    $('ed-sheet-card').classList.toggle('hidden', !has && kind === 'sheet' && !current.hasSheet);
+    $('ed-rows').textContent = s.rows ? `Found ${s.rows.reduce((a, b) => a + b, 0)} poses in ${s.rows.length} rows: ${s.rows.map((n, i) => `row ${i} has ${n}`).join(', ')}.` : 'Poses appear here once he is the active character (use "Use this character").';
+    const img = $('ed-preview');
+    if (s.preview) img.src = s.preview; else img.removeAttribute('src');
+    $('ed-scale').value = s.scale || 1;
+    $('ed-anims').innerHTML = current.animKeys.map((k) => {
+      const a = s.animations[k] || {};
+      const frames = a.frames != null ? a.frames : (a.row != null ? `${a.row}:0-99` : '');
+      return `<tr data-key="${k}">
+        <td>${k}<small>${esc(HELP[k] || '')}</small></td>
+        <td><input type="text" class="f" value="${esc(frames)}" placeholder="${k === 'idle' ? '0:0-3' : ''}" /></td>
+        <td><input type="number" class="fps" min="0.2" max="30" step="0.5" value="${a.fps != null ? a.fps : ''}" placeholder="6" /></td>
+        <td><input type="checkbox" class="flip" ${a.flip ? 'checked' : ''} /></td>
+        <td><input type="checkbox" class="loop" ${a.loop === false ? '' : 'checked'} /></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function collect() {
+    const existing = current[kind].animations || {};
+    const anims = {};
+    document.querySelectorAll('#ed-anims tr').forEach((tr) => {
+      const k = tr.dataset.key;
+      const frames = tr.querySelector('.f').value.replace(/\s+/g, '');
+      if (!frames) return;
+      const a = { ...(existing[k] || {}), frames };
+      delete a.row;
+      const fps = Number(tr.querySelector('.fps').value);
+      if (fps > 0) a.fps = fps; else delete a.fps;
+      if (tr.querySelector('.flip').checked) a.flip = true; else delete a.flip;
+      if (!tr.querySelector('.loop').checked) a.loop = false; else delete a.loop;
+      anims[k] = a;
+    });
+    // Keep mod animations mapped by hand in character.json.
+    for (const [k, v] of Object.entries(existing)) if (k.startsWith('anim-')) anims[k] = v;
+    return anims;
+  }
+
+  function openEditor(id) {
+    showTab('edit');
+    setTimeout(() => loadCharacters(id).then(() => loadDetails(id, { waitForPreview: true })), 300);
+  }
+
+  $('ed-char').addEventListener('change', (e) => loadDetails(e.target.value));
+  $('ed-kind').addEventListener('change', (e) => { kind = e.target.value; renderSheet(); });
+  $('ed-use').addEventListener('click', async () => {
+    const r = await chars.switchTo($('ed-char').value);
+    if (r.error) { note('ed-msg', r.error, true); return; }
+    note('ed-msg', 'Switched.');
+    loadDetails($('ed-char').value, { waitForPreview: true });
+  });
+  $('ed-export').addEventListener('click', async () => {
+    const r = await chars.exportPack($('ed-char').value);
+    if (r.error) note('ed-msg', r.error, true);
+    else if (!r.canceled) note('ed-msg', `Exported to ${r.file}`);
+  });
+  $('ed-save').addEventListener('click', async () => {
+    if (!current) return;
+    const patch = { personality: $('ed-personality').value };
+    patch[kind] = { animations: collect(), scale: Number($('ed-scale').value) || 1 };
+    const r = await chars.save(current.id, patch);
+    if (r.error) { note('ed-msg', r.error, true); return; }
+    note('ed-msg', 'Saved. The pet reloads with the new animations.');
+    setTimeout(() => loadDetails(current.id), 1500);
+  });
+
+  showTab(location.hash === '#edit' ? 'edit' : 'import');
+})();

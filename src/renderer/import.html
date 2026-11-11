@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' file: data:" />
+  <title>Characters</title>
+  <link rel="stylesheet" href="ui/jar.css" />
+  <link rel="stylesheet" href="ui/customize.css" />
+  <link rel="stylesheet" href="ui/import.css" />
+</head>
+<body>
+  <main id="page">
+    <nav class="tabs">
+      <button data-tab="import" class="tab active">Import a character</button>
+      <button data-tab="edit" class="tab">Animations and personality</button>
+    </nav>
+
+    <!-- ===== import ===== -->
+    <section id="tab-import">
+      <div class="card" id="drop-files">
+        <h2>Quick import</h2>
+        <div class="muted small-note">Drop files anywhere on this card, or choose them. Only the sprite sheet (or a still image) is required.</div>
+        <div class="row"><input type="text" id="imp-name" maxlength="40" placeholder="Character name" /></div>
+        <textarea id="imp-personality" rows="3" maxlength="600" placeholder="Personality (optional): how he talks and acts. Upgrades write new lines in this voice."></textarea>
+        <div class="files">
+          <div class="file" data-slot="sheet"><span class="lbl">Sprite sheet</span><span class="val muted">none</span><button class="small ghost" data-pick="image">Choose…</button></div>
+          <div class="file" data-slot="ultimate-sheet"><span class="lbl">Ultimate sheet <em>(optional)</em></span><span class="val muted">none</span><button class="small ghost" data-pick="image">Choose…</button></div>
+          <div class="file" data-slot="skin"><span class="lbl">Still image <em>(optional)</em></span><span class="val muted">none</span><button class="small ghost" data-pick="image">Choose…</button></div>
+          <div class="file" data-slot="ultimate"><span class="lbl">Ultimate image <em>(optional)</em></span><span class="val muted">none</span><button class="small ghost" data-pick="image">Choose…</button></div>
+          <div class="file" data-slot="quips"><span class="lbl">Quips <em>(.json or .txt, optional)</em></span><span class="val muted">none</span><button class="small ghost" data-pick="quips">Choose…</button></div>
+        </div>
+        <div class="row">
+          <label class="inline">Size <input type="number" id="imp-scale" min="0.2" max="4" step="0.05" value="1" /></label>
+          <span class="grow"></span>
+          <button id="imp-go">Import</button>
+        </div>
+        <div id="imp-msg" class="note"></div>
+      </div>
+
+      <div class="card" id="drop-pack">
+        <h2>Import a character pack</h2>
+        <div class="muted small-note">A .zip or folder with character.json (what <b>Export</b> makes). Drop it here or choose it.</div>
+        <div class="row">
+          <button class="ghost" id="pack-zip">Choose .zip…</button>
+          <button class="ghost" id="pack-folder">Choose folder…</button>
+        </div>
+        <div id="pack-msg" class="note"></div>
+      </div>
+
+      <div class="card">
+        <h2>Tips</h2>
+        <ul class="muted small-note tips">
+          <li>A sprite sheet is a grid of poses with space between them. Transparent or plain backgrounds work.</li>
+          <li>After importing, the next tab shows every pose numbered <code>row:frame</code> so you can choose which poses play when he walks, talks, sleeps, and so on.</li>
+          <li>Quips in .txt: one line per quip; they play as idle remarks. Use .json for tags (see characters/README.md).</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ===== animations / personality ===== -->
+    <section id="tab-edit" class="hidden">
+      <div class="card">
+        <div class="row">
+          <label class="inline grow">Character <select id="ed-char"></select></label>
+          <button class="ghost small" id="ed-use">Use this character</button>
+          <button class="ghost small" id="ed-export">Export…</button>
+        </div>
+        <div id="ed-msg" class="note"></div>
+      </div>
+      <div id="ed-body">
+        <div class="card">
+          <h2>Personality</h2>
+          <textarea id="ed-personality" rows="3" maxlength="600" placeholder="How he talks and acts. Sent to upgrade runs as his voice (nothing else from the pack is sent)."></textarea>
+        </div>
+        <div class="card" id="ed-sheet-card">
+          <div class="row between">
+            <h2>Animations</h2>
+            <select id="ed-kind"><option value="sheet">Main sheet</option><option value="ultimateSheet">Ultimate sheet</option></select>
+          </div>
+          <div id="ed-rows" class="muted small-note"></div>
+          <div class="preview-wrap"><img id="ed-preview" alt="Numbered frames" /></div>
+          <div class="muted small-note">Frames: <code>1:0-5</code> = row 1, frames 0 to 5. Lists work too: <code>0:0-4,0:3-1</code>. Leave empty to fall back to idle.</div>
+          <table class="anims">
+            <thead><tr><th>When</th><th>Frames</th><th>FPS</th><th title="Mirror the poses (they face left)">Flip</th><th title="Off: hold the last frame">Loop</th></tr></thead>
+            <tbody id="ed-anims"></tbody>
+          </table>
+          <div class="row">
+            <label class="inline">Size <input type="number" id="ed-scale" min="0.2" max="4" step="0.05" /></label>
+            <span class="grow"></span>
+          </div>
+        </div>
+        <div class="row end">
+          <button id="ed-save">Save and reload</button>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script src="ui/import.js"></script>
+</body>
+</html>

@@ -2,7 +2,8 @@
 const { app, Menu, Tray, ipcMain, powerMonitor, screen, shell, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { createOverlay, createJarWindow, createCustomizeWindow } = require('./overlay');
+const { createOverlay, createJarWindow, createCustomizeWindow, createImportWindow } = require('./overlay');
+const characterImport = require('./character-import');
 const { QuipStore } = require('./quip-store');
 const { Settings } = require('./settings');
 const { Ledger } = require('./jar/ledger');
@@ -213,13 +214,15 @@ function start() {
   const currentSkin = () => (isBuiltinActive() ? null : activeCharacter());
   // The renderer slices sprite sheets and sends back a numbered preview
   // (sheet-index.png / ultimate-sheet-index.png) so the user can map frames.
-  ipcMain.on('overlay:sheet-index', (_e, { skin, kind, dataUrl } = {}) => {
+  const sheetInfo = new Map(); // "<id>/<kind>" -> { rows, at }
+  ipcMain.on('overlay:sheet-index', (_e, { skin, kind, dataUrl, rows } = {}) => {
     try {
       if (!['sheet', 'ultimate-sheet'].includes(kind)) return;
       if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image/png;base64,')) return;
       if (!listCharacters(PROJECT_ROOT).some((c) => c.name === skin && !c.builtin)) return;
       const file = path.join(charactersRoot(PROJECT_ROOT), skin, `${kind}-index.png`);
       fs.writeFileSync(file, Buffer.from(dataUrl.slice(22), 'base64'));
+      if (Array.isArray(rows)) sheetInfo.set(`${skin}/${kind}`, { rows: rows.slice(0, 50).map((n) => Math.max(0, Math.floor(Number(n) || 0))), at: Date.now() });
     } catch (e) { log(`sheet index not saved: ${e.message}`); }
   });
   ipcMain.handle('overlay:bootstrap', () => ({
@@ -283,6 +286,97 @@ function start() {
   ipcMain.on('custom:say', (_e, { text } = {}) => {
     const t = String(text || '').trim().slice(0, 240);
     if (t) say(t.replace(/\{name\}/g, charName()).replace(/\{hour\}/g, new Date().getHours()));
+  });
+
+  // ---- characters: import, export, animation mapper ----
+  let importWin = null;
+  function openImport(hash) {
+    if (importWin && !importWin.isDestroyed()) {
+      importWin.webContents.send('import:goto', hash || '');
+      importWin.show();
+      importWin.focus();
+      return;
+    }
+    importWin = createImportWindow(hash);
+    importWin.on('closed', () => { importWin = null; });
+  }
+  function switchCharacter(id) {
+    settings.set('character', id);
+    reloadAndAwaitMods([], 1500);
+    refreshTray();
+    pushJar();
+    quipsChanged();
+  }
+  const PICK_FILTERS = {
+    image: [{ name: 'Images', extensions: ['png', 'webp', 'gif', 'jpg', 'jpeg'] }],
+    quips: [{ name: 'Quips', extensions: ['json', 'txt'] }],
+    zip: [{ name: 'Character pack', extensions: ['zip'] }],
+  };
+  const importParent = () => (importWin && !importWin.isDestroyed() ? importWin : undefined);
+  ipcMain.handle('import:pick', async (_e, { kind } = {}) => {
+    if (kind === 'folder') {
+      const r = await dialog.showOpenDialog(importParent(), { title: 'Choose a character pack folder', properties: ['openDirectory'] });
+      return r.canceled ? null : r.filePaths[0];
+    }
+    const r = await dialog.showOpenDialog(importParent(), { properties: ['openFile'], filters: PICK_FILTERS[kind] || PICK_FILTERS.image });
+    return r.canceled ? null : r.filePaths[0];
+  });
+  ipcMain.handle('import:files', guarded((args) => {
+    const id = characterImport.importFiles(PROJECT_ROOT, args);
+    log(`character imported: ${id}`);
+    switchCharacter(id);
+    return { id };
+  }));
+  ipcMain.handle('import:pack', guarded(({ source }) => {
+    const id = characterImport.importPack(PROJECT_ROOT, String(source || ''));
+    log(`character pack imported: ${id}`);
+    switchCharacter(id);
+    return { id };
+  }));
+  ipcMain.handle('import:characters', () => ({
+    active: activeCharacterId(),
+    characters: listCharacters(PROJECT_ROOT).map((c) => ({ id: c.name, name: displayNameOf(c), test: c.test, builtin: c.builtin })),
+  }));
+  ipcMain.handle('import:details', (_e, { id } = {}) => {
+    const c = listCharacters(PROJECT_ROOT).find((x) => x.name === id);
+    if (!c) return { error: 'Unknown character.' };
+    const dir = path.join(charactersRoot(PROJECT_ROOT), c.name);
+    const preview = (kind) => {
+      const file = path.join(dir, `${kind}-index.png`);
+      return fs.existsSync(file) ? `${require('url').pathToFileURL(file).href}?v=${fs.statSync(file).mtimeMs}` : null;
+    };
+    const sheetOf = (cfgKey, kind) => ({
+      scale: (c.config[cfgKey] || {}).scale || 1,
+      animations: (c.config[cfgKey] || {}).animations || {},
+      rows: (sheetInfo.get(`${c.name}/${kind}`) || {}).rows || null,
+      preview: preview(kind),
+    });
+    return {
+      id: c.name, name: displayNameOf(c), builtin: c.builtin, test: c.test,
+      personality: c.config.personality || '',
+      hasSheet: !!c.sheet, hasUltimateSheet: !!c.ultimateSheet,
+      sheet: sheetOf('sheet', 'sheet'),
+      ultimateSheet: sheetOf('ultimateSheet', 'ultimate-sheet'),
+      animKeys: characterImport.ANIM_KEYS,
+    };
+  });
+  ipcMain.handle('import:save', guarded(({ id, patch }) => {
+    characterImport.saveCharacter(PROJECT_ROOT, String(id || ''), patch || {});
+    if (id === activeCharacterId()) reloadAndAwaitMods([], 1500);
+    return { ok: true };
+  }));
+  ipcMain.handle('import:switch', guarded(({ id }) => {
+    if (!listCharacters(PROJECT_ROOT).some((c) => c.name === id)) throw new Error('Unknown character.');
+    switchCharacter(id);
+    return { ok: true };
+  }));
+  ipcMain.handle('import:export', async (_e, { id } = {}) => {
+    try {
+      const r = await dialog.showSaveDialog(importParent(), { title: 'Export character', defaultPath: path.join(app.getPath('desktop'), `${id}.zip`), filters: PICK_FILTERS.zip });
+      if (r.canceled || !r.filePath) return { canceled: true };
+      const files = characterImport.exportPack(PROJECT_ROOT, String(id || ''), r.filePath);
+      return { file: r.filePath, files };
+    } catch (e) { return { error: e.message }; }
   });
 
   // ---- jar IPC ----
@@ -425,6 +519,8 @@ function start() {
     ];
     return Menu.buildFromTemplate([
       { label: `${charName()} Buddy`, enabled: false },
+      { label: 'Import character…', click: () => openImport('import') },
+      { label: 'Edit animations and personality…', click: () => openImport('edit') },
       { label: 'Rename character…', click: openCustomize },
       { label: 'Edit quips…', click: openCustomize },
       { type: 'separator' },
@@ -573,6 +669,9 @@ function start() {
         await new Promise((r) => setTimeout(r, 1500));
         const cp = await customizeWin.webContents.capturePage();
         fs.writeFileSync(path.join(selftestDir, 'customize.png'), cp.toPNG());
+        openImport('edit');
+        await new Promise((r) => setTimeout(r, 3500));
+        if (importWin) { const ip = await importWin.webContents.capturePage(); fs.writeFileSync(path.join(selftestDir, 'characters-edit.png'), ip.toPNG()); await importWin.webContents.executeJavaScript("document.querySelector('.tab[data-tab=import]').click(); 1"); await new Promise((r) => setTimeout(r, 400)); const ip2 = await importWin.webContents.capturePage(); fs.writeFileSync(path.join(selftestDir, 'characters-import.png'), ip2.toPNG()); }
         const sfxCheck = await overlay.webContents.executeJavaScript(`JSON.stringify(BuddySfx.names.map((n) => { try { return [n, BuddySfx.play(n)]; } catch (e) { return [n, 'ERR ' + e.message]; } }))`);
         fs.writeFileSync(path.join(selftestDir, 'sfx.json'), sfxCheck);
         const probe = await overlay.webContents.executeJavaScript(`JSON.stringify({ mods: BuddyMods.list(), skippedMods: BuddyMods.skipped(), modProps: document.querySelectorAll('#pet [data-mod]').length, surprisedAnim: (() => { const p = document.getElementById('pet'); p.classList.add('surprised'); const a = getComputedStyle(document.getElementById('sprite')).animationName; p.classList.remove('surprised'); return a; })(), quips: BuddyQuips.all().length, mode: BuddyBrain.state.mode, x: BuddyBrain.state.x, y: BuddyBrain.state.y, bubble: BuddyBubble.isVisible(), text: document.getElementById('bubble-text').textContent, petClass: document.getElementById('pet').className, skin: document.getElementById('pet').classList.contains('skin'), skinImg: !!document.getElementById('skin-img'), ultimateImg: !!document.getElementById('skin-ultimate'), idle: BuddyBrain.state.idleSeconds })`);

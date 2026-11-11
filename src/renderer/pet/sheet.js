@@ -298,7 +298,7 @@
     const animList = Object.keys(anims).join(', ');
     buddy.log(`sheet ${name}: ${w}x${h}, ${removed == null ? 'already transparent' : `background ${Math.round(removed * 100)}% removed`}, ${det.rows.length} rows [${det.rows.join(', ')}] = ${frames.length} frames; animations: ${animList}`);
     if (opts.indexKind && opts.skinName) {
-      try { buddy.saveSheetIndex(opts.skinName, opts.indexKind, indexImage(canvas, frames, det)); } catch (_) { /* preview only */ }
+      try { buddy.saveSheetIndex(opts.skinName, opts.indexKind, indexImage(canvas, frames, det), det.rows); } catch (_) { /* preview only */ }
     }
     return sheet;
   }
