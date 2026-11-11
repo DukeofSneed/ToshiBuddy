@@ -4,6 +4,11 @@ const fs = require('fs');
 const path = require('path');
 const { pathToFileURL } = require('url');
 
+// JSON files people edit by hand on Windows often start with a byte-order mark.
+function readJson(file) {
+  return JSON.parse(fs.readFileSync(file, 'utf8').replace(/^﻿/, ''));
+}
+
 function listMods(projectRoot, disabled = []) {
   const dir = path.join(projectRoot, 'mods');
   let entries = [];
@@ -29,7 +34,7 @@ function readQuipPacks(projectRoot) {
   try { files = fs.readdirSync(dir).filter((f) => f.endsWith('.json')); } catch (_) { return quips; }
   for (const f of files) {
     try {
-      const data = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8'));
+      const data = readJson(path.join(dir, f));
       const list = Array.isArray(data) ? data : data.quips || [];
       for (const q of list) {
         if (typeof q === 'string') quips.push({ text: q, tags: ['idle'], pack: f });
@@ -68,7 +73,7 @@ function listSkins(projectRoot) {
     if (!primary) continue;
     const ultimate = byBase('ultimate');
     let config = {};
-    try { config = JSON.parse(fs.readFileSync(path.join(folder, 'skin.json'), 'utf8')); } catch (_) { /* optional */ }
+    try { config = readJson(path.join(folder, 'skin.json')); } catch (_) { /* optional */ }
     out.push({
       name: e.name,
       url: fileUrl(path.join(folder, primary)),
