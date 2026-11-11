@@ -68,7 +68,8 @@ AskinMods.register({
 - `characters`: optional, `['kori']`, `['skin']`, or both (the default). A mod
   limited to `kori` is skipped entirely (props, animations, quips, behaviors) while
   a user skin is active. Leave it out for upgrades: they should work on both.
-- `quips[].text` <= 240 chars; `tags` is an array. Useful tags: `idle`, `greet`,
+- `quips[].text` <= 240 chars; write `{name}` wherever the character's name goes
+  (the user can rename him, and skins have their own names); `tags` is an array. Useful tags: `idle`, `greet`,
   `lean`, `click`, `drag`, `drop`, `drop-hard`, `wake`, `hour`, `trick`, `upgrade`,
   `desk` (any desk session), `desk-writing`, `desk-lab`, `desk-enter`, `desk-exit`,
   `desk-click`, `desk-break`, `slacking`, `annoyed-1`/`annoyed-2`/`annoyed-3`

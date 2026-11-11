@@ -69,6 +69,11 @@
   // ---- speaking ----
   function say(text, { animate = null, ms } = {}) {
     if (!text) return;
+    // {name} is the active character's name; on a skin, older text that says
+    // "Kori" (catalog ideas, older mods) uses the skin's name instead.
+    const nm = vars().name;
+    text = String(text).replace(/\{name\}/g, nm);
+    if (window.AskinApp && AskinApp.skin) text = text.replace(/\bKori\b/g, nm);
     AskinBubble.show(text, { ms });
     pet().classList.add('talk');
     const spoke = AskinVoice.speak(text);
@@ -352,7 +357,7 @@
     const dt = Math.min(0.05, (ts - (st.lastTs || ts)) / 1000);
     st.lastTs = ts;
     if (st.mode === 'walk') {
-      st.x += st.dir * WALK_SPEED * dt;
+      st.x += st.dir * ((window.AskinApp && AskinApp.walkSpeed) || WALK_SPEED) * dt;
       if (st.x < 0) { st.x = 0; face(1); st.nextDecision = Math.min(st.nextDecision, now() + 400); }
       if (st.x > st.stageW - PET_W) { st.x = st.stageW - PET_W; face(-1); st.nextDecision = Math.min(st.nextDecision, now() + 400); }
       place();

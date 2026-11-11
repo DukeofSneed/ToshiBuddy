@@ -16,7 +16,7 @@ const RESULT_SCHEMA = {
     slug: { type: 'string', description: 'The mod folder name you created under mods/' },
     summary: { type: 'string' },
     files: { type: 'array', items: { type: 'string' } },
-    announcement: { type: 'string', description: "One short line in Kori's serious, dry voice announcing the new trick" },
+    announcement: { type: 'string', description: "One short line in the character's serious, dry voice announcing the new trick; refer to the character only by the name given in the prompt" },
   },
   required: ['title', 'slug', 'summary', 'files', 'announcement'],
 };
@@ -68,7 +68,9 @@ function nodeCheck(file) {
 }
 
 class Upgrader {
-  constructor({ projectRoot, ledger, guard, settings, git, log, emit, reloadAndAwaitMods }) {
+  constructor({ projectRoot, ledger, guard, settings, git, log, emit, reloadAndAwaitMods, character }) {
+    // () => { name, isSkin }: who the pet is right now, so prompts use the right name.
+    this.character = character || (() => ({ name: 'Kori', isSkin: false }));
     this.projectRoot = projectRoot;
     this.ledger = ledger;
     this.guard = guard;
@@ -101,9 +103,12 @@ class Upgrader {
         `You have about ${extraTokens} more tokens. Finish the mod with as few file reads as possible, then reply with the JSON summary.`,
       ].join('\n');
     }
+    const { name, isSkin } = this.character();
+    // Catalog ideas were written for Kori; on a skin they're about the active character.
+    const named = (s) => (isSkin ? String(s || '').replace(/\bKori\b/g, name) : String(s || ''));
     return [
-      `# Upgrade request: ${goal.title}`,
-      goal.summary,
+      `# Upgrade request: ${named(goal.title)}`,
+      named(goal.summary),
       goal.request ? `\nOriginal words from the human: "${goal.request}"` : '',
       '',
       '## Rules',
@@ -111,11 +116,14 @@ class Upgrader {
       '- Never create or edit anything under src/, docs/, prompts/, package.json, or any file outside mods/ and content/. Such a run is reverted automatically.',
       '- The mod must be self-contained browser JavaScript calling AskinMods.register(...). No require, no fetch, no eval, no network, no timers longer than needed.',
       `- Token budget for this run: about ${goal.goalTokens} tokens total. Be economical: read MOD_API.md and at most one existing mod, then write.`,
-      '- The active character may be Kori (a drawn SVG with limbs) or a user-supplied skin image (no limbs). The mod must look right on both:',
-      '  put items on the head/hand/desk anchors, and animate the whole body by targeting #pet.anim-<name> #sprite. Limb animations (#arm-r etc.) are a bonus that only shows on Kori.',
+      isSkin
+        ? `- The character is called ${name}. In every quip and the announcement, call him ${name} or write {name} (it is replaced with his name); never use the name Kori. The pet is drawn as a user-supplied skin image (no limbs); MOD_API.md calls the built-in character Kori, which is not who is active.`
+        : `- The character is called ${name}. In quips, write {name} wherever his name appears.`,
+      '- The mod must look right on both the drawn built-in character (with limbs) and a user-supplied skin image (no limbs):',
+      '  put items on the head/hand/desk anchors, and animate the whole body by targeting #pet.anim-<name> #sprite. Limb animations (#arm-r etc.) are a bonus that only shows on the built-in character.',
       '- Do not describe or guess what the skin depicts. Write lines in the established voice: young, serious, clipped, dry, procedure jokes and cold puns, hates being called small.',
       '- Everything must be original. No copyrighted characters, art, dialogue, or audio.',
-      '- When done, reply with the JSON summary the schema asks for. The announcement is one short line Kori will say out loud.',
+      '- When done, reply with the JSON summary the schema asks for. The announcement is one short line the character will say out loud.',
     ].join('\n');
   }
 

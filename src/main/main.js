@@ -42,7 +42,6 @@ function start() {
   const guard = new Guard({ ledger, settings, projectRoot: PROJECT_ROOT, log });
   const quipStore = new QuipStore(userData);
   const quipsForPet = () => quipStore.merged(readQuipPacks(PROJECT_ROOT));
-  const charName = () => String(settings.get('characterName') || '').trim() || 'Kori';
 
   let overlay = null;
   let jarWin = null;
@@ -72,6 +71,7 @@ function start() {
 
   const upgrader = new Upgrader({
     projectRoot: PROJECT_ROOT, ledger, guard, settings, git, log,
+    character: () => ({ name: charName(), isSkin: activeSkinName() !== 'kori' }),
     emit: (ev) => {
       if (overlay && !overlay.isDestroyed()) overlay.webContents.send('upgrade-event', ev);
       pushJar();
@@ -91,7 +91,7 @@ function start() {
     return {
       ledger: ledger.snapshot(),
       guard: guard.status(),
-      settings: settings.all(),
+      settings: publicSettings(),
       busy: upgrader.isBusy(),
       claudeInstalled: !!findClaude(),
       skins: listSkins(PROJECT_ROOT).map((s) => s.name),
@@ -129,6 +129,14 @@ function start() {
     if (want && skins.some((s) => s.name === want)) return want;
     return skins.length ? skins[0].name : 'kori';
   };
+  // The display name belongs to the active character: each skin (and Kori) has its own.
+  const prettySkin = (n) => n.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  const charName = () => {
+    const who = activeSkinName();
+    const names = settings.get('characterNames') || {};
+    return String(names[who] || '').trim() || (who === 'kori' ? 'Kori' : prettySkin(who));
+  };
+  const publicSettings = () => ({ ...settings.all(), characterName: charName() });
   const currentSkin = () => {
     const name = activeSkinName();
     return name === 'kori' ? null : listSkins(PROJECT_ROOT).find((s) => s.name === name) || null;
@@ -146,7 +154,7 @@ function start() {
   });
   ipcMain.handle('overlay:bootstrap', () => ({
     workArea: screen.getPrimaryDisplay().workArea,
-    settings: settings.all(),
+    settings: publicSettings(),
     skin: currentSkin(),
     mods: listMods(PROJECT_ROOT, ledger.data.disabledMods),
     quips: quipsForPet(),
@@ -191,8 +199,8 @@ function start() {
   ipcMain.handle('custom:set-name', guarded(({ name }) => {
     const clean = String(name || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40);
     if (!clean) throw new Error('The name can\'t be empty.');
-    settings.set('characterName', clean);
-    if (overlay && !overlay.isDestroyed()) overlay.webContents.send('settings', settings.all());
+    settings.set('characterNames', { ...(settings.get('characterNames') || {}), [activeSkinName()]: clean });
+    if (overlay && !overlay.isDestroyed()) overlay.webContents.send('settings', publicSettings());
     refreshTray();
     pushJar();
     return quipsChanged();
@@ -228,8 +236,8 @@ function start() {
     if ('sfxVolume' in clean) clean.sfxVolume = Math.min(1, Math.max(0, Number(clean.sfxVolume) || 0));
     settings.update(clean);
     if ('autostart' in clean) applyAutostart();
-    if (overlay && !overlay.isDestroyed()) overlay.webContents.send('settings', settings.all());
-    if (skinChanged) reloadAndAwaitMods([], 1000);
+    if (overlay && !overlay.isDestroyed()) overlay.webContents.send('settings', publicSettings());
+    if (skinChanged) { reloadAndAwaitMods([], 1000); quipsChanged(); }
     refreshTray();
     return jarState();
   });
@@ -248,7 +256,7 @@ function start() {
     if (!text) return { ok: false, error: 'empty suggestion' };
     if (!findClaude()) return { ok: false, error: 'Claude Code is not installed or not logged in' };
     say(`"${text.slice(0, 60)}${text.length > 60 ? '…' : ''}" Noted. I'll draft a cost estimate. Estimates cost tokens too.`, { animate: 'think' });
-    const r = await estimate({ projectRoot: PROJECT_ROOT, ledger, request: text, log });
+    const r = await estimate({ projectRoot: PROJECT_ROOT, ledger, request: text, log, character: { name: charName(), isSkin: activeSkinName() !== 'kori' } });
     if (r.rateLimit) guard.observe(r.rateLimit);
     if (!r.ok) { say(`I couldn't estimate that one: ${r.error}`); return { ok: false, error: r.error, state: jarState() }; }
     if (!r.goal.feasible || r.goal.touchesCore) {
@@ -314,7 +322,7 @@ function start() {
     const skins = listSkins(PROJECT_ROOT);
     const skinItems = [
       ...skins.map((s) => ({ label: s.name, type: 'radio', checked: activeSkinName() === s.name, click: () => setSkin(s.name) })),
-      { label: 'Kori (original character)', type: 'radio', checked: activeSkinName() === 'kori', click: () => setSkin('kori') },
+      { label: activeSkinName() === 'kori' ? 'Kori (original character)' : 'Built-in character', type: 'radio', checked: activeSkinName() === 'kori', click: () => setSkin('kori') },
       { type: 'separator' },
       { label: 'Show prop anchors (for tuning skin.json)', type: 'checkbox', checked: !!settings.get('showAnchors'), click: (m) => toggleSetting('showAnchors', m.checked) },
       { label: 'Open skins folder', click: () => { const d = skinsRoot(PROJECT_ROOT); fs.mkdirSync(d, { recursive: true }); shell.openPath(d); } },
@@ -351,13 +359,14 @@ function start() {
     reloadAndAwaitMods([], 1000);
     refreshTray();
     pushJar();
+    quipsChanged(); // the editor shows the new character's name
   }
   function toggleSetting(key, value) {
     settings.set(key, value);
     if (key === 'autostart') applyAutostart();
     if (key === 'deskMode' || key === 'slackNudges') { if (watcherWanted()) activity.start(); else activity.stop(); }
     if (key === 'showAnchors') reloadAndAwaitMods([], 1000);
-    if (overlay && !overlay.isDestroyed()) overlay.webContents.send('settings', settings.all());
+    if (overlay && !overlay.isDestroyed()) overlay.webContents.send('settings', publicSettings());
     refreshTray();
     pushJar();
   }
@@ -387,7 +396,7 @@ function start() {
   if (!findClaude()) {
     log('Claude Code CLI not found; the jar can hold tokens but cannot spend them until it is installed and logged in.');
   }
-  log(`Kori Buddy started. userData=${userData}`);
+  log(`Desktop buddy started. userData=${userData}`);
 
   // ---- self-test: ASKIN_SELFTEST=<dir> captures both windows and quits ----
   const selftestDir = process.env.ASKIN_SELFTEST;
@@ -471,6 +480,8 @@ function start() {
         fs.writeFileSync(path.join(selftestDir, 'sfx.json'), sfxCheck);
         const probe = await overlay.webContents.executeJavaScript(`JSON.stringify({ mods: AskinMods.list(), skippedMods: AskinMods.skipped(), modProps: document.querySelectorAll('#pet [data-mod]').length, surprisedAnim: (() => { const p = document.getElementById('pet'); p.classList.add('surprised'); const a = getComputedStyle(document.getElementById('sprite')).animationName; p.classList.remove('surprised'); return a; })(), quips: AskinQuips.all().length, mode: AskinBrain.state.mode, x: AskinBrain.state.x, y: AskinBrain.state.y, bubble: AskinBubble.isVisible(), text: document.getElementById('bubble-text').textContent, petClass: document.getElementById('pet').className, skin: document.getElementById('pet').classList.contains('skin'), skinImg: !!document.getElementById('skin-img'), ultimateImg: !!document.getElementById('skin-ultimate'), idle: AskinBrain.state.idleSeconds })`);
         fs.writeFileSync(path.join(selftestDir, 'state.json'), probe);
+        const labels = (m) => m.items.flatMap((i) => [i.label, ...(i.submenu ? labels(i.submenu) : [])]).filter(Boolean);
+        fs.writeFileSync(path.join(selftestDir, 'menu.json'), JSON.stringify({ name: charName(), tooltipName: `${charName()} Buddy`, menu: labels(buildMenu()) }, null, 1));
         fs.writeFileSync(path.join(selftestDir, 'log.txt'), logLines.join('\n'));
       } catch (e) {
         fs.writeFileSync(path.join(selftestDir, 'log.txt'), logLines.join('\n') + `\nSELFTEST ERROR: ${e.stack}`);

@@ -23,7 +23,7 @@ const SCHEMA = {
     feasible: { type: 'boolean', description: 'False if it cannot be done within the Mod API' },
     touches_core: { type: 'boolean', description: 'True if it would need changes outside mods/ and content/' },
     risk_note: { type: 'string' },
-    reply: { type: 'string', description: "One short, serious, dry sentence in Kori's voice (a young, by-the-book ice officer) reacting to the request" },
+    reply: { type: 'string', description: "One short, serious, dry sentence in the character's voice (young, by-the-book) reacting to the request; if it names the character, use the name given in the prompt" },
   },
   required: ['title', 'summary', 'size', 'estimated_tokens', 'feasible', 'touches_core', 'risk_note', 'reply'],
 };
@@ -36,12 +36,13 @@ function listModSlugs(projectRoot) {
   } catch (_) { return []; }
 }
 
-function buildPrompt(projectRoot, request, ledger) {
+function buildPrompt(projectRoot, request, ledger, character = { name: 'Kori', isSkin: false }) {
+  const { name, isSkin } = character;
   const api = fs.readFileSync(path.join(projectRoot, 'docs', 'MOD_API.md'), 'utf8');
   const mods = listModSlugs(projectRoot);
   const done = ledger.data.upgrades.filter((u) => !u.reverted).map((u) => `- ${u.title} (${u.tokens} tokens)`).join('\n') || '- none yet';
   return [
-    'You are the pricing brain of "Kori Buddy", an Electron desktop pet that does paperwork at a desk. The active character is either Kori (an original chibi ice officer drawn as SVG) or a user-supplied skin image; upgrades must work on whichever is active, through props on anchors and whole-body animations.',
+    `You are the pricing brain of a desktop pet (Electron) that does paperwork at a desk. The character is called ${name}${isSkin ? ' and is shown as a user-supplied skin image (no limbs)' : ', the built-in drawn character'}; upgrades must work on whichever character is active, through props on anchors and whole-body animations. Write the title, summary, and reply about ${name}${isSkin ? '; never use the name Kori, which is only the built-in character the Mod API describes' : ''}.`,
     'Requests to reproduce copyrighted characters, art, dialogue, or audio are not feasible; set feasible to false for those.',
     'A human has suggested an upgrade. Estimate what it would take for a separate headless Claude Code run (model: haiku) to implement it as a mod.',
     'Mods can only add quips, CSS animations, SVG props, and simple behaviors through the Mod API below; they cannot touch src/.',
@@ -59,9 +60,9 @@ function buildPrompt(projectRoot, request, ledger) {
   ].join('\n');
 }
 
-async function estimate({ projectRoot, ledger, request, log }) {
+async function estimate({ projectRoot, ledger, request, log, character }) {
   const run = runClaude({
-    prompt: buildPrompt(projectRoot, request, ledger),
+    prompt: buildPrompt(projectRoot, request, ledger, character),
     cwd: projectRoot,
     args: ['--model', 'haiku', '--effort', 'low', '--max-turns', '1', '--max-budget-usd', '0.05',
       '--disallowedTools', 'Bash,PowerShell,Edit,Write,Read,Glob,Grep,WebFetch,WebSearch,Agent,NotebookEdit',

@@ -131,6 +131,8 @@
   document.getElementById('pet').classList.toggle('ultimate-sheet', !!(skin && skin.ultimateSheet));
   AskinApp.skin = skin;
   AskinApp.sheetPlayers = AskinSheet.start(skin);
+  // A sheet's walk can set its own ground speed so the feet match the stride.
+  AskinApp.walkSpeed = (skin && skin.sheet && skin.sheet.anims.walk && skin.sheet.anims.walk.speed) || null;
   AskinApp.ultimateSeconds = (skin && skin.ultimateSeconds) || Number(boot.settings.ultimateSeconds) || 30;
 
   AskinApp.name = boot.settings.characterName || 'Kori';

@@ -180,10 +180,22 @@
       }
       g.putImageData(out, 0, 0);
       const base = det.baselines[f.row];
+      // Horizontal anchor: the center of the head (top 30% of the figure), not the
+      // bounding box. A swinging leg or an outstretched sword widens the box and
+      // would make the body jitter sideways from frame to frame.
+      const m = f.main;
+      const headBottom = m.miny + Math.round((m.maxy - m.miny) * 0.3);
+      let hmin = Infinity, hmax = -Infinity;
+      for (let y = m.miny; y <= headBottom; y++) {
+        for (let x = m.minx; x <= m.maxx; x++) {
+          if (det.label[y * w + x] === m.id) { if (x < hmin) hmin = x; if (x > hmax) hmax = x; }
+        }
+      }
+      const cx = Number.isFinite(hmin) ? (hmin + hmax) / 2 : (m.minx + m.maxx) / 2;
       return {
         row: f.row, col: f.col, url: c.toDataURL('image/png'), w: fw, h: fh,
-        ox: (f.main.minx + f.main.maxx) / 2 - f.minx, // body center, from the frame's left edge
-        top: base - f.miny,                              // baseline to the frame's top
+        ox: cx - f.minx,   // head center, from the frame's left edge
+        top: base - f.miny, // baseline to the frame's top
       };
     });
   }
@@ -269,6 +281,7 @@
         flip: !!d.flip,
         loop: d.loop !== false,
         loopFrom: Math.max(0, Math.min(list.length - 1, Number(d.loopFrom) || 0)),
+        speed: Number(d.speed) > 0 ? Math.min(400, Number(d.speed)) : null, // walk: pixels per second
       };
     }
     if (!anims.idle) anims.idle = { frames: [0], fps: 1, flip: false, loop: true, loopFrom: 0 };
