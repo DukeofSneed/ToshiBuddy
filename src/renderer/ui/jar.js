@@ -76,11 +76,11 @@
     $('voice-muted').checked = !!state.settings.muted;
     $('desk-mode').checked = state.settings.deskMode !== false;
     const skinSel = $('skin');
-    const opts = [''].concat(state.skins || []);
+    const opts = (state.skins || []).concat(['kori']);
     if (skinSel.options.length !== opts.length || opts.some((v, i) => skinSel.options[i].value !== v)) {
-      skinSel.innerHTML = opts.map((v) => `<option value="${esc(v)}">${v ? esc(v) : 'Kori (built-in)'}</option>`).join('');
+      skinSel.innerHTML = opts.map((v) => `<option value="${esc(v)}">${v === 'kori' ? 'Kori (original character)' : esc(v)}</option>`).join('');
     }
-    skinSel.value = state.settings.skin || '';
+    skinSel.value = state.activeSkin || 'kori';
     AskinSfx.setEnabled(sfxOn);
     AskinSfx.setVolume(vol / 100);
 

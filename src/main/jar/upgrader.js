@@ -111,7 +111,9 @@ class Upgrader {
       '- Never create or edit anything under src/, docs/, prompts/, package.json, or any file outside mods/ and content/. Such a run is reverted automatically.',
       '- The mod must be self-contained browser JavaScript calling AskinMods.register(...). No require, no fetch, no eval, no network, no timers longer than needed.',
       `- Token budget for this run: about ${goal.goalTokens} tokens total. Be economical: read MOD_API.md and at most one existing mod, then write.`,
-      '- Keep Kori in character: young, serious, clipped, dry, procedure jokes and cold puns, hates being called small.',
+      '- The active character may be Kori (a drawn SVG with limbs) or a user-supplied skin image (no limbs). The mod must look right on both:',
+      '  put items on the head/hand/desk anchors, and animate the whole body by targeting #pet.anim-<name> #sprite. Limb animations (#arm-r etc.) are a bonus that only shows on Kori.',
+      '- Do not describe or guess what the skin depicts. Write lines in the established voice: young, serious, clipped, dry, procedure jokes and cold puns, hates being called small.',
       '- Everything must be original. No copyrighted characters, art, dialogue, or audio.',
       '- When done, reply with the JSON summary the schema asks for. The announcement is one short line Kori will say out loud.',
     ].join('\n');

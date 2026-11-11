@@ -159,6 +159,7 @@
     if (!already) {
       playAnimation('release');
       setTimeout(() => {
+        if (window.AskinApp && AskinApp.skin) PetSprite.applySkinAnchors(AskinApp.skin, true);
         el.classList.add('ultimate', 'ultimate-in');
         setTimeout(() => el.classList.remove('ultimate-in'), 650);
         fire('ultimate', {});
@@ -178,6 +179,7 @@
     AskinSfx.play('freeze');
     setTimeout(() => {
       el.classList.remove('ultimate', 'ultimate-out');
+      if (window.AskinApp && AskinApp.skin) PetSprite.applySkinAnchors(AskinApp.skin, false);
       AskinSfx.play('shimmer');
       if (st.mode !== 'sleep') quip(['ultimate-end']);
     }, 350);

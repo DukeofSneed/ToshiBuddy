@@ -111,6 +111,8 @@
   document.getElementById('sprite').innerHTML = PetSprite.svg(skin);
   document.getElementById('pet').classList.toggle('skin', !!skin);
   document.getElementById('pet').classList.toggle('has-ultimate', !!(skin && skin.ultimate));
+  document.getElementById('pet').classList.toggle('show-anchors', !!boot.settings.showAnchors);
+  AskinApp.skin = skin;
   AskinApp.ultimateSeconds = (skin && skin.ultimateSeconds) || Number(boot.settings.ultimateSeconds) || 30;
 
   AskinApp.level = boot.level;
@@ -134,6 +136,7 @@
     AskinVoice.setMuted(!!s.muted);
     AskinBrain.setPaused(!!s.paused);
     AskinBrain.setDeskEnabled(s.deskMode !== false);
+    document.getElementById('pet').classList.toggle('show-anchors', !!s.showAnchors);
     AskinSfx.setEnabled(s.sfx !== false);
     AskinSfx.setVolume(s.sfxVolume ?? 0.5);
   });

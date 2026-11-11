@@ -3,6 +3,10 @@
 Use your own images instead of the built-in Kori. Skins stay on your PC: everything
 in this folder except this file is git-ignored.
 
+When at least one skin exists, the first one is used by default; Kori is available
+as "Kori (original character)" in the Skin menu. Upgrades bought with the jar apply
+to whichever character is active.
+
 1. Make a folder here, for example `skins/my-skin/`.
 2. Put your main image in it as `skin.png` or `skin.jpg` (`.webp` and `.gif` work too).
 3. Optional: add `ultimate.png` or `ultimate.jpg`. After a donation, the pet plays the
@@ -35,8 +39,15 @@ in this folder except this file is git-ignored.
      (0-255). Raise it if a gradient background leaves a halo; lower it if parts of
      the character disappear.
    - `ultimateSeconds`: how long the ultimate form lasts (5-600).
-   - `ultimate`: the same `scale`, `offsetX`, `offsetY`, `keyMode`, `keyColor`, and
-     `keyTolerance` settings for the ultimate image.
+   - `ultimate`: the same `scale`, `offsetX`, `offsetY`, `keyMode`, `keyColor`,
+     `keyTolerance`, and `anchors` settings for the ultimate image.
+   - `anchors`: where upgrades attach props, in pet units (the pet is 160 wide, the
+     ground is at y=188). Example:
+     `"anchors": { "head": { "x": 80, "y": 70, "size": 70 }, "hand-r": { "x": 104, "y": 128 }, "hand-l": { "x": 56, "y": 128 } }`.
+     `size` is the width of the face; props scale with it. Turn on **Show prop anchors**
+     in the tray's Skin menu to see pink crosshairs where they currently land, then
+     adjust until they sit on the head and hands. Without `anchors`, positions are
+     estimated from the image size.
 5. Right-click the pet or the tray icon, open **Skin**, and pick your folder. The jar's
    Settings section has the same picker. Changes to the files apply when you re-pick
    the skin or choose **Reload mods and quips**.

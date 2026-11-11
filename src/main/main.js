@@ -91,6 +91,7 @@ function start() {
       busy: upgrader.isBusy(),
       claudeInstalled: !!findClaude(),
       skins: listSkins(PROJECT_ROOT).map((s) => s.name),
+      activeSkin: activeSkinName(),
       log: logLines.slice(-80),
       projectRoot: PROJECT_ROOT,
     };
@@ -115,9 +116,18 @@ function start() {
     if (overlay && !overlay.isDestroyed()) overlay.setIgnoreMouseEvents(ignore, { forward: true });
   });
   ipcMain.on('overlay:log', (_e, line) => log(`renderer: ${line}`));
+  // Which character is active: a user skin is the default when one exists;
+  // 'kori' explicitly picks the built-in original character.
+  const activeSkinName = () => {
+    const want = process.env.ASKIN_SKIN || settings.get('skin') || '';
+    if (want === 'kori') return 'kori';
+    const skins = listSkins(PROJECT_ROOT);
+    if (want && skins.some((s) => s.name === want)) return want;
+    return skins.length ? skins[0].name : 'kori';
+  };
   const currentSkin = () => {
-    const want = process.env.ASKIN_SKIN || settings.get('skin');
-    return want ? listSkins(PROJECT_ROOT).find((s) => s.name === want) || null : null;
+    const name = activeSkinName();
+    return name === 'kori' ? null : listSkins(PROJECT_ROOT).find((s) => s.name === name) || null;
   };
   ipcMain.handle('overlay:bootstrap', () => ({
     workArea: screen.getPrimaryDisplay().workArea,
@@ -158,7 +168,7 @@ function start() {
     const clean = {};
     for (const k of allowed) if (k in patch) clean[k] = patch[k];
     const skinChanged = 'skin' in clean && clean.skin !== settings.get('skin');
-    if ('skin' in clean && clean.skin && !listSkins(PROJECT_ROOT).some((s) => s.name === clean.skin)) clean.skin = '';
+    if ('skin' in clean && clean.skin && clean.skin !== 'kori' && !listSkins(PROJECT_ROOT).some((s) => s.name === clean.skin)) clean.skin = '';
     if ('maxUtilization' in clean) clean.maxUtilization = Math.min(95, Math.max(10, Number(clean.maxUtilization) || 80));
     if ('sfxVolume' in clean) clean.sfxVolume = Math.min(1, Math.max(0, Number(clean.sfxVolume) || 0));
     settings.update(clean);
@@ -248,9 +258,10 @@ function start() {
   function buildMenu() {
     const skins = listSkins(PROJECT_ROOT);
     const skinItems = [
-      { label: 'Kori (built-in)', type: 'radio', checked: !settings.get('skin'), click: () => setSkin('') },
-      ...skins.map((s) => ({ label: s.name, type: 'radio', checked: settings.get('skin') === s.name, click: () => setSkin(s.name) })),
+      ...skins.map((s) => ({ label: s.name, type: 'radio', checked: activeSkinName() === s.name, click: () => setSkin(s.name) })),
+      { label: 'Kori (original character)', type: 'radio', checked: activeSkinName() === 'kori', click: () => setSkin('kori') },
       { type: 'separator' },
+      { label: 'Show prop anchors (for tuning skin.json)', type: 'checkbox', checked: !!settings.get('showAnchors'), click: (m) => toggleSetting('showAnchors', m.checked) },
       { label: 'Open skins folder', click: () => { const d = skinsRoot(PROJECT_ROOT); fs.mkdirSync(d, { recursive: true }); shell.openPath(d); } },
     ];
     return Menu.buildFromTemplate([
@@ -286,6 +297,7 @@ function start() {
     settings.set(key, value);
     if (key === 'autostart') applyAutostart();
     if (key === 'deskMode' || key === 'slackNudges') { if (watcherWanted()) activity.start(); else activity.stop(); }
+    if (key === 'showAnchors') reloadAndAwaitMods([], 1000);
     if (overlay && !overlay.isDestroyed()) overlay.webContents.send('settings', settings.all());
     refreshTray();
     pushJar();
@@ -342,6 +354,11 @@ function start() {
         // A blink may still be in flight; wait it out.
         await overlay.webContents.executeJavaScript(`document.getElementById('pet').classList.remove('blink'); 1`);
         await new Promise((r) => setTimeout(r, 200));
+        if (process.env.ASKIN_SELFTEST_PROPS) {
+          // Show every hidden mod prop and the anchor markers for this capture.
+          await overlay.webContents.executeJavaScript(`document.querySelectorAll('[data-mod]').forEach(g => g.setAttribute('display','inline')); document.getElementById('pet').classList.add('show-anchors'); 1`);
+          await new Promise((r) => setTimeout(r, 200));
+        }
         const plain = await overlay.webContents.capturePage({ x: Math.max(0, Math.round(pos.x)), y: Math.max(0, Math.round(pos.y)), width: 160, height: 200 });
         fs.writeFileSync(path.join(selftestDir, 'plain.png'), plain.resize({ width: 480, quality: 'best' }).toPNG());
         // Then a bubble and the ice-crystal trick, cropped wider.

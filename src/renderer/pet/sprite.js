@@ -257,24 +257,78 @@
   // A prepared skin image is { url, aspect, config }. It is sized by height (188
   // pet units x scale), keeps its own proportions, stands on the ground line, and
   // may overflow the pet box (wide images with wings, for example).
-  function skinImage(img, id) {
+  function imageBox(img) {
     const c = img.config || {};
     const scale = Number(c.scale) || 1;
     const h = 188 * scale;
     const w = h * (img.aspect || 160 / 188);
     const x = 80 - w / 2 + (Number(c.offsetX) || 0);
     const y = 188 - h + (Number(c.offsetY) || 0);
-    return `<image id="${id}" href="${img.url}" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" preserveAspectRatio="xMidYMax meet"/>`;
+    return { x, y, w, h };
+  }
+  function skinImage(img, id) {
+    const b = imageBox(img);
+    return `<image id="${id}" href="${img.url}" x="${b.x.toFixed(1)}" y="${b.y.toFixed(1)}" width="${b.w.toFixed(1)}" height="${b.h.toFixed(1)}" preserveAspectRatio="xMidYMax meet"/>`;
   }
 
-  // In skin mode the anchors float at fixed spots instead of riding on limbs.
-  const SKIN_ANCHORS = `
-  <g id="props-hand-l"></g><g id="props-hand-r"></g>
-  <g id="head"><g id="props-head"></g></g>`;
+  // ---- prop anchors on skins ----
+  // Mods draw props against Kori's body: head centered at (80, 69) with a face
+  // 84 units wide, hands at (53, 135) and (107, 135). On a skin, each anchor group
+  // is transformed so those reference points land on the skin's own head and
+  // hands. Positions come from skin.json "anchors" (pet units), or default to
+  // typical chibi proportions of the image box.
+  const REF = { head: { x: 80, y: 69 }, 'hand-r': { x: 107, y: 135 }, 'hand-l': { x: 53, y: 135 } };
+  const REF_HEAD_SIZE = 84;
+  function skinAnchors(img) {
+    const b = imageBox(img);
+    const a = (img.config && img.config.anchors) || {};
+    const headSize = Number(a.head && a.head.size) || b.h * 0.36;
+    const s = headSize / REF_HEAD_SIZE;
+    const pick = (name, dx, dy) => ({
+      x: Number(a[name] && a[name].x) || 80 + dx,
+      y: Number(a[name] && a[name].y) || b.y + dy,
+    });
+    const pts = {
+      head: pick('head', 0, b.h * 0.27),
+      'hand-r': pick('hand-r', b.h * 0.15, b.h * 0.64),
+      'hand-l': pick('hand-l', -b.h * 0.15, b.h * 0.64),
+    };
+    const out = {};
+    for (const [k, p] of Object.entries(pts)) {
+      out[k] = { ...p, s, transform: `translate(${p.x.toFixed(1)} ${p.y.toFixed(1)}) scale(${s.toFixed(3)}) translate(${-REF[k].x} ${-REF[k].y})` };
+    }
+    return out;
+  }
+  function skinAnchorGroups(anchors) {
+    const marker = (k) => {
+      const p = anchors[k];
+      return `<g class="anchor-marker" transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})">
+        <circle r="4" fill="none" stroke="#ff3b7a" stroke-width="1.2"/><path d="M-7,0 L7,0 M0,-7 L0,7" stroke="#ff3b7a" stroke-width="1"/>
+        <text x="6" y="-6" font-size="7" fill="#ff3b7a" stroke="#ffffff" stroke-width="0.4">${k}</text></g>`;
+    };
+    return `
+  <g id="anchor-hand-l" transform="${anchors['hand-l'].transform}"><g id="props-hand-l"></g></g>
+  <g id="anchor-hand-r" transform="${anchors['hand-r'].transform}"><g id="props-hand-r"></g></g>
+  <g id="anchor-head" transform="${anchors.head.transform}"><g id="head"><g id="props-head"></g></g></g>
+  <g id="anchor-markers">${['head', 'hand-r', 'hand-l'].map(marker).join('')}</g>`;
+  }
+  // Re-aim the anchors at the primary or ultimate image (called when the
+  // ultimate form starts and ends).
+  function applySkinAnchors(skin, useUltimate) {
+    if (!skin) return;
+    const img = useUltimate && skin.ultimate ? skin.ultimate : skin.primary;
+    const anchors = skinAnchors(img);
+    for (const k of ['head', 'hand-r', 'hand-l']) {
+      const g = document.getElementById(`anchor-${k}`);
+      if (g) g.setAttribute('transform', anchors[k].transform);
+    }
+    const m = document.getElementById('anchor-markers');
+    if (m) m.outerHTML = skinAnchorGroups(anchors).match(/<g id="anchor-markers">[\s\S]*<\/g>\s*$/)[0];
+  }
 
   function svg(skin) {
     const body = skin
-      ? `${skinImage(skin.primary, 'skin-img')}${skin.ultimate ? skinImage(skin.ultimate, 'skin-ultimate') : ''}${DESK}${SKIN_ANCHORS}`
+      ? `${skinImage(skin.primary, 'skin-img')}${skin.ultimate ? skinImage(skin.ultimate, 'skin-ultimate') : ''}${DESK}${skinAnchorGroups(skinAnchors(skin.primary))}`
       : `${HAIR_BACK}${LEGS}${TORSO}${DESK}${ARMS}${HEAD}`;
     return `
 <svg id="pet-svg" viewBox="0 0 160 200" xmlns="http://www.w3.org/2000/svg" stroke-linejoin="round" stroke-linecap="round">
@@ -289,5 +343,5 @@
 </svg>`;
   }
 
-  window.PetSprite = { svg, snowflake };
+  window.PetSprite = { svg, snowflake, skinAnchors, applySkinAnchors };
 })();

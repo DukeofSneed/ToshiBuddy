@@ -12,7 +12,8 @@ const DEFAULTS = {
   slackNudges: true, // a rare comment after a long stretch of games or videos
   deskApps: null,   // override { writing: [...process names], lab: [...] }
   deskTitles: null, // override { writing: [...title keywords], lab: [...] }
-  skin: '',         // '' = Kori; otherwise a folder name under skins/
+  skin: '',         // '' = first user skin (or Kori if none); 'kori' = Kori; else a folder under skins/
+  showAnchors: false, // draw markers where props attach (for tuning a skin's anchors)
   ultimateSeconds: 30, // how long the ultimate form lasts after a donation (a skin can override)
   autostart: false,
   // Plan-limit guard

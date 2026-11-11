@@ -44,7 +44,8 @@ html, body {
 @keyframes cowlickBounce { 0%, 100% { transform: rotate(4deg); } 50% { transform: rotate(-6deg); } }
 
 /* hidden-by-default parts */
-#orb, #desk, #quill, #stamp, #release-back, #halo, #zzz { display: none; }
+#orb, #desk, #quill, #stamp, #release-back, #halo, #zzz, #anchor-markers { display: none; }
+#pet.show-anchors #anchor-markers { display: inline; }
 
 /* ---- idle ---- */
 #pet.idle #sprite { animation: breathe 3.2s ease-in-out infinite; }

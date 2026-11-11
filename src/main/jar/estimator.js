@@ -41,7 +41,7 @@ function buildPrompt(projectRoot, request, ledger) {
   const mods = listModSlugs(projectRoot);
   const done = ledger.data.upgrades.filter((u) => !u.reverted).map((u) => `- ${u.title} (${u.tokens} tokens)`).join('\n') || '- none yet';
   return [
-    'You are the pricing brain of "Kori Buddy", an Electron desktop pet: Kori, an original chibi ice officer who also does paperwork at a desk.',
+    'You are the pricing brain of "Kori Buddy", an Electron desktop pet that does paperwork at a desk. The active character is either Kori (an original chibi ice officer drawn as SVG) or a user-supplied skin image; upgrades must work on whichever is active, through props on anchors and whole-body animations.',
     'Requests to reproduce copyrighted characters, art, dialogue, or audio are not feasible; set feasible to false for those.',
     'A human has suggested an upgrade. Estimate what it would take for a separate headless Claude Code run (model: haiku) to implement it as a mod.',
     'Mods can only add quips, CSS animations, SVG props, and simple behaviors through the Mod API below; they cannot touch src/.',

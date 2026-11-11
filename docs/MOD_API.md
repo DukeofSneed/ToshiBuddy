@@ -18,8 +18,17 @@ Prop anchors are empty `<g>` elements: `#props-head`, `#props-hand-r`,
 `#props-hand-l`, `#props-back` (behind everything), `#props-front` (in front of
 everything), `#props-desk` (on the desk, visible only in desk mode).
 
-If the user has picked a skin (their own image), limb parts don't exist; props and
-the desk still work, and limb animations simply do nothing.
+**The active character may be a user skin** (their own image, the default when
+one exists) or Kori. Every upgrade must work on both:
+- **Props:** draw them against Kori's coordinates (below). On a skin, the `head`,
+  `hand-r`, and `hand-l` anchors are mapped onto the skin's own head and hands,
+  scaled to fit, so a hat drawn for Kori sits on the skin's head too. `back`,
+  `front`, and `desk` stay in place.
+- **Animations:** animate the whole body with `#pet.anim-<name> #sprite { ... }`;
+  that works on any character. Limb animations (`#arm-r`, `#head`, `#lids`...)
+  only show on Kori; treat them as a bonus.
+- **Don't describe the skin.** You can't see it and shouldn't guess what it is.
+  Lines use the established voice in the style guide.
 
 After a donation the pet enters the **ultimate form** for about 30 seconds: the
 `ultimate` class is on `#pet` (plus `has-ultimate` when the skin has its own
