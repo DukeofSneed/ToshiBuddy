@@ -1,5 +1,5 @@
-// Mod loader and the AskinMods API that generated upgrades call.
-// A mod is mods/<slug>/mod.js: plain browser JS that calls AskinMods.register({...}).
+// Mod loader and the BuddyMods API that generated upgrades call.
+// A mod is mods/<slug>/mod.js: plain browser JS that calls BuddyMods.register({...}).
 // See docs/MOD_API.md for the contract this file enforces.
 (function () {
   const registry = []; // { slug, def }
@@ -53,7 +53,7 @@
         if (a.animate !== undefined && typeof a.animate !== 'string') fail('action.animate must be a string');
         if (a.say !== undefined && typeof a.say !== 'string' && !Array.isArray(a.say)) fail('action.say must be a string or array');
         if (a.prop !== undefined && (typeof a.prop !== 'object' || !a.prop.id)) fail('action.prop needs { id, show|toggle }');
-        if (a.sound !== undefined && (!window.AskinSfx || !AskinSfx.names.includes(a.sound))) fail(`action.sound must be one of ${window.AskinSfx ? AskinSfx.names.join(', ') : 'the built-in sounds'}`);
+        if (a.sound !== undefined && (!window.BuddySfx || !BuddySfx.names.includes(a.sound))) fail(`action.sound must be one of ${window.BuddySfx ? BuddySfx.names.join(', ') : 'the built-in sounds'}`);
       }
     }
     if (def.onTick !== undefined) fail('onTick is not part of the API; use behaviors');
@@ -65,7 +65,7 @@
   //  - a skin's skin.json can set "mods": false (none) or a list of mod ids.
   const skipped = [];
   function allowed(def, slug) {
-    const skin = window.AskinApp && AskinApp.skin;
+    const skin = window.BuddyApp && BuddyApp.skin;
     const who = skin ? 'skin' : 'kori';
     if (def.characters && !def.characters.includes(who)) return false;
     if (skin) {
@@ -162,9 +162,9 @@
       s.dataset.mod = mod.slug;
       const done = () => {
         window.removeEventListener('error', onError);
-        if (!error && !currentRegistered) error = 'mod loaded but never called AskinMods.register()';
+        if (!error && !currentRegistered) error = 'mod loaded but never called BuddyMods.register()';
         const status = { slug: mod.slug, ok: !error, error };
-        if (window.askin) window.askin.reportMod(status);
+        if (window.buddy) window.buddy.reportMod(status);
         currentSlug = null;
         resolve(status);
       };
@@ -174,5 +174,5 @@
     });
   }
 
-  window.AskinMods = { register, loadAll, quips, animations, behaviors, setProp, list: () => registry.map((r) => r.slug), skipped: () => skipped.slice() };
+  window.BuddyMods = { register, loadAll, quips, animations, behaviors, setProp, list: () => registry.map((r) => r.slug), skipped: () => skipped.slice() };
 })();

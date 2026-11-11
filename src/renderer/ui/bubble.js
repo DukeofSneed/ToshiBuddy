@@ -16,7 +16,7 @@
     b.classList.remove('pop');
     void b.offsetWidth; // restart the pop animation
     b.classList.add('pop');
-    if (!visible && window.AskinSfx) AskinSfx.play('pop');
+    if (!visible && window.BuddySfx) BuddySfx.play('pop');
     visible = true;
     position();
     clearTimeout(hideTimer);
@@ -59,5 +59,5 @@
     t.__timer = setTimeout(() => t.classList.add('hidden'), ms);
   }
 
-  window.AskinBubble = { show, hide, position, toast, isVisible: () => visible };
+  window.BuddyBubble = { show, hide, position, toast, isVisible: () => visible };
 })();

@@ -4,7 +4,7 @@ Electron desktop pet: Kori, an original chibi ice officer who walks the taskbar,
 talks in synthesized animalese, does paperwork at a desk while the user writes or
 does labs, and carries a "Claude token" donation jar. Donations trigger the Frost
 Release animation; the jar spawns headless `claude -p` upgrade runs that write mods.
-(The folder and some internal identifiers still say "askin"; that's historical.)
+
 
 ## If you are an upgrade run (headless, spawned by the jar)
 - Read `docs/MOD_API.md`, then write exactly one mod under `mods/<slug>/`.

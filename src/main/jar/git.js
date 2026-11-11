@@ -27,8 +27,8 @@ class Git {
     catch (_) { await this.run(['init', '-b', 'main']); }
     try { await this.run(['config', 'user.name']); }
     catch (_) {
-      await this.run(['config', 'user.name', 'Askin Buddy']);
-      await this.run(['config', 'user.email', 'askin-buddy@localhost']);
+      await this.run(['config', 'user.name', 'ToshiBuddy']);
+      await this.run(['config', 'user.email', 'toshibuddy@localhost']);
     }
   }
 

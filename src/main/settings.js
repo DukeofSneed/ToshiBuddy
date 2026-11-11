@@ -4,7 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const DEFAULTS = {
-  muted: false,     // Askin's animalese voice
+  muted: false,     // the character's animalese voice
   sfx: true,        // sound effects
   sfxVolume: 0.5,   // 0-1
   paused: false,

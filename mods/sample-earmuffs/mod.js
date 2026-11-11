@@ -1,6 +1,6 @@
 // Sample mod: proves the pipeline. Fluffy earmuffs that Kori puts on or takes
 // off when clicked, a "salute" animation, and a few quips.
-AskinMods.register({
+BuddyMods.register({
   id: 'sample-earmuffs',
   name: 'Earmuffs and salute',
   characters: ['kori'], // drawn for Kori's head and arm; skins don't get them

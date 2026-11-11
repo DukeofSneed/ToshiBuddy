@@ -74,7 +74,7 @@
       tone(t, { freq: 520, to: 1150, dur: 0.07, gain: 0.35 });
       noise(t, { dur: 0.02, freq: 3000, q: 2, gain: 0.08 });
     },
-    // Askin gets clicked.
+    // The character gets clicked.
     boop(t) {
       tone(t, { freq: 440, to: 290, dur: 0.14, type: 'triangle', gain: 0.45 });
     },
@@ -182,7 +182,7 @@
     try { SOUNDS[name](ctx.currentTime + 0.01); return true; } catch (_) { return false; }
   }
 
-  window.AskinSfx = {
+  window.BuddySfx = {
     play,
     names: Object.keys(SOUNDS),
     setEnabled(on) { enabled = on !== false; },

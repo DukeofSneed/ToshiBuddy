@@ -1,7 +1,7 @@
 // Renderer entry: builds the sprite (Kori or the user's skin), loads content and
 // mods, starts the brain, and listens to the main process.
 (async function () {
-  window.AskinApp = { level: null, balance: 0 };
+  window.BuddyApp = { level: null, balance: 0 };
 
   // ---- user skin images ----
   function loadImage(url) {
@@ -84,7 +84,7 @@
     const keyed = keyOut(img, cfg);
     const s = keyOut.lastStats;
     const name = decodeURIComponent(url.split('?')[0].split('/').pop());
-    askin.log(`skin ${name}: ${img.naturalWidth}x${img.naturalHeight}, background ${s.removedPct}% removed, border ${s.borderPct}% clear (key rgb ${s.key}, tolerance ${s.tol})`);
+    buddy.log(`skin ${name}: ${img.naturalWidth}x${img.naturalHeight}, background ${s.removedPct}% removed, border ${s.borderPct}% clear (key rgb ${s.key}, tolerance ${s.tol})`);
     return { url: keyed, aspect, config: cfg };
   }
 
@@ -92,36 +92,36 @@
     if (!skin) return null;
     const base = skin.config || {};
     // A sprite sheet, when present, replaces the still image (frames are played
-    // by AskinSheet); a broken sheet falls back to the still image.
+    // by BuddySheet); a broken sheet falls back to the still image.
     let sheet = null, ultimateSheet = null;
     if (skin.sheet) {
       try {
-        sheet = await AskinSheet.prepare(skin.sheet.url, skin.sheet.config, { skinName: skin.name, indexKind: 'sheet', scale: base.scale });
-      } catch (e) { askin.log(`skin "${skin.name}" sheet failed: ${e.message}`); if (!skin.url) throw e; }
+        sheet = await BuddySheet.prepare(skin.sheet.url, skin.sheet.config, { skinName: skin.name, indexKind: 'sheet', scale: base.scale });
+      } catch (e) { buddy.log(`skin "${skin.name}" sheet failed: ${e.message}`); if (!skin.url) throw e; }
     }
     if (skin.ultimateSheet) {
       try {
-        ultimateSheet = await AskinSheet.prepare(skin.ultimateSheet.url, skin.ultimateSheet.config, { skinName: skin.name, indexKind: 'ultimate-sheet', scale: (base.ultimate || {}).scale });
-      } catch (e) { askin.log(`skin "${skin.name}" ultimate sheet failed: ${e.message}`); }
+        ultimateSheet = await BuddySheet.prepare(skin.ultimateSheet.url, skin.ultimateSheet.config, { skinName: skin.name, indexKind: 'ultimate-sheet', scale: (base.ultimate || {}).scale });
+      } catch (e) { buddy.log(`skin "${skin.name}" ultimate sheet failed: ${e.message}`); }
     }
-    const primary = sheet ? AskinSheet.asImage(sheet, base.anchors) : await prepareImage(skin.url, base);
+    const primary = sheet ? BuddySheet.asImage(sheet, base.anchors) : await prepareImage(skin.url, base);
     let ultimate = null;
     if (ultimateSheet) {
-      ultimate = AskinSheet.asImage(ultimateSheet, (base.ultimate || {}).anchors);
+      ultimate = BuddySheet.asImage(ultimateSheet, (base.ultimate || {}).anchors);
     } else if (skin.ultimate) {
       try {
         // The ultimate image inherits keying settings unless it sets its own.
         const ucfg = { keyMode: base.keyMode, keyTolerance: base.keyTolerance, ...skin.ultimate.config };
         ultimate = await prepareImage(skin.ultimate.url, ucfg);
-      } catch (e) { askin.log(`skin "${skin.name}" ultimate image failed: ${e.message}`); }
+      } catch (e) { buddy.log(`skin "${skin.name}" ultimate image failed: ${e.message}`); }
     }
     return { name: skin.name, primary, ultimate, sheet, ultimateSheet, mods: base.mods, ultimateSeconds: Number(base.ultimateSeconds) || null };
   }
 
-  const boot = await askin.getBootstrap();
+  const boot = await buddy.getBootstrap();
   let skin = null;
   if (boot.skin) {
-    try { skin = await prepareSkin(boot.skin); } catch (e) { askin.log(`skin "${boot.skin.name}" failed: ${e.message}; using Kori`); }
+    try { skin = await prepareSkin(boot.skin); } catch (e) { buddy.log(`skin "${boot.skin.name}" failed: ${e.message}; using Kori`); }
   }
   document.getElementById('sprite').innerHTML = PetSprite.svg(skin);
   document.getElementById('pet').classList.toggle('skin', !!skin);
@@ -129,92 +129,92 @@
   document.getElementById('pet').classList.toggle('show-anchors', !!boot.settings.showAnchors);
   document.getElementById('pet').classList.toggle('sheet', !!(skin && skin.sheet));
   document.getElementById('pet').classList.toggle('ultimate-sheet', !!(skin && skin.ultimateSheet));
-  AskinApp.skin = skin;
-  AskinApp.sheetPlayers = AskinSheet.start(skin);
+  BuddyApp.skin = skin;
+  BuddyApp.sheetPlayers = BuddySheet.start(skin);
   // A sheet's walk can set its own ground speed so the feet match the stride.
-  AskinApp.walkSpeed = (skin && skin.sheet && skin.sheet.anims.walk && skin.sheet.anims.walk.speed) || null;
-  AskinApp.ultimateSeconds = (skin && skin.ultimateSeconds) || Number(boot.settings.ultimateSeconds) || 30;
+  BuddyApp.walkSpeed = (skin && skin.sheet && skin.sheet.anims.walk && skin.sheet.anims.walk.speed) || null;
+  BuddyApp.ultimateSeconds = (skin && skin.ultimateSeconds) || Number(boot.settings.ultimateSeconds) || 30;
 
-  AskinApp.name = boot.settings.characterName || 'Kori';
-  AskinApp.level = boot.level;
-  AskinApp.balance = boot.balance;
-  AskinQuips.setBase(boot.quips);
-  AskinVoice.setMuted(!!boot.settings.muted);
-  AskinSfx.setEnabled(boot.settings.sfx !== false);
-  AskinSfx.setVolume(boot.settings.sfxVolume ?? 0.5);
+  BuddyApp.name = boot.settings.characterName || 'Kori';
+  BuddyApp.level = boot.level;
+  BuddyApp.balance = boot.balance;
+  BuddyQuips.setBase(boot.quips);
+  BuddyVoice.setMuted(!!boot.settings.muted);
+  BuddySfx.setEnabled(boot.settings.sfx !== false);
+  BuddySfx.setVolume(boot.settings.sfxVolume ?? 0.5);
 
-  await AskinMods.loadAll(boot.mods);
-  if (AskinMods.skipped().length) askin.log(`mods not used on this character: ${AskinMods.skipped().join(', ')}`);
-  AskinQuips.setFromMods(AskinMods.quips());
+  await BuddyMods.loadAll(boot.mods);
+  if (BuddyMods.skipped().length) buddy.log(`mods not used on this character: ${BuddyMods.skipped().join(', ')}`);
+  BuddyQuips.setFromMods(BuddyMods.quips());
 
-  AskinBrain.start({ workArea: boot.workArea });
-  AskinBrain.setPaused(!!boot.settings.paused);
-  AskinBrain.setDeskEnabled(boot.settings.deskMode !== false);
+  BuddyBrain.start({ workArea: boot.workArea });
+  BuddyBrain.setPaused(!!boot.settings.paused);
+  BuddyBrain.setDeskEnabled(boot.settings.deskMode !== false);
 
-  askin.on('work-area', (wa) => AskinBrain.resize(wa));
-  askin.on('idle-seconds', (sec) => AskinBrain.onIdleSeconds(sec));
-  askin.on('activity', (a) => AskinBrain.onActivity(a));
-  askin.on('quips', (list) => AskinQuips.setBase(list));
-  askin.on('settings', (s) => {
-    AskinApp.name = s.characterName || 'Kori';
-    AskinVoice.setMuted(!!s.muted);
-    AskinBrain.setPaused(!!s.paused);
-    AskinBrain.setDeskEnabled(s.deskMode !== false);
+  buddy.on('work-area', (wa) => BuddyBrain.resize(wa));
+  buddy.on('idle-seconds', (sec) => BuddyBrain.onIdleSeconds(sec));
+  buddy.on('activity', (a) => BuddyBrain.onActivity(a));
+  buddy.on('quips', (list) => BuddyQuips.setBase(list));
+  buddy.on('settings', (s) => {
+    BuddyApp.name = s.characterName || 'Kori';
+    BuddyVoice.setMuted(!!s.muted);
+    BuddyBrain.setPaused(!!s.paused);
+    BuddyBrain.setDeskEnabled(s.deskMode !== false);
     document.getElementById('pet').classList.toggle('show-anchors', !!s.showAnchors);
-    AskinSfx.setEnabled(s.sfx !== false);
-    AskinSfx.setVolume(s.sfxVolume ?? 0.5);
+    BuddySfx.setEnabled(s.sfx !== false);
+    BuddySfx.setVolume(s.sfxVolume ?? 0.5);
   });
-  askin.on('sfx', ({ name }) => AskinSfx.play(name));
+  buddy.on('sfx', ({ name }) => BuddySfx.play(name));
   // The main process can name event tags; the character's own line for them is
   // used when there is one, otherwise the text it sent.
-  askin.on('say', ({ text, animate, tags }) => {
-    if (Array.isArray(tags) && tags.length && AskinBrain.quip(tags, { fallback: false, animate })) return;
-    AskinBrain.say(text, { animate });
+  buddy.on('say', ({ text, animate, tags }) => {
+    if (Array.isArray(tags) && tags.length && BuddyBrain.quip(tags, { fallback: false, animate })) return;
+    BuddyBrain.say(text, { animate });
   });
-  askin.on('quip', ({ tags }) => { if (Array.isArray(tags)) AskinBrain.quip(tags, { fallback: false }); });
-  askin.on('animate', ({ name, durationMs }) => AskinBrain.playAnimation(name, durationMs));
-  askin.on('reload-content', () => { try { localStorage.setItem('askin.pos', JSON.stringify({ x: AskinBrain.state.x, dir: AskinBrain.state.dir })); } catch (_) {} location.reload(); });
+  buddy.on('quip', ({ tags }) => { if (Array.isArray(tags)) BuddyBrain.quip(tags, { fallback: false }); });
+  buddy.on('animate', ({ name, durationMs }) => BuddyBrain.playAnimation(name, durationMs));
+  buddy.on('reload-content', () => { try { localStorage.setItem('buddy.pos', JSON.stringify({ x: BuddyBrain.state.x, dir: BuddyBrain.state.dir })); } catch (_) {} location.reload(); });
 
-  askin.on('upgrade-event', (ev) => {
+  buddy.on('upgrade-event', (ev) => {
     switch (ev.phase) {
       case 'start':
-        AskinBrain.setWorking(true);
-        AskinSfx.play('hum');
-        AskinBrain.say(`Request received: "${ev.title}". Filing it properly. ${ev.model === 'sonnet' ? 'This one needs senior review.' : 'Do not hover.'}`, { animate: 'think' });
+        BuddyBrain.setWorking(true);
+        BuddySfx.play('hum');
+        BuddyBrain.say(`Request received: "${ev.title}". Filing it properly. ${ev.model === 'sonnet' ? 'This one needs senior review.' : 'Do not hover.'}`, { animate: 'think' });
         break;
       case 'progress':
-        if (ev.tokens && ev.budgetTokens) AskinBubble.toast(`Upgrading… ${Math.round(ev.tokens / 1000)}k / ${Math.round(ev.budgetTokens / 1000)}k tokens`, 2500);
+        if (ev.tokens && ev.budgetTokens) BuddyBubble.toast(`Upgrading… ${Math.round(ev.tokens / 1000)}k / ${Math.round(ev.budgetTokens / 1000)}k tokens`, 2500);
         break;
       case 'done':
-        AskinBrain.setWorking(false);
-        AskinSfx.play('fanfare');
-        AskinBrain.fire('upgrade', { title: ev.title });
-        AskinBrain.say(ev.announcement || `"${ev.title}" is approved and in effect.`, { animate: 'frost', priority: 3 });
+        BuddyBrain.setWorking(false);
+        BuddySfx.play('fanfare');
+        BuddyBrain.fire('upgrade', { title: ev.title });
+        BuddyBrain.say(ev.announcement || `"${ev.title}" is approved and in effect.`, { animate: 'frost', priority: 3 });
         // Then an achievement line, if the character has them.
-        setTimeout(() => { if (!AskinBubble.isVisible()) AskinBrain.quip(['upgrade'], { fallback: false }); }, 9000);
+        setTimeout(() => { if (!BuddyBubble.isVisible()) BuddyBrain.quip(['upgrade'], { fallback: false }); }, 9000);
         break;
       case 'paused':
-        AskinBrain.setWorking(false);
-        AskinSfx.play('womp');
-        AskinBrain.say(`"${ev.title}" is half filed. The budget ran out. I need ${Math.round((ev.need || 0) / 1000)}k more tokens to finish it.`, { animate: 'shrug' });
+        BuddyBrain.setWorking(false);
+        BuddySfx.play('womp');
+        BuddyBrain.say(`"${ev.title}" is half filed. The budget ran out. I need ${Math.round((ev.need || 0) / 1000)}k more tokens to finish it.`, { animate: 'shrug' });
         break;
       case 'failed':
-        AskinBrain.setWorking(false);
-        AskinSfx.play('womp');
+        BuddyBrain.setWorking(false);
+        BuddySfx.play('womp');
         // The character's own setback line when it has one; the reason goes in a toast.
-        if (AskinQuips.has(['upgrade-failed'])) {
-          AskinBrain.quip(['upgrade-failed'], { fallback: false, animate: 'huff', priority: 3 });
-          AskinBubble.toast(`"${ev.title}" failed: ${String(ev.reason || '').slice(0, 120)}`, 6000);
+        if (BuddyQuips.has(['upgrade-failed'])) {
+          BuddyBrain.quip(['upgrade-failed'], { fallback: false, animate: 'huff', priority: 3 });
+          BuddyBubble.toast(`"${ev.title}" failed: ${String(ev.reason || '').slice(0, 120)}`, 6000);
         } else {
-          AskinBrain.say(`"${ev.title}" was rejected. ${String(ev.reason || '').slice(0, 120)}. I am writing that down.`, { animate: 'huff', priority: 3 });
+          BuddyBrain.say(`"${ev.title}" was rejected. ${String(ev.reason || '').slice(0, 120)}. I am writing that down.`, { animate: 'huff', priority: 3 });
         }
         break;
       case 'blocked':
-        AskinSfx.play('womp');
-        AskinBrain.say(`"${ev.title}" is on hold: ${ev.reason}.`, { animate: 'shrug' });
+        BuddySfx.play('womp');
+        BuddyBrain.say(`"${ev.title}" is on hold: ${ev.reason}.`, { animate: 'shrug' });
         break;
       default:
         break;
     }
   });
-})().catch((e) => { if (window.askin) askin.log(`boot failed: ${e.message}`); console.error(e); });
+})().catch((e) => { if (window.buddy) buddy.log(`boot failed: ${e.message}`); console.error(e); });

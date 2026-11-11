@@ -93,8 +93,8 @@
       skinSel.innerHTML = opts.map((v) => `<option value="${esc(v)}">${v === 'kori' ? (ON_SKIN ? 'Built-in character' : 'Kori (original character)') : esc(v)}</option>`).join('');
     }
     skinSel.value = state.activeSkin || 'kori';
-    AskinSfx.setEnabled(sfxOn);
-    AskinSfx.setVolume(vol / 100);
+    BuddySfx.setEnabled(sfxOn);
+    BuddySfx.setVolume(vol / 100);
 
     $('log').textContent = nm((state.log || []).join('\n'));
   }
@@ -154,7 +154,7 @@
     const text = $('suggest-text').value.trim();
     if (!text) return;
     $('suggest-btn').disabled = true;
-    $('suggest-msg').textContent = 'Askin is thinking about what that costs…';
+    $('suggest-msg').textContent = 'Pricing it…';
     try {
       const r = await act(jar.suggest(text));
       $('suggest-msg').textContent = r.ok
@@ -170,13 +170,13 @@
   $('endpoint-fallback').onchange = (e) => jar.updateSettings({ allowUsageEndpointFallback: e.target.checked }).then(render);
   $('upgrade-model').onchange = (e) => jar.updateSettings({ upgradeModel: e.target.value }).then(render);
   $('sfx-on').onchange = (e) => jar.updateSettings({ sfx: e.target.checked }).then(render);
-  $('sfx-vol').oninput = (e) => { $('sfx-vol-val').textContent = e.target.value; AskinSfx.setVolume(e.target.value / 100); };
-  $('sfx-vol').onchange = (e) => jar.updateSettings({ sfxVolume: Number(e.target.value) / 100 }).then((s) => { render(s); AskinSfx.play('tick'); });
+  $('sfx-vol').oninput = (e) => { $('sfx-vol-val').textContent = e.target.value; BuddySfx.setVolume(e.target.value / 100); };
+  $('sfx-vol').onchange = (e) => jar.updateSettings({ sfxVolume: Number(e.target.value) / 100 }).then((s) => { render(s); BuddySfx.play('tick'); });
   $('voice-muted').onchange = (e) => jar.updateSettings({ muted: e.target.checked }).then(render);
   $('desk-mode').onchange = (e) => jar.updateSettings({ deskMode: e.target.checked }).then(render);
   $('skin').onchange = (e) => jar.updateSettings({ skin: e.target.value }).then(render);
   // Soft tick on every jar button.
-  document.addEventListener('click', (e) => { if (e.target.closest('button')) AskinSfx.play('tick'); }, true);
+  document.addEventListener('click', (e) => { if (e.target.closest('button')) BuddySfx.play('tick'); }, true);
 
   $('goals').addEventListener('click', async (e) => {
     const b = e.target.closest('button');

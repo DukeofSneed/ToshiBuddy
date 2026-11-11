@@ -296,9 +296,9 @@
 
     const name = decodeURIComponent(url.split('?')[0].split('/').pop());
     const animList = Object.keys(anims).join(', ');
-    askin.log(`sheet ${name}: ${w}x${h}, ${removed == null ? 'already transparent' : `background ${Math.round(removed * 100)}% removed`}, ${det.rows.length} rows [${det.rows.join(', ')}] = ${frames.length} frames; animations: ${animList}`);
+    buddy.log(`sheet ${name}: ${w}x${h}, ${removed == null ? 'already transparent' : `background ${Math.round(removed * 100)}% removed`}, ${det.rows.length} rows [${det.rows.join(', ')}] = ${frames.length} frames; animations: ${animList}`);
     if (opts.indexKind && opts.skinName) {
-      try { askin.saveSheetIndex(opts.skinName, opts.indexKind, indexImage(canvas, frames, det)); } catch (_) { /* preview only */ }
+      try { buddy.saveSheetIndex(opts.skinName, opts.indexKind, indexImage(canvas, frames, det)); } catch (_) { /* preview only */ }
     }
     return sheet;
   }
@@ -355,7 +355,7 @@
     function update(force) {
       const k = resolveKey(pet, sheet.anims);
       if (k === key && !force) return;
-      if (window.ASKIN_SHEET_DEBUG) askin.log(`sheet ${imageId}: ${key} -> ${k} (${pet.className})`);
+      if (window.BUDDY_SHEET_DEBUG) buddy.log(`sheet ${imageId}: ${key} -> ${k} (${pet.className})`);
       key = k; i = 0;
       clearTimeout(timer);
       draw();
@@ -374,5 +374,5 @@
     return out;
   }
 
-  window.AskinSheet = { prepare, asImage, start, parseFrames };
+  window.BuddySheet = { prepare, asImage, start, parseFrames };
 })();

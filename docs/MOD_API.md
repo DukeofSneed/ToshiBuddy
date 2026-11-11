@@ -1,10 +1,9 @@
-# Kori Buddy Mod API
+# ToshiBuddy Mod API
 
 A mod is one folder `mods/<slug>/` containing `mod.js` (and optionally `NOTES.md`).
 `mod.js` is plain browser JavaScript, loaded with a `<script>` tag into the pet's
 page. It has no Node, no `require`, no network. It must call
-`AskinMods.register({...})` exactly once at top level. (The `Askin` prefix is a
-historical name kept for compatibility.)
+`BuddyMods.register({...})` exactly once at top level.
 
 The pet is Kori, an original plush-style ice chibi (huge head, tiny body, stubby
 limbs) drawn as an SVG with id `pet-svg` inside `#pet > #flip > #sprite`. Part ids
@@ -38,7 +37,7 @@ the `ultimate` trigger or style `#pet.ultimate ...`.
 ## register(def)
 
 ```js
-AskinMods.register({
+BuddyMods.register({
   id: 'party-hat',                 // must equal the folder slug: a-z, 0-9, -
   name: 'Party hat',
   quips: [                         // optional, max 200

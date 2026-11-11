@@ -1,7 +1,8 @@
 {
-  "name": "askin-buddy",
-  "version": "0.1.0",
-  "description": "Kori, an original chibi ice-officer desktop buddy with a desk mode and a Claude-token donation jar that funds its own upgrades",
+  "name": "toshibuddy",
+  "productName": "ToshiBuddy",
+  "version": "0.2.0",
+  "description": "ToshiBuddy: a sprite-sheet desktop buddy with a desk mode, importable characters, and a Claude-token donation jar that funds its own upgrades",
   "main": "src/main/main.js",
   "private": true,
   "scripts": {

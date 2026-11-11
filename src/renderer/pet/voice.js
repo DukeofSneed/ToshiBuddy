@@ -142,7 +142,7 @@
     clearTimeout(endTimer);
   }
 
-  window.AskinVoice = {
+  window.BuddyVoice = {
     speak,
     stop,
     setMuted(m) { muted = !!m; if (muted) { stop(); if (onEnd) onEnd(); } },

@@ -1,6 +1,6 @@
 // Quip store and picker. Lines come from the main process (the active
 // character's dialogue: a skin's own quips.json, or content/quips/*.json for
-// Kori, plus the user's edits) and from mods via AskinMods.register({ quips }).
+// Kori, plus the user's edits) and from mods via BuddyMods.register({ quips }).
 //
 // The brain asks for lines by event tag (greet, click, desk-enter, ...). Each
 // event also matches the dialogue-library tags in ALIASES, so a character file
@@ -146,5 +146,5 @@
     return text.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
   }
 
-  window.AskinQuips = { setBase, setFromMods, pick, pickEntry, has, timeTag, seasonTag, all, ALIASES };
+  window.BuddyQuips = { setBase, setFromMods, pick, pickEntry, has, timeTag, seasonTag, all, ALIASES };
 })();

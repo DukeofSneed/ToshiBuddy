@@ -17,7 +17,7 @@ const SCRIPT = `
 $ErrorActionPreference = 'SilentlyContinue'
 Add-Type @"
 using System; using System.Runtime.InteropServices; using System.Text;
-public static class KoriFg {
+public static class BuddyFg {
   [StructLayout(LayoutKind.Sequential)] public struct LASTINPUTINFO { public uint cbSize; public uint dwTime; }
   [StructLayout(LayoutKind.Sequential)] public struct POINT { public int X; public int Y; }
   [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
@@ -28,25 +28,25 @@ public static class KoriFg {
   public static uint LastInput() { var i = new LASTINPUTINFO(); i.cbSize = 8; GetLastInputInfo(ref i); return i.dwTime; }
 }
 "@
-$prevInput = [KoriFg]::LastInput()
-$prevPos = New-Object KoriFg+POINT
-[void][KoriFg]::GetCursorPos([ref]$prevPos)
+$prevInput = [BuddyFg]::LastInput()
+$prevPos = New-Object BuddyFg+POINT
+[void][BuddyFg]::GetCursorPos([ref]$prevPos)
 while ($true) {
   $k = 0
   for ($i = 0; $i -lt 8; $i++) {
     Start-Sleep -Milliseconds 250
-    $inp = [KoriFg]::LastInput()
-    $pos = New-Object KoriFg+POINT
-    [void][KoriFg]::GetCursorPos([ref]$pos)
+    $inp = [BuddyFg]::LastInput()
+    $pos = New-Object BuddyFg+POINT
+    [void][BuddyFg]::GetCursorPos([ref]$pos)
     if ($inp -ne $prevInput -and $pos.X -eq $prevPos.X -and $pos.Y -eq $prevPos.Y) { $k++ }
     $prevInput = $inp
     $prevPos = $pos
   }
-  $h = [KoriFg]::GetForegroundWindow()
+  $h = [BuddyFg]::GetForegroundWindow()
   $procId = 0
-  [void][KoriFg]::GetWindowThreadProcessId($h, [ref]$procId)
+  [void][BuddyFg]::GetWindowThreadProcessId($h, [ref]$procId)
   $sb = New-Object System.Text.StringBuilder 512
-  [void][KoriFg]::GetWindowText($h, $sb, 512)
+  [void][BuddyFg]::GetWindowText($h, $sb, 512)
   $name = ''
   try { $name = (Get-Process -Id $procId).ProcessName } catch {}
   [Console]::Out.WriteLine((@{ p = $name; t = $sb.ToString(); k = $k } | ConvertTo-Json -Compress))
@@ -76,7 +76,7 @@ const DEFAULT_TITLES = {
   leisure: ['youtube', 'netflix', 'twitch', 'crunchyroll', 'hulu', 'disney+', 'tiktok', 'reddit'],
 };
 const KIND_ORDER = ['lab', 'coding', 'writing', 'reading', 'leisure'];
-const IGNORE = ['electron', 'askin-buddy', 'claude', 'explorer', 'shellexperiencehost', 'searchhost', 'lockapp', 'taskmgr'];
+const IGNORE = ['electron', 'toshibuddy', 'claude', 'explorer', 'shellexperiencehost', 'searchhost', 'lockapp', 'taskmgr'];
 
 function classify(sample, cfg = {}) {
   if (!sample) return null;

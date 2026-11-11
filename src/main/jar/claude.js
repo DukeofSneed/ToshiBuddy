@@ -8,7 +8,7 @@ const fs = require('fs');
 
 function findClaude() {
   const candidates = [
-    process.env.ASKIN_CLAUDE_PATH,
+    process.env.TOSHI_CLAUDE_PATH,
     path.join(os.homedir(), '.local', 'bin', 'claude.exe'),
     path.join(os.homedir(), '.local', 'bin', 'claude'),
   ].filter(Boolean);

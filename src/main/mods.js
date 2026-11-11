@@ -83,7 +83,7 @@ function fileUrl(file) {
 }
 
 function skinsRoot(projectRoot) {
-  return process.env.ASKIN_SKINS_DIR || path.join(projectRoot, 'skins');
+  return process.env.TOSHI_CHARACTERS_DIR || path.join(projectRoot, 'skins');
 }
 
 function listSkins(projectRoot) {

@@ -79,4 +79,4 @@ untouched.
 - `src/renderer/` the sprite (SVG), animations (CSS), brain, animalese voice,
   synthesized sound effects, mod loader.
 - `docs/MOD_API.md` the contract every upgrade follows.
-- State lives in `%APPDATA%\askin-buddy` (`ledger.json`, `settings.json`).
+- State lives in `%APPDATA%\ToshiBuddy` (`ledger.json`, `settings.json`).

@@ -1,7 +1,7 @@
 'use strict';
 const { contextBridge, ipcRenderer } = require('electron');
 
-contextBridge.exposeInMainWorld('askin', {
+contextBridge.exposeInMainWorld('buddy', {
   setIgnoreMouse: (ignore) => ipcRenderer.send('overlay:set-ignore', !!ignore),
   popupMenu: (x, y) => ipcRenderer.send('overlay:popup-menu', { x, y }),
   openJar: () => ipcRenderer.send('jar:open'),

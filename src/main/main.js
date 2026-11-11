@@ -26,8 +26,26 @@ if (!app.requestSingleInstanceLock()) {
   app.whenReady().then(start);
 }
 
+// Data from before the rename lived in %APPDATA%\askin-buddy (older package name).
+// Copy it over once so balances, names, and edited quips survive.
+function migrateOldUserData(userData) {
+  try {
+    if (fs.existsSync(path.join(userData, 'settings.json'))) return;
+    const old = path.join(path.dirname(userData), ['ask', 'in-buddy'].join(''));
+    if (!fs.existsSync(path.join(old, 'settings.json'))) return;
+    fs.mkdirSync(userData, { recursive: true });
+    for (const f of fs.readdirSync(old)) {
+      if (f === 'settings.json' || f === 'ledger.json' || /^quips-custom.*\.json$/.test(f)) {
+        fs.copyFileSync(path.join(old, f), path.join(userData, f));
+      }
+    }
+  } catch (e) { console.error(`userData migration failed: ${e.message}`); }
+}
+
 function start() {
   const userData = app.getPath('userData');
+  migrateOldUserData(userData);
+  try { app.setAppUserModelId('ToshiBuddy'); } catch (_) { /* Windows only */ }
   const settings = new Settings(userData);
   const ledger = new Ledger(userData);
   const logLines = [];
@@ -134,7 +152,7 @@ function start() {
   // Which character is active: a user skin is the default when one exists;
   // 'kori' explicitly picks the built-in original character.
   const activeSkinName = () => {
-    const want = process.env.ASKIN_SKIN || settings.get('skin') || '';
+    const want = process.env.TOSHI_CHARACTER || settings.get('skin') || '';
     if (want === 'kori') return 'kori';
     const skins = listSkins(PROJECT_ROOT);
     if (want && skins.some((s) => s.name === want)) return want;
@@ -337,7 +355,7 @@ function start() {
     },
   });
   const watcherWanted = () => settings.get('deskMode') !== false || settings.get('slackNudges') !== false;
-  if (watcherWanted() && !process.env.ASKIN_SELFTEST) activity.start();
+  if (watcherWanted() && !process.env.TOSHI_SELFTEST) activity.start();
 
   // ---- tray + menus ----
   function buildMenu() {
@@ -418,10 +436,10 @@ function start() {
   if (!findClaude()) {
     log('Claude Code CLI not found; the jar can hold tokens but cannot spend them until it is installed and logged in.');
   }
-  log(`Desktop buddy started. userData=${userData}`);
+  log(`ToshiBuddy started. userData=${userData}`);
 
-  // ---- self-test: ASKIN_SELFTEST=<dir> captures both windows and quits ----
-  const selftestDir = process.env.ASKIN_SELFTEST;
+  // ---- self-test: TOSHI_SELFTEST=<dir> captures both windows and quits ----
+  const selftestDir = process.env.TOSHI_SELFTEST;
   for (const [name, w] of [['overlay', overlay], ['jar', jarWin]]) {
     w.webContents.on('console-message', (ev) => {
       if (ev.level === 'error' || ev.level === 'warning') log(`${name} console: ${ev.message}`);
@@ -439,12 +457,12 @@ function start() {
         const ov = await overlay.webContents.capturePage({ x: 0, y: wa.height - 420, width: wa.width, height: 420 });
         fs.writeFileSync(path.join(selftestDir, 'overlay.png'), ov.toPNG());
         // Plain close-up at 3x: freeze him in idle with no bubble.
-        const pos = JSON.parse(await overlay.webContents.executeJavaScript(`AskinBrain.setPaused(true); AskinBubble.hide(); AskinVoice.stop(); const p=document.getElementById('pet'); const keep=['skin','has-ultimate','sheet','ultimate-sheet'].filter(c=>p.classList.contains(c)); p.className=['idle','face-right',...keep].join(' '); document.querySelectorAll('#pet *').forEach(e=>e.style.animationPlayState='paused'); JSON.stringify({x: AskinBrain.state.x, y: AskinBrain.state.y})`));
+        const pos = JSON.parse(await overlay.webContents.executeJavaScript(`BuddyBrain.setPaused(true); BuddyBubble.hide(); BuddyVoice.stop(); const p=document.getElementById('pet'); const keep=['skin','has-ultimate','sheet','ultimate-sheet'].filter(c=>p.classList.contains(c)); p.className=['idle','face-right',...keep].join(' '); document.querySelectorAll('#pet *').forEach(e=>e.style.animationPlayState='paused'); JSON.stringify({x: BuddyBrain.state.x, y: BuddyBrain.state.y})`));
         await new Promise((r) => setTimeout(r, 400));
         // A blink may still be in flight; wait it out.
         await overlay.webContents.executeJavaScript(`document.getElementById('pet').classList.remove('blink'); 1`);
         await new Promise((r) => setTimeout(r, 200));
-        if (process.env.ASKIN_SELFTEST_PROPS) {
+        if (process.env.TOSHI_SELFTEST_PROPS) {
           // Show every hidden mod prop and the anchor markers for this capture.
           await overlay.webContents.executeJavaScript(`document.querySelectorAll('[data-mod]').forEach(g => g.setAttribute('display','inline')); document.getElementById('pet').classList.add('show-anchors'); 1`);
           await new Promise((r) => setTimeout(r, 200));
@@ -452,41 +470,41 @@ function start() {
         const plain = await overlay.webContents.capturePage({ x: Math.max(0, Math.round(pos.x)), y: Math.max(0, Math.round(pos.y)), width: 160, height: 200 });
         fs.writeFileSync(path.join(selftestDir, 'plain.png'), plain.resize({ width: 480, quality: 'best' }).toPNG());
         // Sprite-sheet skins: one capture per pet state, to check the frame mapping.
-        if (await overlay.webContents.executeJavaScript(`window.ASKIN_SHEET_DEBUG = true; document.getElementById('pet').classList.contains('sheet')`)) {
+        if (await overlay.webContents.executeJavaScript(`window.BUDDY_SHEET_DEBUG = true; document.getElementById('pet').classList.contains('sheet')`)) {
           for (const [k, wait] of [['walk', 500], ['talk', 500], ['think', 300], ['surprised', 300], ['huff', 300], ['drag', 300], ['fall', 300], ['sleep', 3400], ['frost', 900]]) {
             const mode = ['walk', 'sleep', 'drag', 'fall'].includes(k) ? k : 'idle';
             const extra = mode === k ? '' : ` ${k}`;
             await overlay.webContents.executeJavaScript(k === 'sleep'
-              ? `AskinBrain.onIdleSeconds(400); AskinBubble.hide(); 1` // a real nap, so the brain doesn't undo it
+              ? `BuddyBrain.onIdleSeconds(400); BuddyBubble.hide(); 1` // a real nap, so the brain doesn't undo it
               : `(() => { const p=document.getElementById('pet'); const keep=['skin','has-ultimate','sheet','ultimate-sheet'].filter(c=>p.classList.contains(c)); p.className=['${mode}${extra}','face-right',...keep].join(' '); return 1; })()`);
             await new Promise((r) => setTimeout(r, wait));
             const shot = await overlay.webContents.capturePage({ x: Math.max(0, Math.round(pos.x) - 40), y: Math.max(0, Math.round(pos.y) - 20), width: 240, height: 220 });
             fs.writeFileSync(path.join(selftestDir, `state-${k}.png`), shot.toPNG());
           }
-          await overlay.webContents.executeJavaScript(`AskinBrain.onIdleSeconds(0); (() => { const p=document.getElementById('pet'); const keep=['skin','has-ultimate','sheet','ultimate-sheet'].filter(c=>p.classList.contains(c)); p.className=['idle','face-right',...keep].join(' '); return 1; })()`);
+          await overlay.webContents.executeJavaScript(`BuddyBrain.onIdleSeconds(0); (() => { const p=document.getElementById('pet'); const keep=['skin','has-ultimate','sheet','ultimate-sheet'].filter(c=>p.classList.contains(c)); p.className=['idle','face-right',...keep].join(' '); return 1; })()`);
         }
         // Then a bubble and the ice-crystal trick, cropped wider.
-        await overlay.webContents.executeJavaScript(`document.querySelectorAll('#pet *').forEach(e=>e.style.animationPlayState=''); AskinBrain.say('Do not touch the crystal. It is evidence.'); AskinBrain.playAnimation('frost'); 1`);
+        await overlay.webContents.executeJavaScript(`document.querySelectorAll('#pet *').forEach(e=>e.style.animationPlayState=''); BuddyBrain.say('Do not touch the crystal. It is evidence.'); BuddyBrain.playAnimation('frost'); 1`);
         await new Promise((r) => setTimeout(r, 900));
         const cx = Math.max(0, Math.round(pos.x) - 120);
         const close = await overlay.webContents.capturePage({ x: cx, y: Math.max(0, Math.round(pos.y) - 130), width: 400, height: 330 });
         fs.writeFileSync(path.join(selftestDir, 'closeup.png'), close.resize({ width: 800 }).toPNG());
         // Desk mode with a full paper stack, mid-stamp.
-        await overlay.webContents.executeJavaScript(`AskinBubble.hide(); AskinBrain.enterDesk('lab'); document.getElementById('pet').dataset.papers='8'; 1`);
+        await overlay.webContents.executeJavaScript(`BuddyBubble.hide(); BuddyBrain.enterDesk('lab'); document.getElementById('pet').dataset.papers='8'; 1`);
         await new Promise((r) => setTimeout(r, 1500));
-        await overlay.webContents.executeJavaScript(`AskinBrain.playAnimation('stamp'); 1`);
+        await overlay.webContents.executeJavaScript(`BuddyBrain.playAnimation('stamp'); 1`);
         await new Promise((r) => setTimeout(r, 1000));
         const desk = await overlay.webContents.capturePage({ x: cx, y: Math.max(0, Math.round(pos.y) - 130), width: 400, height: 330 });
         fs.writeFileSync(path.join(selftestDir, 'desk.png'), desk.resize({ width: 800 }).toPNG());
         // Frost Release, captured mid-transformation.
-        await overlay.webContents.executeJavaScript(`AskinBubble.hide(); AskinBrain.exitDesk({ quiet: true }); AskinBrain.playAnimation('release'); 1`);
+        await overlay.webContents.executeJavaScript(`BuddyBubble.hide(); BuddyBrain.exitDesk({ quiet: true }); BuddyBrain.playAnimation('release'); 1`);
         await new Promise((r) => setTimeout(r, 1700));
         const rx = Math.max(0, Math.round(pos.x) - 220);
         const rel = await overlay.webContents.capturePage({ x: rx, y: Math.max(0, Math.round(pos.y) - 260), width: 600, height: 460 });
         fs.writeFileSync(path.join(selftestDir, 'release.png'), rel.toPNG());
         // Ultimate form, captured while held after the release finishes.
         await new Promise((r) => setTimeout(r, 3000));
-        await overlay.webContents.executeJavaScript(`AskinBubble.hide(); AskinBrain.enterUltimate(12); 1`);
+        await overlay.webContents.executeJavaScript(`BuddyBubble.hide(); BuddyBrain.enterUltimate(12); 1`);
         await new Promise((r) => setTimeout(r, 5200));
         const ult = await overlay.webContents.capturePage({ x: rx, y: Math.max(0, Math.round(pos.y) - 260), width: 600, height: 460 });
         fs.writeFileSync(path.join(selftestDir, 'ultimate.png'), ult.toPNG());
@@ -498,25 +516,25 @@ function start() {
         await new Promise((r) => setTimeout(r, 1500));
         const cp = await customizeWin.webContents.capturePage();
         fs.writeFileSync(path.join(selftestDir, 'customize.png'), cp.toPNG());
-        const sfxCheck = await overlay.webContents.executeJavaScript(`JSON.stringify(AskinSfx.names.map((n) => { try { return [n, AskinSfx.play(n)]; } catch (e) { return [n, 'ERR ' + e.message]; } }))`);
+        const sfxCheck = await overlay.webContents.executeJavaScript(`JSON.stringify(BuddySfx.names.map((n) => { try { return [n, BuddySfx.play(n)]; } catch (e) { return [n, 'ERR ' + e.message]; } }))`);
         fs.writeFileSync(path.join(selftestDir, 'sfx.json'), sfxCheck);
-        const probe = await overlay.webContents.executeJavaScript(`JSON.stringify({ mods: AskinMods.list(), skippedMods: AskinMods.skipped(), modProps: document.querySelectorAll('#pet [data-mod]').length, surprisedAnim: (() => { const p = document.getElementById('pet'); p.classList.add('surprised'); const a = getComputedStyle(document.getElementById('sprite')).animationName; p.classList.remove('surprised'); return a; })(), quips: AskinQuips.all().length, mode: AskinBrain.state.mode, x: AskinBrain.state.x, y: AskinBrain.state.y, bubble: AskinBubble.isVisible(), text: document.getElementById('bubble-text').textContent, petClass: document.getElementById('pet').className, skin: document.getElementById('pet').classList.contains('skin'), skinImg: !!document.getElementById('skin-img'), ultimateImg: !!document.getElementById('skin-ultimate'), idle: AskinBrain.state.idleSeconds })`);
+        const probe = await overlay.webContents.executeJavaScript(`JSON.stringify({ mods: BuddyMods.list(), skippedMods: BuddyMods.skipped(), modProps: document.querySelectorAll('#pet [data-mod]').length, surprisedAnim: (() => { const p = document.getElementById('pet'); p.classList.add('surprised'); const a = getComputedStyle(document.getElementById('sprite')).animationName; p.classList.remove('surprised'); return a; })(), quips: BuddyQuips.all().length, mode: BuddyBrain.state.mode, x: BuddyBrain.state.x, y: BuddyBrain.state.y, bubble: BuddyBubble.isVisible(), text: document.getElementById('bubble-text').textContent, petClass: document.getElementById('pet').className, skin: document.getElementById('pet').classList.contains('skin'), skinImg: !!document.getElementById('skin-img'), ultimateImg: !!document.getElementById('skin-ultimate'), idle: BuddyBrain.state.idleSeconds })`);
         fs.writeFileSync(path.join(selftestDir, 'state.json'), probe);
         // Desk and dialogue, driven with simulated typing samples.
         const deskProbe = await overlay.webContents.executeJavaScript(`(() => {
-          const B = AskinBrain, st = B.state, txt = () => document.getElementById('bubble-text').textContent, r = {};
-          document.getElementById('pet').classList.remove('ultimate'); B.exitDesk({ quiet: true }); AskinBubble.hide(); st.typingLog = [];
+          const B = BuddyBrain, st = B.state, txt = () => document.getElementById('bubble-text').textContent, r = {};
+          document.getElementById('pet').classList.remove('ultimate'); B.exitDesk({ quiet: true }); BuddyBubble.hide(); st.typingLog = [];
           for (let i = 0; i < 30; i++) B.onActivity({ typing: 1, kind: 'writing' });
           r.clickingAround = st.mode;
           st.typingLog = [];
           for (let i = 0; i < 10; i++) B.onActivity({ typing: 8, kind: 'coding' });
           r.afterTyping = st.mode; r.deskKind = st.deskKind; r.spawnLine = txt();
-          AskinBubble.hide(); st.bubblePriority = 0; st.lastTypingAt -= 30000; Math.random = () => 0.1;
+          BuddyBubble.hide(); st.bubblePriority = 0; st.lastTypingAt -= 30000; Math.random = () => 0.1;
           B.onActivity({ typing: 0, kind: 'coding' });
           r.pauseLine = txt(); r.stillAtDesk = st.mode;
-          AskinBubble.hide(); st.lastTypingAt -= 100000; B.onActivity({ typing: 0 });
+          BuddyBubble.hide(); st.lastTypingAt -= 100000; B.onActivity({ typing: 0 });
           r.afterLongPause = st.mode; r.despawnLine = txt();
-          r.greet = AskinQuips.pick(['greet']); r.idle = AskinQuips.pick(['idle']); r.click = AskinQuips.pick(['click']);
+          r.greet = BuddyQuips.pick(['greet']); r.idle = BuddyQuips.pick(['idle']); r.click = BuddyQuips.pick(['click']);
           return JSON.stringify(r, null, 1);
         })()`);
         fs.writeFileSync(path.join(selftestDir, 'desk-dialogue.json'), deskProbe);

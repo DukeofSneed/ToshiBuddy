@@ -50,7 +50,7 @@ const RUN_SETTINGS = JSON.stringify({
 // Written to a file and passed by path: inline JSON on a Windows command line
 // is fragile to quote.
 function runSettingsFile() {
-  const file = path.join(os.tmpdir(), 'askin-buddy-run-settings.json');
+  const file = path.join(os.tmpdir(), 'toshibuddy-run-settings.json');
   fs.writeFileSync(file, RUN_SETTINGS);
   return file;
 }
@@ -114,7 +114,7 @@ class Upgrader {
       '## Rules',
       `- Read docs/MOD_API.md first, then write exactly one mod folder: mods/${slugify(goal.title)}/mod.js (plus an optional NOTES.md). You may also add a quip pack under content/quips/.`,
       '- Never create or edit anything under src/, docs/, prompts/, package.json, or any file outside mods/ and content/. Such a run is reverted automatically.',
-      '- The mod must be self-contained browser JavaScript calling AskinMods.register(...). No require, no fetch, no eval, no network, no timers longer than needed.',
+      '- The mod must be self-contained browser JavaScript calling BuddyMods.register(...). No require, no fetch, no eval, no network, no timers longer than needed.',
       `- Token budget for this run: about ${goal.goalTokens} tokens total. Be economical: read MOD_API.md and at most one existing mod, then write.`,
       isSkin
         ? `- The character is called ${name}. In every quip and the announcement, call him ${name} or write {name} (it is replaced with his name); never use the name Kori. The pet is drawn as a user-supplied skin image (no limbs); MOD_API.md calls the built-in character Kori, which is not who is active.`

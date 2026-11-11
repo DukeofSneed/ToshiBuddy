@@ -75,10 +75,10 @@
     const el = pet();
     el.style.left = `${Math.round(st.x)}px`;
     el.style.top = `${Math.round(st.y)}px`;
-    if (window.AskinBubble) AskinBubble.position();
+    if (window.BuddyBubble) BuddyBubble.position();
   }
   function save() {
-    try { localStorage.setItem('askin.pos', JSON.stringify({ x: st.x, dir: st.dir })); } catch (_) { /* ignore */ }
+    try { localStorage.setItem('buddy.pos', JSON.stringify({ x: st.x, dir: st.dir })); } catch (_) { /* ignore */ }
   }
 
   // ---- speaking ----
@@ -87,7 +87,7 @@
   // app says directly (upgrade news, jar replies).
   function say(text, { animate = null, ms, priority = 2 } = {}) {
     if (!text) return false;
-    if (AskinBubble.isVisible() && st.bubblePriority > priority) {
+    if (BuddyBubble.isVisible() && st.bubblePriority > priority) {
       if (animate) playAnimation(animate);
       return false;
     }
@@ -95,11 +95,11 @@
     // "Kori" (catalog ideas, older mods) uses the skin's name instead.
     const nm = vars().name;
     text = String(text).replace(/\{name\}/g, nm);
-    if (window.AskinApp && AskinApp.skin) text = text.replace(/\bKori\b/g, nm);
+    if (window.BuddyApp && BuddyApp.skin) text = text.replace(/\bKori\b/g, nm);
     st.bubblePriority = priority;
-    AskinBubble.show(text, { ms });
+    BuddyBubble.show(text, { ms });
     pet().classList.add('talk');
-    const spoke = AskinVoice.speak(text);
+    const spoke = BuddyVoice.speak(text);
     if (!spoke) setTimeout(() => pet().classList.remove('talk'), Math.min(4000, 900 + text.length * 40));
     if (animate) playAnimation(animate);
     return true;
@@ -107,13 +107,13 @@
   // opts: fallback (false = stay quiet if the character has no line for this),
   // priority (overrides the line's own), animate, ms.
   function quip(tags, opts = {}) {
-    const e = AskinQuips.pickEntry(tags, vars(), { fallback: opts.fallback });
+    const e = BuddyQuips.pickEntry(tags, vars(), { fallback: opts.fallback });
     st.nextQuip = now() + rand(120000, 300000);
     if (!e) return false;
     return say(e.text, { ...opts, priority: opts.priority != null ? opts.priority : e.priority });
   }
   function vars() {
-    return { hour: new Date().getHours(), name: (window.AskinApp && AskinApp.name) || 'Kori', level: (window.AskinApp && AskinApp.level && AskinApp.level.title) || 'Recruit' };
+    return { hour: new Date().getHours(), name: (window.BuddyApp && BuddyApp.name) || 'Kori', level: (window.BuddyApp && BuddyApp.level && BuddyApp.level.title) || 'Recruit' };
   }
 
   // ---- one-shot animations (built-in or from mods) ----
@@ -122,12 +122,12 @@
     if (name === 'giftball') name = 'frost'; // old name from before the character change
     if (name === 'stamp') return stamp();
     if (name === 'ultimate') return enterUltimate();
-    const modAnims = AskinMods.animations();
+    const modAnims = BuddyMods.animations();
     const dur = durationMs || BUILTIN_ANIMS[name] || (modAnims[name] && modAnims[name].durationMs);
     if (!dur) return false;
     const cls = BUILTIN_ANIMS[name] ? name : `anim-${name}`;
-    if (name === 'frost') AskinSfx.play('shimmer');
-    if (name === 'huff') AskinSfx.play('huff');
+    if (name === 'frost') BuddySfx.play('shimmer');
+    if (name === 'huff') BuddySfx.play('huff');
     if (name === 'release') releaseFx();
     const el = pet();
     el.classList.remove(cls);
@@ -145,9 +145,9 @@
   function releaseFx() {
     const stage = document.getElementById('stage');
     const c = petCenter();
-    AskinSfx.play('freeze');
-    setTimeout(() => AskinSfx.play('chime'), 450);
-    setTimeout(() => AskinSfx.play('blizzard'), 700);
+    BuddySfx.play('freeze');
+    setTimeout(() => BuddySfx.play('chime'), 450);
+    setTimeout(() => BuddySfx.play('blizzard'), 700);
     const ring = (delay) => setTimeout(() => {
       const r = document.createElement('div');
       r.className = 'frost-ring';
@@ -186,19 +186,19 @@
   let ultimateTimer = null;
   function enterUltimate(seconds) {
     const el = pet();
-    const ms = Math.max(5, Math.min(600, seconds || (window.AskinApp && AskinApp.ultimateSeconds) || 30)) * 1000;
+    const ms = Math.max(5, Math.min(600, seconds || (window.BuddyApp && BuddyApp.ultimateSeconds) || 30)) * 1000;
     const already = el.classList.contains('ultimate');
     if (!already) {
       playAnimation('release');
       setTimeout(() => {
-        if (window.AskinApp && AskinApp.skin) PetSprite.applySkinAnchors(AskinApp.skin, true);
+        if (window.BuddyApp && BuddyApp.skin) PetSprite.applySkinAnchors(BuddyApp.skin, true);
         el.classList.add('ultimate', 'ultimate-in');
         setTimeout(() => el.classList.remove('ultimate-in'), 650);
         fire('ultimate', {});
       }, 550);
     } else {
       // Another donation mid-form: a smaller flourish and a fresh timer.
-      AskinSfx.play('chime');
+      BuddySfx.play('chime');
     }
     clearTimeout(ultimateTimer);
     ultimateTimer = setTimeout(exitUltimate, ms + (already ? 0 : 550));
@@ -208,11 +208,11 @@
     const el = pet();
     if (!el.classList.contains('ultimate')) return;
     el.classList.add('ultimate-out');
-    AskinSfx.play('freeze');
+    BuddySfx.play('freeze');
     setTimeout(() => {
       el.classList.remove('ultimate', 'ultimate-out');
-      if (window.AskinApp && AskinApp.skin) PetSprite.applySkinAnchors(AskinApp.skin, false);
-      AskinSfx.play('shimmer');
+      if (window.BuddyApp && BuddyApp.skin) PetSprite.applySkinAnchors(BuddyApp.skin, false);
+      BuddySfx.play('shimmer');
       if (st.mode !== 'sleep') quip(['ultimate-end']);
     }, 350);
   }
@@ -228,7 +228,7 @@
     el.dataset.papers = String(st.papers);
     el.classList.add('desk-in');
     setTimeout(() => el.classList.remove('desk-in'), 600);
-    AskinSfx.play('stamp');
+    BuddySfx.play('stamp');
     if (!fire('desk', { kind })) quip([`desk-enter-${kind}`, 'desk-enter']);
     st.nextQuip = now() + rand(150000, 300000);
     scheduleDeskWork();
@@ -247,7 +247,7 @@
     loop(() => {
       const el = pet();
       el.classList.add('scribbling');
-      AskinSfx.play('scribble');
+      BuddySfx.play('scribble');
       setTimeout(() => el.classList.remove('scribbling'), rand(1800, 3600));
     }, 3500, 7000);
     loop(() => stamp(), 11000, 24000);
@@ -262,7 +262,7 @@
     el.classList.remove('stamp');
     void el.offsetWidth;
     el.classList.add('stamp');
-    setTimeout(() => { AskinSfx.play('stamp'); el.classList.add('stamped'); }, 470);
+    setTimeout(() => { BuddySfx.play('stamp'); el.classList.add('stamped'); }, 470);
     setTimeout(() => el.classList.remove('stamp'), 900);
     setTimeout(() => el.classList.remove('stamped'), 2600);
     return true;
@@ -289,7 +289,7 @@
   //   leisure: a game or video app (only when slacking nudges are on).
   function onActivity({ typing = 0, kind = null, leisure = false }) {
     const t = now();
-    const calm = ['idle', 'walk', 'lean'].includes(st.mode) && !AskinBubble.isVisible() && !st.working;
+    const calm = ['idle', 'walk', 'lean'].includes(st.mode) && !BuddyBubble.isVisible() && !st.working;
     // A long, uninterrupted stretch of games or videos earns a dry remark; if it
     // keeps going, a firmer one later. Being inactive never counts as slacking.
     if (leisure) {
@@ -315,7 +315,7 @@
       st.readingSince = 0;
     }
     // At the desk for a long time: remind the user to take a break.
-    if (st.mode === 'desk' && t - st.deskSince >= DESK_BREAK_MS && t - st.lastDeskBreak >= DESK_BREAK_MS && !AskinBubble.isVisible()) {
+    if (st.mode === 'desk' && t - st.deskSince >= DESK_BREAK_MS && t - st.lastDeskBreak >= DESK_BREAK_MS && !BuddyBubble.isVisible()) {
       st.lastDeskBreak = t;
       quip(['desk-break']);
     }
@@ -344,14 +344,14 @@
     if (quietFor >= DESK_EXIT_MS) { exitDesk(); return; }
     if (quietFor >= DESK_PAUSE_MS && !st.deskPauseSaid) {
       st.deskPauseSaid = true;
-      if (!AskinBubble.isVisible() && Math.random() < 0.6) quip(['desk-pause'], { fallback: false });
+      if (!BuddyBubble.isVisible() && Math.random() < 0.6) quip(['desk-pause'], { fallback: false });
     }
   }
 
   // ---- mod behaviors ----
   function fire(trigger, extra = {}) {
     let handled = false;
-    for (const b of AskinMods.behaviors(trigger)) {
+    for (const b of BuddyMods.behaviors(trigger)) {
       const chance = b.chance === undefined ? 1 : b.chance;
       if (Math.random() > chance) continue;
       runAction(b, extra);
@@ -363,19 +363,19 @@
     const a = b.action;
     try {
       if (a.animate) playAnimation(a.animate);
-      if (a.sound) AskinSfx.play(a.sound);
+      if (a.sound) BuddySfx.play(a.sound);
       if (a.say) {
         const text = Array.isArray(a.say) ? a.say[Math.floor(Math.random() * a.say.length)] : a.say;
         say(String(text).replace(/\{(\w+)\}/g, (m, k) => (k in extra ? extra[k] : m)));
       }
-      if (a.prop) AskinMods.setProp(b.slug, a.prop.id, a.prop.toggle ? 'toggle' : a.prop.show !== false);
-    } catch (e) { if (window.askin) askin.log(`behavior error in ${b.slug}: ${e.message}`); }
+      if (a.prop) BuddyMods.setProp(b.slug, a.prop.id, a.prop.toggle ? 'toggle' : a.prop.show !== false);
+    } catch (e) { if (window.buddy) buddy.log(`behavior error in ${b.slug}: ${e.message}`); }
   }
   const intervalTimers = [];
   function armIntervals() {
     for (const t of intervalTimers) clearInterval(t);
     intervalTimers.length = 0;
-    for (const b of AskinMods.behaviors('interval')) {
+    for (const b of BuddyMods.behaviors('interval')) {
       intervalTimers.push(setInterval(() => { if (st.mode !== 'sleep' && st.mode !== 'drag' && !st.paused) { const c = b.chance === undefined ? 1 : b.chance; if (Math.random() <= c) runAction(b, {}); } }, b.every));
     }
   }
@@ -415,7 +415,7 @@
     const dt = Math.min(0.05, (ts - (st.lastTs || ts)) / 1000);
     st.lastTs = ts;
     if (st.mode === 'walk') {
-      st.x += st.dir * ((window.AskinApp && AskinApp.walkSpeed) || WALK_SPEED) * dt;
+      st.x += st.dir * ((window.BuddyApp && BuddyApp.walkSpeed) || WALK_SPEED) * dt;
       if (st.x < 0) { st.x = 0; face(1); st.nextDecision = Math.min(st.nextDecision, now() + 400); }
       if (st.x > st.stageW - PET_W) { st.x = st.stageW - PET_W; face(-1); st.nextDecision = Math.min(st.nextDecision, now() + 400); }
       place();
@@ -428,7 +428,7 @@
         st.vy = 0;
         setMode('idle');
         playAnimation('land');
-        AskinSfx.play(hard ? 'land-hard' : 'land');
+        BuddySfx.play(hard ? 'land-hard' : 'land');
         save();
         st.nextDecision = now() + 1500;
         if (!fire('drop', {})) quip(hard ? ['drop-hard', 'drop'] : ['drop']);
@@ -437,15 +437,15 @@
     }
     const free = !['drag', 'fall', 'sleep', 'desk'].includes(st.mode);
     if (free && now() >= st.nextDecision) decide();
-    if (st.mode !== 'sleep' && st.mode !== 'drag' && !AskinBubble.isVisible() && now() >= st.nextQuip && !st.working) {
+    if (st.mode !== 'sleep' && st.mode !== 'drag' && !BuddyBubble.isVisible() && now() >= st.nextQuip && !st.working) {
       if (st.mode === 'desk') quip([`desk-${st.deskKind}`, 'desk']);
-      else if (!fire('idle', {})) quip(['idle', `time:${AskinQuips.timeTag()}`]);
+      else if (!fire('idle', {})) quip(['idle', `time:${BuddyQuips.timeTag()}`]);
     }
     const h = new Date().getHours();
     if (h !== st.lastHour) { st.lastHour = h; if (st.mode !== 'sleep' && !fire('hour', { hour: h })) quip(['hour'], { fallback: false }); }
     // A new part of the day (morning -> afternoon...): its greeting, once per session.
-    const part = AskinQuips.timeTag();
-    if (!st.timeParts.has(part) && free && st.mode !== 'sleep' && !AskinBubble.isVisible() && !st.working) {
+    const part = BuddyQuips.timeTag();
+    if (!st.timeParts.has(part) && free && st.mode !== 'sleep' && !BuddyBubble.isVisible() && !st.working) {
       st.timeParts.add(part);
       quip(['time-change'], { fallback: false });
     }
@@ -468,15 +468,15 @@
     st.idleSeconds = sec;
     // A while without input: one remark per idle stretch (never an accusation of slacking).
     if (sec < 8) st.inactiveSaid = false;
-    else if (sec >= INACTIVE_S && sec < 300 && !st.inactiveSaid && ['idle', 'walk', 'lean'].includes(st.mode) && !AskinBubble.isVisible() && !st.working) {
+    else if (sec >= INACTIVE_S && sec < 300 && !st.inactiveSaid && ['idle', 'walk', 'lean'].includes(st.mode) && !BuddyBubble.isVisible() && !st.working) {
       st.inactiveSaid = true;
       quip(['inactive'], { fallback: false });
     }
     if (sec >= 300 && st.mode !== 'sleep' && st.mode !== 'drag' && !st.working) {
       setMode('sleep');
-      AskinVoice.stop();
-      AskinBubble.hide();
-      AskinSfx.play('yawn');
+      BuddyVoice.stop();
+      BuddyBubble.hide();
+      BuddySfx.play('yawn');
       fire('sleep', {});
     } else if (sec < 8 && st.mode === 'sleep') {
       wake();
@@ -484,7 +484,7 @@
   }
   function wake() {
     setMode('idle');
-    AskinSfx.play('chirp');
+    BuddySfx.play('chirp');
     st.nextDecision = now() + 2500;
     if (!fire('wake', {})) quip(['wake']);
   }
@@ -494,7 +494,7 @@
   function setHover(on) {
     if (on === hovering) return;
     hovering = on;
-    if (window.askin) askin.setIgnoreMouse(!on && !st.dragging);
+    if (window.buddy) buddy.setIgnoreMouse(!on && !st.dragging);
   }
   function wire() {
     const el = pet();
@@ -508,8 +508,8 @@
           st.dragging.moved = true;
           st.typingLog = []; // pulled away; the desk timer starts over
           setMode('drag');
-          AskinSfx.play('whee');
-          AskinBubble.hide();
+          BuddySfx.play('whee');
+          BuddyBubble.hide();
           if (Math.random() < 0.6) quip(['drag']);
         }
         if (st.dragging.moved) {
@@ -537,7 +537,7 @@
       } else {
         // A plain click. Repeated pokes make him progressively more irritated;
         // he puts up with it, but he makes sure you know.
-        AskinSfx.play('boop');
+        BuddySfx.play('boop');
         const t = now();
         st.clickTimes = st.clickTimes.filter((c) => t - c < 12000);
         st.clickTimes.push(t);
@@ -556,8 +556,8 @@
       if (st.mode === 'desk') return;
       if (!fire('dblclick', {})) { playAnimation('frost'); quip(['trick']); }
     });
-    el.addEventListener('contextmenu', (e) => { e.preventDefault(); if (window.askin) askin.popupMenu(e.screenX, e.screenY); });
-    document.getElementById('bubble').addEventListener('click', () => AskinBubble.hide());
+    el.addEventListener('contextmenu', (e) => { e.preventDefault(); if (window.buddy) buddy.popupMenu(e.screenX, e.screenY); });
+    document.getElementById('bubble').addEventListener('click', () => BuddyBubble.hide());
   }
 
   // ---- public ----
@@ -565,7 +565,7 @@
     st.stageW = workArea.width;
     st.stageH = workArea.height;
     try {
-      const saved = JSON.parse(localStorage.getItem('askin.pos') || 'null');
+      const saved = JSON.parse(localStorage.getItem('buddy.pos') || 'null');
       if (saved && typeof saved.x === 'number') { st.x = Math.max(0, Math.min(st.stageW - PET_W, saved.x)); if (saved.dir) st.dir = saved.dir; }
     } catch (_) { /* ignore */ }
     st.y = floor();
@@ -576,10 +576,10 @@
     st.nextQuip = now() + rand(6000, 15000);
     wire();
     armIntervals();
-    AskinVoice.setHandlers(() => pet().classList.add('talk'), () => pet().classList.remove('talk'));
+    BuddyVoice.setHandlers(() => pet().classList.add('talk'), () => pet().classList.remove('talk'));
     requestAnimationFrame(tick);
     setTimeout(blinkLoop, 1500);
-    st.timeParts.add(AskinQuips.timeTag()); // the greeting covers this part of the day
+    st.timeParts.add(BuddyQuips.timeTag()); // the greeting covers this part of the day
     if (!fire('wake', {})) setTimeout(() => quip(['greet']), 1200);
   }
   function resize(workArea) {
@@ -597,7 +597,7 @@
     if (on && st.mode === 'walk') setMode('idle');
   }
 
-  window.AskinBrain = {
+  window.BuddyBrain = {
     start, resize, say, quip, playAnimation, fire, setPaused, setWorking, setDeskEnabled,
     onIdleSeconds, onActivity, enterDesk, exitDesk, enterUltimate, exitUltimate, armIntervals, state: st,
   };
