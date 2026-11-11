@@ -581,7 +581,10 @@ function start() {
     tray.on('click', openJar);
   } catch (e) { log(`tray failed: ${e.message}`); }
 
-  app.on('second-instance', () => openJar());
+  // Launching again with --import (or --edit) opens the Characters window; otherwise the jar.
+  const openFromArgs = (argv) => { if (argv.includes('--import')) { openImport('import'); return true; } if (argv.includes('--edit')) { openImport('edit'); return true; } return false; };
+  app.on('second-instance', (_e, argv) => { if (!openFromArgs(argv)) openJar(); });
+  if (!process.env.TOSHI_SELFTEST) setTimeout(() => openFromArgs(process.argv), 2500);
   app.on('window-all-closed', (e) => { /* keep running in the tray */ });
   app.on('before-quit', () => { if (jarWin) jarWin.__reallyClose = true; activity.stop(); });
 
