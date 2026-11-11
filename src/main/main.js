@@ -65,6 +65,8 @@ function migrateSkinSettings(settings, userData) {
 }
 
 function start() {
+  // Tests can point the app at a throwaway data folder (TOSHI_USERDATA).
+  if (process.env.TOSHI_USERDATA) app.setPath('userData', process.env.TOSHI_USERDATA);
   const userData = app.getPath('userData');
   migrateOldUserData(userData);
   try { app.setAppUserModelId('ToshiBuddy'); } catch (_) { /* Windows only */ }
@@ -138,6 +140,18 @@ function start() {
 
   function pushJar() {
     if (jarWin && !jarWin.isDestroyed()) jarWin.webContents.send('jar:changed', jarState());
+    if (overlay && !overlay.isDestroyed()) overlay.webContents.send('jar-state', jarPropState());
+  }
+  // What the jar on screen shows: balance, fill toward the next level, quick amount.
+  function jarPropState() {
+    const lv = ledger.level();
+    return {
+      balance: ledger.data.balance,
+      progress: lv.progress || 0,
+      level: lv.level,
+      quick: Number(settings.get('quickDonateTokens')) || 1000,
+      show: settings.get('showJarProp') !== false,
+    };
   }
   function jarState() {
     return {
@@ -212,6 +226,7 @@ function start() {
     workArea: screen.getPrimaryDisplay().workArea,
     settings: publicSettings(),
     skin: currentSkin(),
+    jar: jarPropState(),
     mods: listMods(PROJECT_ROOT, ledger.data.disabledMods),
     quips: quipsForPet(),
     level: ledger.level(),
@@ -272,7 +287,9 @@ function start() {
 
   // ---- jar IPC ----
   ipcMain.handle('jar:state', () => jarState());
-  ipcMain.handle('jar:donate', (_e, { tokens, goalId }) => {
+  // One donation path for the panel and the jar on screen, so the guard's
+  // ceiling, pledges, and the donation reaction are always the same.
+  function donate(tokens, goalId) {
     const ceiling = guard.maxSafeDonation();
     const levelBefore = ledger.level().level;
     const r = ledger.donate(tokens, { ceiling, goalId });
@@ -285,6 +302,13 @@ function start() {
     }
     if (r.pledged) say(`I can only accept ${fmt(r.accepted)} right now. The other ${fmt(r.pledged)} is filed as a pledge until your plan window resets. Regulations.`);
     return { ...r, ceiling, state: jarState() };
+  }
+  ipcMain.handle('jar:donate', (_e, { tokens, goalId } = {}) => donate(tokens, goalId));
+  // Double-clicking the jar on screen donates the configured amount (default 1k).
+  ipcMain.handle('jar:quick-donate', () => {
+    const tokens = Math.max(100, Math.min(1000000, Number(settings.get('quickDonateTokens')) || 1000));
+    const r = donate(tokens);
+    return { accepted: r.accepted || 0, pledged: r.pledged || 0, balance: ledger.data.balance };
   });
   ipcMain.handle('jar:fund', (_e, { goalId, tokens }) => {
     const r = ledger.fundGoal(goalId, tokens);
@@ -293,18 +317,20 @@ function start() {
   });
   ipcMain.handle('jar:remove-goal', (_e, { goalId }) => ({ ok: ledger.removeGoal(goalId), state: jarState() }));
   ipcMain.handle('jar:settings', (_e, patch) => {
-    const allowed = ['muted', 'sfx', 'sfxVolume', 'paused', 'autostart', 'deskMode', 'slackNudges', 'character', 'maxUtilization', 'calibrationRunTokens', 'autoBuild', 'allowUsageEndpointFallback', 'upgradeModel', 'upgradeEffort', 'maxTurns'];
+    const allowed = ['muted', 'sfx', 'sfxVolume', 'paused', 'autostart', 'deskMode', 'slackNudges', 'character', 'maxUtilization', 'calibrationRunTokens', 'autoBuild', 'allowUsageEndpointFallback', 'upgradeModel', 'upgradeEffort', 'maxTurns', 'showJarProp', 'quickDonateTokens'];
     const clean = {};
     for (const k of allowed) if (k in patch) clean[k] = patch[k];
     if ('character' in clean && !listCharacters(PROJECT_ROOT).some((c) => c.name === clean.character)) delete clean.character;
     const skinChanged = 'character' in clean && clean.character !== activeCharacterId();
     if ('maxUtilization' in clean) clean.maxUtilization = Math.min(95, Math.max(10, Number(clean.maxUtilization) || 80));
+    if ('quickDonateTokens' in clean) clean.quickDonateTokens = Math.max(100, Math.min(1000000, Math.round(Number(clean.quickDonateTokens) || 1000)));
     if ('sfxVolume' in clean) clean.sfxVolume = Math.min(1, Math.max(0, Number(clean.sfxVolume) || 0));
     settings.update(clean);
     if ('autostart' in clean) applyAutostart();
     if (overlay && !overlay.isDestroyed()) overlay.webContents.send('settings', publicSettings());
     if (skinChanged) { reloadAndAwaitMods([], 1000); quipsChanged(); }
     refreshTray();
+    pushJar();
     return jarState();
   });
   ipcMain.handle('jar:check-usage', async () => {
@@ -466,6 +492,7 @@ function start() {
   if (!findClaude()) {
     log('Claude Code CLI not found; the jar can hold tokens but cannot spend them until it is installed and logged in.');
   }
+  if (settings.get('autostart') && !process.env.TOSHI_SELFTEST) applyAutostart();
   log(`ToshiBuddy started. userData=${userData}`);
 
   // ---- self-test: TOSHI_SELFTEST=<dir> captures both windows and quits ----
@@ -568,6 +595,22 @@ function start() {
           return JSON.stringify(r, null, 1);
         })()`);
         fs.writeFileSync(path.join(selftestDir, 'desk-dialogue.json'), deskProbe);
+        // The jar on screen: where it sits, and (only with a throwaway data
+        // folder) that a double-click donates the quick amount.
+        const jarRect = JSON.parse(await overlay.webContents.executeJavaScript(`JSON.stringify((() => { const r = document.getElementById('jar-prop').getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height, stageW: innerWidth, stageH: innerHeight, label: document.getElementById('jar-label').textContent, zone: BuddyApp.jarZone }; })())`));
+        const jarShot = await overlay.webContents.capturePage({ x: Math.max(0, Math.round(jarRect.x) - 260), y: Math.max(0, Math.round(jarRect.y) - 120), width: 360, height: 230 });
+        fs.writeFileSync(path.join(selftestDir, 'jar-prop.png'), jarShot.toPNG());
+        const jarTest = { rect: jarRect };
+        if (process.env.TOSHI_USERDATA) {
+          jarTest.before = ledger.data.balance;
+          jarTest.ceiling = guard.maxSafeDonation();
+          await overlay.webContents.executeJavaScript(`document.getElementById('jar-prop').dispatchEvent(new MouseEvent('dblclick', { bubbles: true })); 1`);
+          await new Promise((r) => setTimeout(r, 1500));
+          jarTest.after = ledger.data.balance;
+          jarTest.pledged = ledger.data.pledged;
+          jarTest.labelAfter = await overlay.webContents.executeJavaScript(`document.getElementById('jar-label').textContent`);
+        }
+        fs.writeFileSync(path.join(selftestDir, 'jar-prop.json'), JSON.stringify(jarTest, null, 1));
         const labels = (m) => m.items.flatMap((i) => [i.label, ...(i.submenu ? labels(i.submenu) : [])]).filter(Boolean);
         fs.writeFileSync(path.join(selftestDir, 'menu.json'), JSON.stringify({ name: charName(), tooltipName: `${charName()} Buddy`, menu: labels(buildMenu()) }, null, 1));
         fs.writeFileSync(path.join(selftestDir, 'log.txt'), logLines.join('\n'));

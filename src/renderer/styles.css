@@ -294,3 +294,31 @@ html, body {
 
 /* Sprite-sheet characters draw their own sleep "zzz". */
 #pet.sheet #zzz { display: none !important; }
+
+/* ---- the donation jar on screen (bottom-right) ---- */
+#jar-prop {
+  position: absolute;
+  right: 14px;
+  bottom: 0;
+  width: 84px;
+  height: 104px;
+  cursor: pointer;
+  z-index: 3;
+  filter: drop-shadow(0 0 6px rgba(124, 196, 245, 0.55));
+  transform-origin: 50% 100%;
+}
+#jar-prop.hidden { display: none; }
+#jar-prop svg { width: 100%; height: 100%; display: block; overflow: visible; }
+#jar-prop:hover { filter: drop-shadow(0 0 10px rgba(124, 196, 245, 0.9)); }
+#jar-prop #jar-fill, #jar-prop #jar-coins { transition: all 600ms ease; }
+#jar-prop.jar-bump { animation: jarBump 450ms ease-out; }
+@keyframes jarBump { 0%, 100% { transform: none; } 30% { transform: scale(1.08, 0.92); } 60% { transform: scale(0.96, 1.05) translateY(-4px); } }
+.jar-float {
+  position: absolute; left: 50%; top: -6px;
+  transform: translateX(-50%);
+  font: 700 14px "Segoe UI", sans-serif; color: #eaf6ff;
+  text-shadow: 0 0 6px #3f8fdc, 0 1px 2px #0d1626;
+  pointer-events: none; white-space: nowrap;
+  animation: jarFloat 1400ms ease-out forwards;
+}
+@keyframes jarFloat { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, -46px); } }

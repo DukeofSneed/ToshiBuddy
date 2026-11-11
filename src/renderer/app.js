@@ -147,6 +147,8 @@
   if (BuddyMods.skipped().length) buddy.log(`mods not used on this character: ${BuddyMods.skipped().join(', ')}`);
   BuddyQuips.setFromMods(BuddyMods.quips());
 
+  BuddyJarProp.mount(boot.jar);
+  buddy.on('jar-state', (s) => BuddyJarProp.update(s));
   BuddyBrain.start({ workArea: boot.workArea });
   BuddyBrain.setPaused(!!boot.settings.paused);
   BuddyBrain.setDeskEnabled(boot.settings.deskMode !== false);

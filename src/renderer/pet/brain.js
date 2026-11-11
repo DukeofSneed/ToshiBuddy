@@ -56,6 +56,8 @@
 
   const pet = () => document.getElementById('pet');
   const floor = () => st.stageH - PET_H;
+  // He walks up to the jar in the corner but not over it.
+  const rightBound = () => st.stageW - PET_W - ((window.BuddyApp && BuddyApp.jarZone) || 0);
   const rand = (a, b) => a + Math.random() * (b - a);
   const now = () => performance.now();
 
@@ -384,7 +386,7 @@
   function decide() {
     if (st.paused || st.working) { setMode('idle'); st.nextDecision = now() + 4000; return; }
     const atLeft = st.x <= 4;
-    const atRight = st.x >= st.stageW - PET_W - 4;
+    const atRight = st.x >= rightBound() - 4;
     const r = Math.random();
     if ((atLeft || atRight) && r < 0.45) {
       face(atLeft ? 1 : -1);
@@ -417,7 +419,7 @@
     if (st.mode === 'walk') {
       st.x += st.dir * ((window.BuddyApp && BuddyApp.walkSpeed) || WALK_SPEED) * dt;
       if (st.x < 0) { st.x = 0; face(1); st.nextDecision = Math.min(st.nextDecision, now() + 400); }
-      if (st.x > st.stageW - PET_W) { st.x = st.stageW - PET_W; face(-1); st.nextDecision = Math.min(st.nextDecision, now() + 400); }
+      if (st.x > rightBound()) { st.x = rightBound(); face(-1); st.nextDecision = Math.min(st.nextDecision, now() + 400); }
       place();
     } else if (st.mode === 'fall') {
       st.vy += GRAVITY * dt;
@@ -499,7 +501,7 @@
   function wire() {
     const el = pet();
     document.addEventListener('mousemove', (e) => {
-      const over = !!(e.target && e.target.closest && e.target.closest('#pet, #bubble'));
+      const over = !!(e.target && e.target.closest && e.target.closest('#pet, #bubble, #jar-prop'));
       setHover(over || !!st.dragging);
       if (st.dragging) {
         const dx = e.clientX - st.dragging.sx;
@@ -530,7 +532,7 @@
       const d = st.dragging;
       st.dragging = null;
       if (d.moved) {
-        st.x = Math.max(0, Math.min(st.stageW - PET_W, st.x));
+        st.x = Math.max(0, Math.min(rightBound(), st.x));
         if (st.y < floor() - 2) { setMode('fall'); st.vy = 0; }
         else { setMode('idle'); st.nextDecision = now() + 1500; save(); }
         place();
@@ -550,7 +552,7 @@
         else if (!fire('click', {})) { playAnimation(Math.random() < 0.5 ? 'surprised' : 'huff'); quip(['click']); }
         st.nextDecision = now() + 2500;
       }
-      setHover(!!(e.target && e.target.closest && e.target.closest('#pet, #bubble')));
+      setHover(!!(e.target && e.target.closest && e.target.closest('#pet, #bubble, #jar-prop')));
     });
     el.addEventListener('dblclick', () => {
       if (st.mode === 'desk') return;
@@ -566,7 +568,7 @@
     st.stageH = workArea.height;
     try {
       const saved = JSON.parse(localStorage.getItem('buddy.pos') || 'null');
-      if (saved && typeof saved.x === 'number') { st.x = Math.max(0, Math.min(st.stageW - PET_W, saved.x)); if (saved.dir) st.dir = saved.dir; }
+      if (saved && typeof saved.x === 'number') { st.x = Math.max(0, Math.min(rightBound(), saved.x)); if (saved.dir) st.dir = saved.dir; }
     } catch (_) { /* ignore */ }
     st.y = floor();
     face(st.dir);
@@ -585,7 +587,7 @@
   function resize(workArea) {
     st.stageW = workArea.width;
     st.stageH = workArea.height;
-    st.x = Math.max(0, Math.min(st.stageW - PET_W, st.x));
+    st.x = Math.max(0, Math.min(rightBound(), st.x));
     if (st.mode !== 'drag' && st.mode !== 'fall') st.y = floor();
     place();
   }

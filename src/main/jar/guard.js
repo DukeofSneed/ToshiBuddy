@@ -117,6 +117,9 @@ class Guard {
   async refresh({ force = false } = {}) {
     const s = this.status();
     if (s.fresh && !force) return s;
+    // Each probe costs a little plan usage: even a forced check (the button)
+    // reuses a reading taken in the last 90 seconds.
+    if (force && s.at && Date.now() - s.at < 90 * 1000 && s.utilization !== null) return s;
     if (this.probing) return this.probing;
     this.probing = this._probe().finally(() => { this.probing = null; });
     return this.probing;

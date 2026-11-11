@@ -87,6 +87,8 @@
     $('sfx-vol-val').textContent = vol;
     $('voice-muted').checked = !!state.settings.muted;
     $('desk-mode').checked = state.settings.deskMode !== false;
+    $('jar-prop-show').checked = state.settings.showJarProp !== false;
+    $('quick-donate').value = String(state.settings.quickDonateTokens || 1000);
     const skinSel = $('skin');
     const chars = state.characters || [];
     const sig = chars.map((c) => `${c.id}=${c.name}`).join('|');
@@ -176,6 +178,8 @@
   $('sfx-vol').onchange = (e) => jar.updateSettings({ sfxVolume: Number(e.target.value) / 100 }).then((s) => { render(s); BuddySfx.play('tick'); });
   $('voice-muted').onchange = (e) => jar.updateSettings({ muted: e.target.checked }).then(render);
   $('desk-mode').onchange = (e) => jar.updateSettings({ deskMode: e.target.checked }).then(render);
+  $('jar-prop-show').onchange = (e) => jar.updateSettings({ showJarProp: e.target.checked }).then(render);
+  $('quick-donate').onchange = (e) => jar.updateSettings({ quickDonateTokens: Number(e.target.value) }).then(render);
   $('skin').onchange = (e) => jar.updateSettings({ character: e.target.value }).then(render);
   // Soft tick on every jar button.
   document.addEventListener('click', (e) => { if (e.target.closest('button')) BuddySfx.play('tick'); }, true);
