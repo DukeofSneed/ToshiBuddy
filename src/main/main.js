@@ -429,7 +429,7 @@ function start() {
     if (r.accepted && overlay && !overlay.isDestroyed()) overlay.webContents.send('sfx', { name: 'coin' });
     // The jar is the thing he tends: a donation is growth (the character's
     // 'activity_bonsai' lines when it has them), a new level is a milestone.
-    if (r.accepted) say(pickDonationLine(r.accepted), { animate: 'ultimate', tags: ['jar-grow'] });
+    if (r.accepted) say(pickDonationLine(r.accepted, characterStyle().effects), { animate: 'ultimate', tags: ['jar-grow'] });
     if (r.accepted && ledger.level().level > levelBefore && overlay && !overlay.isDestroyed()) {
       setTimeout(() => overlay.webContents.send('quip', { tags: ['level-up'] }), 7000);
     }
@@ -776,8 +776,14 @@ function fmt(n) {
   if (n >= 1e3) return (n / 1e3).toFixed(1).replace(/\.?0+$/, '') + 'k';
   return String(n);
 }
-function pickDonationLine(tokens) {
-  const lines = [
+// Used when the character has no "donation" (or "activity_bonsai") lines of its own.
+function pickDonationLine(tokens, effects) {
+  const lines = effects === 'explosion' ? [
+    `${fmt(tokens)} tokens? Now we're talking. Stand back!`,
+    `${fmt(tokens)} tokens. Fine, you've earned a little show. Cover your ears!`,
+    `A donation of ${fmt(tokens)}? Obviously. I deserve it.`,
+    `${fmt(tokens)} tokens! That calls for something loud.`,
+  ] : [
     `${fmt(tokens)} tokens. Logged, stamped, and received. Stand back. Frost Release!`,
     `A donation of ${fmt(tokens)}? I... appreciate it. Don't make it weird. Frost Release!`,
     `${fmt(tokens)} tokens, properly declared. Fine. You've earned a demonstration.`,

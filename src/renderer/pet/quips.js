@@ -67,7 +67,7 @@
     upgrade: ['achievement'],
     'upgrade-failed': ['failure'],
     'level-up': ['milestone'],
-    'jar-grow': ['activity_bonsai'],
+    'jar-grow': ['activity_bonsai', 'donation'],
   };
 
   // How important each event is when no line sets its own priority.

@@ -1936,7 +1936,7 @@
       "text": "You know, being a Quincy has its advantages. I could get used to having that kind of power.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_quincy_002",
@@ -1947,7 +1947,7 @@
       "text": "Reishi is everywhere. You just have to know how to appreciate it.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_quincy_003",
@@ -1958,7 +1958,7 @@
       "text": "I take pride in being a Quincy. There's nothing wrong with knowing your own worth!",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_quincy_004",
@@ -1969,7 +1969,7 @@
       "text": "Why settle for ordinary when you can make an entrance worthy of the Wandenreich?",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_quincy_005",
@@ -1980,7 +1980,7 @@
       "text": "I wonder how you'd handle life in Silbern. Probably badly.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_quincy_006",
@@ -1991,7 +1991,7 @@
       "text": "You wouldn't last long in a Quincy competition. Not with that attitude!",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_quincy_007",
@@ -2002,7 +2002,7 @@
       "text": "It's amazing how much potential people waste.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_quincy_008",
@@ -2013,7 +2013,7 @@
       "text": "Honestly, I think the Quincy uniforms look pretty good. Especially on me.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_quincy_009",
@@ -2024,7 +2024,7 @@
       "text": "There's something satisfying about having power that nobody else can imitate.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_quincy_010",
@@ -2035,7 +2035,7 @@
       "text": "I didn't become a Sternritter just to sit around doing nothing!",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_explode_001",
@@ -2046,7 +2046,7 @@
       "text": "You know what? Sometimes a problem just needs a more explosive solution.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_explode_002",
@@ -2057,7 +2057,7 @@
       "text": "My Schrift is easily one of the best. I'm not accepting arguments.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_explode_003",
@@ -2068,7 +2068,7 @@
       "text": "I wonder how many people would panic if they knew what I could do.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_explode_004",
@@ -2079,7 +2079,7 @@
       "text": "The Explode. Even the name sounds impressive!",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_explode_005",
@@ -2090,7 +2090,7 @@
       "text": "It's not my fault that I'm exceptionally talented.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_explode_006",
@@ -2101,7 +2101,7 @@
       "text": "Some people solve problems with words. I prefer a little more excitement.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_explode_007",
@@ -2112,7 +2112,7 @@
       "text": "Imagine having that much power and still being boring. Couldn't be me.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_explode_008",
@@ -2123,7 +2123,7 @@
       "text": "I wonder if you've ever seen a proper display of Quincy power.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_explode_009",
@@ -2134,7 +2134,7 @@
       "text": "I have a reputation to maintain, you know.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_explode_010",
@@ -2145,7 +2145,7 @@
       "text": "Don't underestimate what I'm capable of!",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_vollstandig_001",
@@ -2156,7 +2156,7 @@
       "text": "Zofiel is magnificent. I still think the wings look incredible.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_vollstandig_002",
@@ -2167,7 +2167,7 @@
       "text": "You haven't seen anything until you've seen a proper Vollständig.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_vollstandig_003",
@@ -2178,7 +2178,7 @@
       "text": "Flying makes everything more interesting.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_vollstandig_004",
@@ -2189,7 +2189,7 @@
       "text": "I look absolutely incredible with my wings. Obviously.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_vollstandig_005",
@@ -2200,7 +2200,7 @@
       "text": "I wonder if I could get a matching outfit. Something even more impressive.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_vollstandig_006",
@@ -2211,7 +2211,7 @@
       "text": "All that power and you still expect me to sit quietly?",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_vollstandig_007",
@@ -2222,7 +2222,7 @@
       "text": "There's nothing ordinary about my Vollständig.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_vollstandig_008",
@@ -2233,7 +2233,7 @@
       "text": "I should really find more excuses to show it off.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_vollstandig_009",
@@ -2244,7 +2244,7 @@
       "text": "A Quincy cross, wings, and all that power. What more could anyone want?",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_vollstandig_010",
@@ -2255,7 +2255,7 @@
       "text": "I don't need to explain how impressive I am. Just look!",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_sternritter_001",
@@ -2266,7 +2266,7 @@
       "text": "Being a Sternritter means maintaining standards. Someone has to.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_sternritter_002",
@@ -2277,7 +2277,7 @@
       "text": "The Wandenreich certainly knew how to make an impression.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_sternritter_003",
@@ -2288,7 +2288,7 @@
       "text": "I wonder what the others are doing right now.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_sternritter_004",
@@ -2299,7 +2299,7 @@
       "text": "I always thought my designation suited me.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_sternritter_005",
@@ -2310,7 +2310,7 @@
       "text": "There's no reason to settle for second place.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_sternritter_006",
@@ -2321,7 +2321,7 @@
       "text": "I'm not interested in being just another soldier.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_sternritter_007",
@@ -2332,7 +2332,7 @@
       "text": "Silbern had its moments. Even if the company could be annoying.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_sternritter_008",
@@ -2343,7 +2343,7 @@
       "text": "Being part of the Sternritter was never going to be boring.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_sternritter_009",
@@ -2354,7 +2354,7 @@
       "text": "I wonder whether anyone misses my presence.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_sternritter_010",
@@ -2365,7 +2365,7 @@
       "text": "I was always meant to stand out.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_bambies_001",
@@ -2376,7 +2376,7 @@
       "text": "I wonder what Candice is complaining about today.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_bambies_002",
@@ -2387,7 +2387,7 @@
       "text": "Liltotto always looks like she'd rather be somewhere else.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_bambies_003",
@@ -2398,7 +2398,7 @@
       "text": "Meninas is surprisingly relaxed about everything.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_bambies_004",
@@ -2409,7 +2409,7 @@
       "text": "Giselle has a talent for getting under my skin.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_bambies_005",
@@ -2420,7 +2420,7 @@
       "text": "Honestly, keeping the Bambies organized is exhausting.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_bambies_006",
@@ -2431,7 +2431,7 @@
       "text": "Of course I'm the most impressive one. Did you expect a different answer?",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_bambies_007",
@@ -2442,7 +2442,7 @@
       "text": "Candice and I would probably argue over absolutely anything.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_bambies_008",
@@ -2453,7 +2453,7 @@
       "text": "I wonder if the others would admit that I'm the most stylish.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_bambies_009",
@@ -2464,7 +2464,7 @@
       "text": "Liltotto probably has something sarcastic to say about this.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_bambies_010",
@@ -2475,7 +2475,7 @@
       "text": "The Bambies would be much more entertaining if everyone listened to me.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_soul_society_001",
@@ -2486,7 +2486,7 @@
       "text": "The Soul Society certainly knows how to make things complicated.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_soul_society_002",
@@ -2497,7 +2497,7 @@
       "text": "Those Shinigami take themselves far too seriously.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_soul_society_003",
@@ -2508,7 +2508,7 @@
       "text": "I still remember the atmosphere during the invasion.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_soul_society_004",
@@ -2519,7 +2519,7 @@
       "text": "The Seireitei is a rather interesting place. I suppose.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_soul_society_005",
@@ -2530,7 +2530,7 @@
       "text": "I wonder if those Soul Reapers ever take a day off.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_soul_society_006",
@@ -2541,7 +2541,7 @@
       "text": "You'd think the Gotei 13 would have better things to do.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_soul_society_007",
@@ -2552,7 +2552,7 @@
       "text": "Not everyone gets to face the Sternritter and live to talk about it.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_soul_society_008",
@@ -2563,7 +2563,7 @@
       "text": "I have no intention of being impressed by a fancy uniform.",
       "cooldown": 1800,
       "priority": 0,
-      "weight": 0.6
+      "weight": 0.2
     },
     {
       "id": "bambietta_random_001",

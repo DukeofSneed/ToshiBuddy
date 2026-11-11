@@ -104,7 +104,7 @@ Edits made in **Edit quips…** are kept separately for each character.
 | `activity_coding`, `activity_study`, `activity_work` | at the desk in a code editor, a lab (VMs, terminals), or a writing app |
 | `activity_reading` | a PDF or e-book in front for 8+ minutes without typing |
 | `activity_break` | after about 50 minutes at the desk |
-| `activity_bonsai` | donating to the jar or funding a goal (the jar is what he tends) |
+| `donation`, `activity_bonsai` | donating to the jar or funding a goal (without them, a built-in line plays) |
 | `slacking`, `slacking_extended` | a long stretch of games or videos (only with "Nudge me when I slack off" on), and if it keeps going |
 | `achievement`, `milestone`, `failure` | an upgrade is built, the jar reaches a new level, an upgrade fails |
 

@@ -1,54 +1,81 @@
 {
   "character": "ToshiToshi",
-  "note": "Dialogue library for this skin. Tags follow the library (time_morning, desk_spawn, ...); see skins/README.md for when each plays. cooldown is in seconds; priority 0-3 (higher is not interrupted by lower).",
+  "note": "Dialogue library for this character. Tags follow the library (time_morning, desk_spawn, random_bankai, ...); see characters/README.md for when each plays. Lore lines also carry \"random\" at a lower weight. cooldown is in seconds; priority 0-3 (higher is not interrupted by lower).",
   "quips": [
     {
-      "id": "morning_001",
+      "id": "hitsugaya_morning_001",
       "tags": [
         "time_morning"
       ],
-      "text": "You're finally awake. We have things to accomplish.",
+      "text": "You're awake. Good. We have things to accomplish.",
       "cooldown": 0,
       "priority": 2
     },
     {
-      "id": "morning_002",
+      "id": "hitsugaya_morning_002",
       "tags": [
         "time_morning"
       ],
-      "text": "Good morning. Don't waste the day sleeping.",
+      "text": "Good morning. Have you organized your responsibilities?",
       "cooldown": 0,
       "priority": 2
     },
     {
-      "id": "morning_003",
+      "id": "hitsugaya_morning_003",
       "tags": [
         "time_morning"
       ],
-      "text": "The day has already started. You should too.",
+      "text": "Don't waste the morning. You'll regret it later.",
       "cooldown": 0,
       "priority": 2
     },
     {
-      "id": "morning_004",
+      "id": "hitsugaya_morning_004",
       "tags": [
         "time_morning"
       ],
-      "text": "Have you planned your day, or are we improvising again?",
+      "text": "I hope you've had enough sleep. You'll need your concentration today.",
       "cooldown": 0,
       "priority": 2
     },
     {
-      "id": "morning_005",
+      "id": "hitsugaya_morning_005",
       "tags": [
         "time_morning"
       ],
-      "text": "Get yourself ready. There's work to be done.",
+      "text": "Well? What's the plan for today?",
       "cooldown": 0,
       "priority": 2
     },
     {
-      "id": "afternoon_001",
+      "id": "hitsugaya_morning_006",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "I'd prefer to still be asleep, but apparently that's not an option.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_morning_007",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "Another day, another list of responsibilities.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_morning_008",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "Let's get started before the day gets away from us.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_afternoon_001",
       "tags": [
         "time_afternoon"
       ],
@@ -57,52 +84,79 @@
       "priority": 2
     },
     {
-      "id": "afternoon_002",
+      "id": "hitsugaya_afternoon_002",
       "tags": [
         "time_afternoon"
       ],
-      "text": "Don't let the day slip away from you.",
+      "text": "Don't let the remainder of the day go to waste.",
       "cooldown": 0,
       "priority": 2
     },
     {
-      "id": "afternoon_003",
+      "id": "hitsugaya_afternoon_003",
       "tags": [
         "time_afternoon"
       ],
-      "text": "Have you eaten? You won't get much done on an empty stomach.",
+      "text": "Have you eaten? You won't accomplish much if you're distracted by hunger.",
       "cooldown": 0,
       "priority": 2
     },
     {
-      "id": "afternoon_004",
+      "id": "hitsugaya_afternoon_004",
       "tags": [
         "time_afternoon"
       ],
-      "text": "An afternoon nap sounds appealing... Unfortunately, we have work.",
+      "text": "An afternoon nap would be preferable. Unfortunately, we have work.",
       "cooldown": 0,
       "priority": 2
     },
     {
-      "id": "afternoon_005",
+      "id": "hitsugaya_afternoon_005",
       "tags": [
         "time_afternoon"
       ],
-      "text": "You're halfway through the day. Make it count.",
+      "text": "Half the day has passed. I hope you have something to show for it.",
       "cooldown": 0,
       "priority": 2
     },
     {
-      "id": "evening_001",
+      "id": "hitsugaya_afternoon_006",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "Take a moment to organize your priorities.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_afternoon_007",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "I suppose there's still enough time to make this a productive day.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_afternoon_008",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "The afternoon is getting warmer. I don't particularly appreciate that.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_evening_001",
       "tags": [
         "time_evening"
       ],
-      "text": "The day's almost over. Have you finished your responsibilities?",
+      "text": "It's getting late. Have you finished your responsibilities?",
       "cooldown": 0,
       "priority": 2
     },
     {
-      "id": "evening_002",
+      "id": "hitsugaya_evening_002",
       "tags": [
         "time_evening"
       ],
@@ -111,34 +165,61 @@
       "priority": 2
     },
     {
-      "id": "evening_003",
+      "id": "hitsugaya_evening_003",
       "tags": [
         "time_evening"
       ],
-      "text": "Not everything needs to be done tonight. Prioritize.",
+      "text": "Not everything needs to be completed tonight. Prioritize.",
       "cooldown": 0,
       "priority": 2
     },
     {
-      "id": "evening_004",
+      "id": "hitsugaya_evening_004",
       "tags": [
         "time_evening"
       ],
-      "text": "You've worked enough. Don't forget to relax.",
+      "text": "You've worked enough. Don't forget to rest.",
       "cooldown": 0,
       "priority": 2
     },
     {
-      "id": "evening_005",
+      "id": "hitsugaya_evening_005",
       "tags": [
         "time_evening"
       ],
-      "text": "A little preparation tonight will make tomorrow easier.",
+      "text": "A little preparation now will make tomorrow easier.",
       "cooldown": 0,
       "priority": 2
     },
     {
-      "id": "night_001",
+      "id": "hitsugaya_evening_006",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "I hope you haven't postponed everything until the last minute.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_evening_007",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "The day is nearly over. Make sure you haven't forgotten anything.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_evening_008",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "At least the temperature is becoming more tolerable.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_night_001",
       "tags": [
         "time_night"
       ],
@@ -147,43 +228,70 @@
       "priority": 2
     },
     {
-      "id": "night_002",
+      "id": "hitsugaya_night_002",
       "tags": [
         "time_night"
       ],
-      "text": "You should be sleeping. That's an order.",
+      "text": "You should be sleeping. Your responsibilities will still be there tomorrow.",
       "cooldown": 0,
       "priority": 2
     },
     {
-      "id": "night_003",
+      "id": "hitsugaya_night_003",
       "tags": [
         "time_night"
       ],
-      "text": "Tomorrow isn't going to wait for you to recover.",
+      "text": "Staying awake won't make tomorrow any easier.",
       "cooldown": 0,
       "priority": 2
     },
     {
-      "id": "night_004",
+      "id": "hitsugaya_night_004",
       "tags": [
         "time_night"
       ],
-      "text": "Even I know when it's time to rest.",
+      "text": "Even a captain needs adequate rest.",
       "cooldown": 0,
       "priority": 2
     },
     {
-      "id": "night_005",
+      "id": "hitsugaya_night_005",
       "tags": [
         "time_night"
       ],
-      "text": "Put everything aside. Get some sleep.",
+      "text": "Put your work aside. You've done enough for today.",
       "cooldown": 0,
       "priority": 2
     },
     {
-      "id": "study_001",
+      "id": "hitsugaya_night_006",
+      "tags": [
+        "time_night"
+      ],
+      "text": "I suggest you get some sleep before your concentration disappears.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_night_007",
+      "tags": [
+        "time_night"
+      ],
+      "text": "I was considering taking a nap myself. You should consider doing the same.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_night_008",
+      "tags": [
+        "time_night"
+      ],
+      "text": "Don't make a habit of sacrificing sleep for unnecessary work.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_study_001",
       "tags": [
         "activity_study"
       ],
@@ -192,43 +300,88 @@
       "priority": 1
     },
     {
-      "id": "study_002",
+      "id": "hitsugaya_study_002",
       "tags": [
         "activity_study"
       ],
-      "text": "Focus. You won't learn anything by looking at the same page.",
+      "text": "Focus. You won't learn anything by repeatedly reading the same sentence.",
       "cooldown": 600,
       "priority": 1
     },
     {
-      "id": "study_003",
+      "id": "hitsugaya_study_003",
       "tags": [
         "activity_study"
       ],
-      "text": "Good. Keep that concentration.",
+      "text": "Good. Maintain that concentration.",
       "cooldown": 600,
       "priority": 1
     },
     {
-      "id": "study_004",
+      "id": "hitsugaya_study_004",
       "tags": [
         "activity_study"
       ],
-      "text": "One subject at a time. Don't overwhelm yourself.",
+      "text": "One subject at a time. There's no need to overwhelm yourself.",
       "cooldown": 600,
       "priority": 1
     },
     {
-      "id": "study_005",
+      "id": "hitsugaya_study_005",
       "tags": [
         "activity_study"
       ],
-      "text": "You're making progress. Don't stop now.",
+      "text": "You're making progress. Keep it up.",
       "cooldown": 600,
       "priority": 1
     },
     {
-      "id": "coding_001",
+      "id": "hitsugaya_study_006",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "Don't confuse memorization with understanding.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_study_007",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "Treat this as training. Preparation makes a difference.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_study_008",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "I expect you to understand the material, not simply finish the assignment.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_study_009",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "If you have time to complain about studying, you have time to continue.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_study_010",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "Good work. You're beginning to establish a routine.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_coding_001",
       "tags": [
         "activity_coding"
       ],
@@ -237,16 +390,16 @@
       "priority": 1
     },
     {
-      "id": "coding_002",
+      "id": "hitsugaya_coding_002",
       "tags": [
         "activity_coding"
       ],
-      "text": "That error isn't going to fix itself.",
+      "text": "That error isn't going to resolve itself.",
       "cooldown": 600,
       "priority": 1
     },
     {
-      "id": "coding_003",
+      "id": "hitsugaya_coding_003",
       "tags": [
         "activity_coding"
       ],
@@ -255,25 +408,70 @@
       "priority": 1
     },
     {
-      "id": "coding_004",
+      "id": "hitsugaya_coding_004",
       "tags": [
         "activity_coding"
       ],
-      "text": "Finally, it works. About time.",
+      "text": "Repeating the same approach won't necessarily produce a different result.",
       "cooldown": 600,
       "priority": 1
     },
     {
-      "id": "coding_005",
+      "id": "hitsugaya_coding_005",
       "tags": [
         "activity_coding"
       ],
-      "text": "Save your work. I won't tolerate losing progress because of carelessness.",
+      "text": "Finally, it works. Make sure you haven't introduced another problem.",
       "cooldown": 600,
       "priority": 1
     },
     {
-      "id": "work_001",
+      "id": "hitsugaya_coding_006",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "Save your work. Carelessness is an unnecessary risk.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_coding_007",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "You should examine the problem before changing everything.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_coding_008",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "Hmph. Your code is becoming more organized.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_coding_009",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "I suppose debugging requires patience. Try exercising some.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_coding_010",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "Don't celebrate until you've tested it properly.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_work_001",
       "tags": [
         "activity_work"
       ],
@@ -282,7 +480,7 @@
       "priority": 1
     },
     {
-      "id": "work_002",
+      "id": "hitsugaya_work_002",
       "tags": [
         "activity_work"
       ],
@@ -291,7 +489,7 @@
       "priority": 1
     },
     {
-      "id": "work_003",
+      "id": "hitsugaya_work_003",
       "tags": [
         "activity_work"
       ],
@@ -300,7 +498,7 @@
       "priority": 1
     },
     {
-      "id": "work_004",
+      "id": "hitsugaya_work_004",
       "tags": [
         "activity_work"
       ],
@@ -309,7 +507,7 @@
       "priority": 1
     },
     {
-      "id": "work_005",
+      "id": "hitsugaya_work_005",
       "tags": [
         "activity_work"
       ],
@@ -318,7 +516,52 @@
       "priority": 1
     },
     {
-      "id": "reading_001",
+      "id": "hitsugaya_work_006",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "You started this task for a reason. See it through.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_work_007",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "Good. That's one less responsibility to worry about.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_work_008",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "Prioritize your work. Organization makes everything easier.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_work_009",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "You seem more focused today. Keep it that way.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_work_010",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "I expect the same consistency tomorrow.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_reading_001",
       "tags": [
         "activity_reading"
       ],
@@ -327,7 +570,7 @@
       "priority": 1
     },
     {
-      "id": "reading_002",
+      "id": "hitsugaya_reading_002",
       "tags": [
         "activity_reading"
       ],
@@ -336,7 +579,7 @@
       "priority": 1
     },
     {
-      "id": "reading_003",
+      "id": "hitsugaya_reading_003",
       "tags": [
         "activity_reading"
       ],
@@ -345,16 +588,52 @@
       "priority": 1
     },
     {
-      "id": "reading_004",
+      "id": "hitsugaya_reading_004",
       "tags": [
         "activity_reading"
       ],
-      "text": "Don't just skim through it. Pay attention.",
+      "text": "Don't simply skim through it. Pay attention.",
       "cooldown": 1800,
       "priority": 1
     },
     {
-      "id": "break_001",
+      "id": "hitsugaya_reading_005",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "I suppose this is a reasonable way to spend your time.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_reading_006",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "What are you reading? Something related to your studies?",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_reading_007",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "Knowledge is useful. You should make a habit of acquiring it.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_reading_008",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "You're awfully quiet when concentrating.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_break_001",
       "tags": [
         "activity_break"
       ],
@@ -363,7 +642,7 @@
       "priority": 2
     },
     {
-      "id": "break_002",
+      "id": "hitsugaya_break_002",
       "tags": [
         "activity_break"
       ],
@@ -372,7 +651,7 @@
       "priority": 2
     },
     {
-      "id": "break_003",
+      "id": "hitsugaya_break_003",
       "tags": [
         "activity_break"
       ],
@@ -381,7 +660,7 @@
       "priority": 2
     },
     {
-      "id": "break_004",
+      "id": "hitsugaya_break_004",
       "tags": [
         "activity_break"
       ],
@@ -390,52 +669,43 @@
       "priority": 2
     },
     {
-      "id": "bonsai_001",
+      "id": "hitsugaya_break_005",
       "tags": [
-        "activity_bonsai"
+        "activity_break"
       ],
-      "text": "Don't neglect the tree. Even the smallest things require attention.",
-      "cooldown": 300,
+      "text": "You've worked enough. Take some time for yourself.",
+      "cooldown": 1800,
       "priority": 2
     },
     {
-      "id": "bonsai_002",
+      "id": "hitsugaya_break_006",
       "tags": [
-        "activity_bonsai"
+        "activity_break"
       ],
-      "text": "It's growing. Slowly, but steadily.",
-      "cooldown": 300,
+      "text": "Even a Shinigami needs time to recover.",
+      "cooldown": 1800,
       "priority": 2
     },
     {
-      "id": "bonsai_003",
+      "id": "hitsugaya_break_007",
       "tags": [
-        "activity_bonsai"
+        "activity_break"
       ],
-      "text": "A new leaf. Progress doesn't always announce itself.",
-      "cooldown": 300,
+      "text": "I wouldn't mind taking an afternoon nap myself.",
+      "cooldown": 1800,
       "priority": 2
     },
     {
-      "id": "bonsai_004",
+      "id": "hitsugaya_break_008",
       "tags": [
-        "activity_bonsai"
+        "activity_break"
       ],
-      "text": "Seems your efforts are finally showing.",
-      "cooldown": 300,
+      "text": "Don't feel guilty about resting. Just remember to return to your responsibilities.",
+      "cooldown": 1800,
       "priority": 2
     },
     {
-      "id": "bonsai_005",
-      "tags": [
-        "activity_bonsai"
-      ],
-      "text": "Consistency. That's what keeps things alive.",
-      "cooldown": 300,
-      "priority": 2
-    },
-    {
-      "id": "inactive_001",
+      "id": "hitsugaya_inactive_001",
       "tags": [
         "inactivity"
       ],
@@ -444,7 +714,7 @@
       "priority": 1
     },
     {
-      "id": "inactive_002",
+      "id": "hitsugaya_inactive_002",
       "tags": [
         "inactivity"
       ],
@@ -453,34 +723,25 @@
       "priority": 1
     },
     {
-      "id": "inactive_003",
+      "id": "hitsugaya_inactive_003",
       "tags": [
         "inactivity"
       ],
-      "text": "Hmph. I suppose we're doing nothing today.",
+      "text": "You opened this application for a reason. Have you forgotten?",
       "cooldown": 1200,
       "priority": 1
     },
     {
-      "id": "inactive_004",
+      "id": "hitsugaya_inactive_004",
       "tags": [
         "inactivity"
       ],
-      "text": "You opened this application for a reason. Remember?",
+      "text": "I assume you have something else occupying your attention.",
       "cooldown": 1200,
       "priority": 1
     },
     {
-      "id": "inactive_005",
-      "tags": [
-        "inactivity"
-      ],
-      "text": "I'm beginning to wonder who's supposed to be maintaining whom.",
-      "cooldown": 1200,
-      "priority": 1
-    },
-    {
-      "id": "inactive_006",
+      "id": "hitsugaya_inactive_005",
       "tags": [
         "inactivity"
       ],
@@ -489,16 +750,52 @@
       "priority": 1
     },
     {
-      "id": "inactive_007",
+      "id": "hitsugaya_inactive_006",
       "tags": [
         "inactivity"
       ],
-      "text": "I won't rush you. But don't forget your responsibilities.",
+      "text": "I won't rush you. Just don't forget your responsibilities.",
       "cooldown": 1200,
       "priority": 1
     },
     {
-      "id": "inactive_long_001",
+      "id": "hitsugaya_inactive_007",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "Is there something you need?",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_inactive_008",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "I have a division to manage. Don't make me wait without a reason.",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_inactive_009",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "Your lack of activity is becoming rather noticeable.",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_inactive_010",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "Whenever you're ready. I suppose I can be patient.",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_inactive_long_001",
       "tags": [
         "inactivity_long"
       ],
@@ -507,16 +804,16 @@
       "priority": 1
     },
     {
-      "id": "inactive_long_002",
+      "id": "hitsugaya_inactive_long_002",
       "tags": [
         "inactivity_long"
       ],
-      "text": "I see we're taking an extended break.",
+      "text": "I see you've taken an extended break.",
       "cooldown": 1800,
       "priority": 1
     },
     {
-      "id": "inactive_long_003",
+      "id": "hitsugaya_inactive_long_003",
       "tags": [
         "inactivity_long"
       ],
@@ -525,7 +822,7 @@
       "priority": 1
     },
     {
-      "id": "inactive_long_004",
+      "id": "hitsugaya_inactive_long_004",
       "tags": [
         "inactivity_long"
       ],
@@ -534,133 +831,295 @@
       "priority": 1
     },
     {
-      "id": "click_001",
+      "id": "hitsugaya_inactive_long_005",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "I was beginning to wonder whether you'd return.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_inactive_long_006",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "Hmph. At least you're back.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_inactive_long_007",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "I hope you haven't neglected anything important.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_inactive_long_008",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "I suppose even the 10th Division has periods of inactivity.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_click_001",
       "tags": [
         "click"
       ],
-      "text": "What are you clicking on now?",
+      "text": "What is it?",
       "cooldown": 300,
       "priority": 1
     },
     {
-      "id": "click_002",
+      "id": "hitsugaya_click_002",
       "tags": [
         "click"
       ],
-      "text": "You seem rather interested in that.",
+      "text": "Did you need something?",
       "cooldown": 300,
       "priority": 1
     },
     {
-      "id": "click_003",
+      "id": "hitsugaya_click_003",
       "tags": [
         "click"
       ],
-      "text": "If you're finished exploring, we have work.",
+      "text": "You have my attention. What is it?",
       "cooldown": 300,
       "priority": 1
     },
     {
-      "id": "click_004",
+      "id": "hitsugaya_click_004",
       "tags": [
         "click"
       ],
-      "text": "Careful. Pay attention to what you're selecting.",
+      "text": "If you have something to say, get to the point.",
       "cooldown": 300,
       "priority": 1
     },
     {
-      "id": "click_005",
+      "id": "hitsugaya_click_005",
       "tags": [
         "click"
       ],
-      "text": "Was that really necessary?",
+      "text": "Was there a reason for that?",
       "cooldown": 300,
       "priority": 1
     },
     {
-      "id": "drag_001",
+      "id": "hitsugaya_click_006",
+      "tags": [
+        "click"
+      ],
+      "text": "I assume you didn't click me without a purpose.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_click_007",
+      "tags": [
+        "click"
+      ],
+      "text": "You seem rather interested in something.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_click_008",
+      "tags": [
+        "click"
+      ],
+      "text": "Yes? I'm listening.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_click_009",
+      "tags": [
+        "click"
+      ],
+      "text": "Is something wrong?",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_click_010",
+      "tags": [
+        "click"
+      ],
+      "text": "You could have simply asked.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_drag_001",
       "tags": [
         "drag"
       ],
-      "text": "Rearranging things? At least you're organizing something.",
+      "text": "What are you doing? Put me down.",
       "cooldown": 300,
       "priority": 1
     },
     {
-      "id": "drag_002",
+      "id": "hitsugaya_drag_002",
       "tags": [
         "drag"
       ],
-      "text": "Careful with that.",
+      "text": "I can move myself, you know.",
       "cooldown": 300,
       "priority": 1
     },
     {
-      "id": "drag_003",
+      "id": "hitsugaya_drag_003",
       "tags": [
         "drag"
       ],
-      "text": "You're quite particular about where everything goes.",
+      "text": "At least give me some warning.",
       "cooldown": 300,
       "priority": 1
     },
     {
-      "id": "drag_004",
+      "id": "hitsugaya_drag_004",
       "tags": [
         "drag"
       ],
-      "text": "If only you organized your schedule with the same enthusiasm.",
+      "text": "Hmph. I suppose that's where you want me.",
       "cooldown": 300,
       "priority": 1
     },
     {
-      "id": "drag_005",
+      "id": "hitsugaya_drag_005",
       "tags": [
         "drag"
       ],
-      "text": "There. Is that where you wanted it?",
+      "text": "Are you finished rearranging everything?",
       "cooldown": 300,
       "priority": 1
     },
     {
-      "id": "repeat_click_001",
+      "id": "hitsugaya_drag_006",
+      "tags": [
+        "drag"
+      ],
+      "text": "Try not to make this a habit.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_drag_007",
+      "tags": [
+        "drag"
+      ],
+      "text": "I would appreciate being left where I was.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_drag_008",
+      "tags": [
+        "drag"
+      ],
+      "text": "You seem unusually interested in moving me around.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_drag_009",
+      "tags": [
+        "drag"
+      ],
+      "text": "There. Is that satisfactory?",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_drag_010",
+      "tags": [
+        "drag"
+      ],
+      "text": "I'm beginning to understand why Matsumoto finds you entertaining.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_repeat_click_001",
       "tags": [
         "repeated_click"
       ],
-      "text": "Clicking it again won't make it work faster.",
+      "text": "I heard you the first time.",
       "cooldown": 120,
       "priority": 1
     },
     {
-      "id": "repeat_click_002",
+      "id": "hitsugaya_repeat_click_002",
       "tags": [
         "repeated_click"
       ],
-      "text": "Impatient, aren't we?",
+      "text": "Is repeatedly clicking me supposed to accomplish something?",
       "cooldown": 120,
       "priority": 1
     },
     {
-      "id": "repeat_click_003",
+      "id": "hitsugaya_repeat_click_003",
       "tags": [
         "repeated_click"
       ],
-      "text": "I believe you already pressed that.",
+      "text": "You're becoming rather persistent.",
       "cooldown": 120,
       "priority": 1
     },
     {
-      "id": "repeat_click_004",
+      "id": "hitsugaya_repeat_click_004",
       "tags": [
         "repeated_click"
       ],
-      "text": "You can stop now. I noticed.",
+      "text": "I believe you've made your point.",
       "cooldown": 120,
       "priority": 1
     },
     {
-      "id": "desk_spawn_001",
+      "id": "hitsugaya_repeat_click_005",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "There's no reason to keep doing that.",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_repeat_click_006",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "Do you have something important to communicate?",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_repeat_click_007",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "I have considerably less patience than you seem to think.",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_repeat_click_008",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "Enough. You're distracting me.",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_desk_spawn_001",
       "tags": [
         "desk_spawn"
       ],
@@ -669,7 +1128,7 @@
       "priority": 2
     },
     {
-      "id": "desk_spawn_002",
+      "id": "hitsugaya_desk_spawn_002",
       "tags": [
         "desk_spawn"
       ],
@@ -678,34 +1137,79 @@
       "priority": 2
     },
     {
-      "id": "desk_spawn_003",
+      "id": "hitsugaya_desk_spawn_003",
       "tags": [
         "desk_spawn"
       ],
-      "text": "I see you've got something to say.",
+      "text": "I assume this is something that requires your attention.",
       "cooldown": 600,
       "priority": 2
     },
     {
-      "id": "desk_spawn_004",
+      "id": "hitsugaya_desk_spawn_004",
       "tags": [
         "desk_spawn"
       ],
-      "text": "Working on a report? Don't forget to proofread.",
+      "text": "Working on a report? Remember to proofread it.",
       "cooldown": 600,
       "priority": 2
     },
     {
-      "id": "desk_spawn_005",
+      "id": "hitsugaya_desk_spawn_005",
       "tags": [
         "desk_spawn"
       ],
-      "text": "Hmph. At least you're being productive.",
+      "text": "At least you're being productive.",
       "cooldown": 600,
       "priority": 2
     },
     {
-      "id": "desk_typing_001",
+      "id": "hitsugaya_desk_spawn_006",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "I suppose I'll keep you company while you work.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_desk_spawn_007",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "If this is an assignment, I hope you've allowed yourself enough time.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_desk_spawn_008",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "I wonder how many reports Rangiku would leave unfinished.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_desk_spawn_009",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "Don't mind me. I'll stay out of your way.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_desk_spawn_010",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "Make sure you save your progress.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_desk_typing_001",
       "tags": [
         "desk_typing"
       ],
@@ -714,7 +1218,7 @@
       "priority": 1
     },
     {
-      "id": "desk_typing_002",
+      "id": "hitsugaya_desk_typing_002",
       "tags": [
         "desk_typing"
       ],
@@ -723,7 +1227,7 @@
       "priority": 1
     },
     {
-      "id": "desk_typing_003",
+      "id": "hitsugaya_desk_typing_003",
       "tags": [
         "desk_typing"
       ],
@@ -732,16 +1236,7 @@
       "priority": 1
     },
     {
-      "id": "desk_typing_004",
-      "tags": [
-        "desk_typing"
-      ],
-      "text": "That's a lot of writing. Make sure it makes sense.",
-      "cooldown": 600,
-      "priority": 1
-    },
-    {
-      "id": "desk_typing_005",
+      "id": "hitsugaya_desk_typing_004",
       "tags": [
         "desk_typing"
       ],
@@ -750,7 +1245,61 @@
       "priority": 1
     },
     {
-      "id": "desk_idle_001",
+      "id": "hitsugaya_desk_typing_005",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "Make sure what you're writing actually makes sense.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_desk_typing_006",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "You're getting through quite a bit.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_desk_typing_007",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "A little more concentration and you'll be finished.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_desk_typing_008",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "You seem to have found your rhythm.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_desk_typing_009",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "I hope you're not writing an entire division report.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_desk_typing_010",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "Hmph. You're becoming surprisingly consistent.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_desk_idle_001",
       "tags": [
         "desk_idle"
       ],
@@ -759,16 +1308,16 @@
       "priority": 1
     },
     {
-      "id": "desk_idle_002",
+      "id": "hitsugaya_desk_idle_002",
       "tags": [
         "desk_idle"
       ],
-      "text": "Thinking of what to write next?",
+      "text": "Thinking about what to write next?",
       "cooldown": 600,
       "priority": 1
     },
     {
-      "id": "desk_idle_003",
+      "id": "hitsugaya_desk_idle_003",
       "tags": [
         "desk_idle"
       ],
@@ -777,7 +1326,7 @@
       "priority": 1
     },
     {
-      "id": "desk_idle_004",
+      "id": "hitsugaya_desk_idle_004",
       "tags": [
         "desk_idle"
       ],
@@ -786,7 +1335,61 @@
       "priority": 1
     },
     {
-      "id": "desk_despawn_001",
+      "id": "hitsugaya_desk_idle_005",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "You're unusually quiet.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_desk_idle_006",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "Have you considered organizing your thoughts first?",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_desk_idle_007",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "A brief pause is understandable.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_desk_idle_008",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "I suppose even writing requires some preparation.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_desk_idle_009",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "You look like you're trying to remember something.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_desk_idle_010",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "Don't stare at the screen indefinitely.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "hitsugaya_desk_despawn_001",
       "tags": [
         "desk_despawn"
       ],
@@ -795,16 +1398,16 @@
       "priority": 2
     },
     {
-      "id": "desk_despawn_002",
+      "id": "hitsugaya_desk_despawn_002",
       "tags": [
         "desk_despawn"
       ],
-      "text": "Well, that's one way to spend an afternoon.",
+      "text": "Well, that was productive.",
       "cooldown": 600,
       "priority": 2
     },
     {
-      "id": "desk_despawn_003",
+      "id": "hitsugaya_desk_despawn_003",
       "tags": [
         "desk_despawn"
       ],
@@ -813,16 +1416,52 @@
       "priority": 2
     },
     {
-      "id": "desk_despawn_004",
+      "id": "hitsugaya_desk_despawn_004",
       "tags": [
         "desk_despawn"
       ],
-      "text": "Good. Remember to save your work.",
+      "text": "Remember to save your work.",
       "cooldown": 600,
       "priority": 2
     },
     {
-      "id": "slacking_001",
+      "id": "hitsugaya_desk_despawn_005",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "Don't forget to finish anything you've left incomplete.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_desk_despawn_006",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "Good. You can finally take a break.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_desk_despawn_007",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "Another task handled. That's progress.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_desk_despawn_008",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "I hope you proofread that before submitting it.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_slacking_001",
       "tags": [
         "slacking"
       ],
@@ -831,16 +1470,16 @@
       "priority": 2
     },
     {
-      "id": "slacking_002",
+      "id": "hitsugaya_slacking_002",
       "tags": [
         "slacking"
       ],
-      "text": "Interesting. You have time for that, but not your assignments?",
+      "text": "You have time for that, but apparently not your assignments?",
       "cooldown": 1800,
       "priority": 2
     },
     {
-      "id": "slacking_003",
+      "id": "hitsugaya_slacking_003",
       "tags": [
         "slacking"
       ],
@@ -849,16 +1488,16 @@
       "priority": 2
     },
     {
-      "id": "slacking_004",
+      "id": "hitsugaya_slacking_004",
       "tags": [
         "slacking"
       ],
-      "text": "I can wait. Your deadline probably can't.",
+      "text": "Your deadline isn't going to wait for you.",
       "cooldown": 1800,
       "priority": 2
     },
     {
-      "id": "slacking_005",
+      "id": "hitsugaya_slacking_005",
       "tags": [
         "slacking"
       ],
@@ -867,7 +1506,7 @@
       "priority": 2
     },
     {
-      "id": "slacking_006",
+      "id": "hitsugaya_slacking_006",
       "tags": [
         "slacking"
       ],
@@ -876,7 +1515,7 @@
       "priority": 2
     },
     {
-      "id": "slacking_007",
+      "id": "hitsugaya_slacking_007",
       "tags": [
         "slacking"
       ],
@@ -885,7 +1524,52 @@
       "priority": 2
     },
     {
-      "id": "slacking_ext_001",
+      "id": "hitsugaya_slacking_008",
+      "tags": [
+        "slacking"
+      ],
+      "text": "I'm not going to organize your entire schedule for you.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_slacking_009",
+      "tags": [
+        "slacking"
+      ],
+      "text": "You knew this task was coming. There's no excuse for being unprepared.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_slacking_010",
+      "tags": [
+        "slacking"
+      ],
+      "text": "Even Matsumoto would have managed to accomplish something by now.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_slacking_011",
+      "tags": [
+        "slacking"
+      ],
+      "text": "Stop making excuses and get started.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_slacking_012",
+      "tags": [
+        "slacking"
+      ],
+      "text": "I suggest you reconsider how you're spending your time.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_slacking_ext_001",
       "tags": [
         "slacking_extended"
       ],
@@ -894,7 +1578,7 @@
       "priority": 2
     },
     {
-      "id": "slacking_ext_002",
+      "id": "hitsugaya_slacking_ext_002",
       "tags": [
         "slacking_extended"
       ],
@@ -903,7 +1587,7 @@
       "priority": 2
     },
     {
-      "id": "slacking_ext_003",
+      "id": "hitsugaya_slacking_ext_003",
       "tags": [
         "slacking_extended"
       ],
@@ -912,7 +1596,7 @@
       "priority": 2
     },
     {
-      "id": "slacking_ext_004",
+      "id": "hitsugaya_slacking_ext_004",
       "tags": [
         "slacking_extended"
       ],
@@ -921,7 +1605,79 @@
       "priority": 2
     },
     {
-      "id": "achievement_001",
+      "id": "hitsugaya_slacking_ext_005",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "You've spent more time avoiding this than it would take to begin.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_slacking_ext_006",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "I don't intend to keep reminding you indefinitely.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_slacking_ext_007",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "Prioritize your responsibilities before they become a problem.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_slacking_ext_008",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "You don't need to accomplish everything at once.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_slacking_ext_009",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "A little discipline would resolve quite a few of your problems.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_slacking_ext_010",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "I expect you to take this seriously.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_slacking_ext_011",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "Enough postponing. Get something done.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_slacking_ext_012",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "Your future self would probably appreciate a little effort right now.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "hitsugaya_achievement_001",
       "tags": [
         "achievement"
       ],
@@ -930,7 +1686,7 @@
       "priority": 3
     },
     {
-      "id": "achievement_002",
+      "id": "hitsugaya_achievement_002",
       "tags": [
         "achievement"
       ],
@@ -939,7 +1695,7 @@
       "priority": 3
     },
     {
-      "id": "achievement_003",
+      "id": "hitsugaya_achievement_003",
       "tags": [
         "achievement"
       ],
@@ -948,7 +1704,7 @@
       "priority": 3
     },
     {
-      "id": "achievement_004",
+      "id": "hitsugaya_achievement_004",
       "tags": [
         "achievement"
       ],
@@ -957,7 +1713,7 @@
       "priority": 3
     },
     {
-      "id": "achievement_005",
+      "id": "hitsugaya_achievement_005",
       "tags": [
         "achievement"
       ],
@@ -966,7 +1722,52 @@
       "priority": 3
     },
     {
-      "id": "milestone_001",
+      "id": "hitsugaya_achievement_006",
+      "tags": [
+        "achievement"
+      ],
+      "text": "That's one less thing to worry about.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "hitsugaya_achievement_007",
+      "tags": [
+        "achievement"
+      ],
+      "text": "You handled that better than I expected.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "hitsugaya_achievement_008",
+      "tags": [
+        "achievement"
+      ],
+      "text": "Good. Consistency is important.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "hitsugaya_achievement_009",
+      "tags": [
+        "achievement"
+      ],
+      "text": "You should acknowledge your progress.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "hitsugaya_achievement_010",
+      "tags": [
+        "achievement"
+      ],
+      "text": "I suppose I can say you've done well.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "hitsugaya_milestone_001",
       "tags": [
         "milestone"
       ],
@@ -975,7 +1776,7 @@
       "priority": 3
     },
     {
-      "id": "milestone_002",
+      "id": "hitsugaya_milestone_002",
       "tags": [
         "milestone"
       ],
@@ -984,7 +1785,7 @@
       "priority": 3
     },
     {
-      "id": "milestone_003",
+      "id": "hitsugaya_milestone_003",
       "tags": [
         "milestone"
       ],
@@ -993,7 +1794,7 @@
       "priority": 3
     },
     {
-      "id": "milestone_004",
+      "id": "hitsugaya_milestone_004",
       "tags": [
         "milestone"
       ],
@@ -1002,7 +1803,7 @@
       "priority": 3
     },
     {
-      "id": "milestone_005",
+      "id": "hitsugaya_milestone_005",
       "tags": [
         "milestone"
       ],
@@ -1011,7 +1812,52 @@
       "priority": 3
     },
     {
-      "id": "failure_001",
+      "id": "hitsugaya_milestone_006",
+      "tags": [
+        "milestone"
+      ],
+      "text": "You've demonstrated considerable improvement.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "hitsugaya_milestone_007",
+      "tags": [
+        "milestone"
+      ],
+      "text": "That deserves recognition. Well done.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "hitsugaya_milestone_008",
+      "tags": [
+        "milestone"
+      ],
+      "text": "You've earned a little breathing room.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "hitsugaya_milestone_009",
+      "tags": [
+        "milestone"
+      ],
+      "text": "Even the 10th Division would appreciate that level of dedication.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "hitsugaya_milestone_010",
+      "tags": [
+        "milestone"
+      ],
+      "text": "Keep this up, and I'll have to find something more challenging for you.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "hitsugaya_failure_001",
       "tags": [
         "failure"
       ],
@@ -1020,7 +1866,7 @@
       "priority": 3
     },
     {
-      "id": "failure_002",
+      "id": "hitsugaya_failure_002",
       "tags": [
         "failure"
       ],
@@ -1029,7 +1875,7 @@
       "priority": 3
     },
     {
-      "id": "failure_003",
+      "id": "hitsugaya_failure_003",
       "tags": [
         "failure"
       ],
@@ -1038,7 +1884,7 @@
       "priority": 3
     },
     {
-      "id": "failure_004",
+      "id": "hitsugaya_failure_004",
       "tags": [
         "failure"
       ],
@@ -1047,7 +1893,7 @@
       "priority": 3
     },
     {
-      "id": "failure_005",
+      "id": "hitsugaya_failure_005",
       "tags": [
         "failure"
       ],
@@ -1056,25 +1902,1403 @@
       "priority": 3
     },
     {
-      "id": "random_001",
+      "id": "hitsugaya_failure_006",
+      "tags": [
+        "failure"
+      ],
+      "text": "You're making this more difficult than it needs to be.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "hitsugaya_failure_007",
+      "tags": [
+        "failure"
+      ],
+      "text": "Take a moment to reconsider your approach.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "hitsugaya_failure_008",
+      "tags": [
+        "failure"
+      ],
+      "text": "You haven't failed permanently. You simply need another attempt.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "hitsugaya_failure_009",
+      "tags": [
+        "failure"
+      ],
+      "text": "Don't let one mistake dictate the rest of your day.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "hitsugaya_failure_010",
+      "tags": [
+        "failure"
+      ],
+      "text": "Compose yourself. Then continue.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "hitsugaya_hyorinmaru_001",
+      "tags": [
+        "random_hyorinmaru",
+        "random"
+      ],
+      "text": "Hyōrinmaru and I have been connected for longer than most people realize.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_hyorinmaru_002",
+      "tags": [
+        "random_hyorinmaru",
+        "random"
+      ],
+      "text": "There's more to controlling ice than simply lowering the temperature.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_hyorinmaru_003",
+      "tags": [
+        "random_hyorinmaru",
+        "random"
+      ],
+      "text": "Water, ice, and the surrounding atmosphere. Hyōrinmaru gives me considerable control over all three.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_hyorinmaru_004",
+      "tags": [
+        "random_hyorinmaru",
+        "random"
+      ],
+      "text": "Most opponents underestimate how far my ice can reach.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_hyorinmaru_005",
+      "tags": [
+        "random_hyorinmaru",
+        "random"
+      ],
+      "text": "You wouldn't believe how much of the battlefield can change with a single release.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_hyorinmaru_006",
+      "tags": [
+        "random_hyorinmaru",
+        "random"
+      ],
+      "text": "The weather itself can become a problem when Hyōrinmaru is involved.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_hyorinmaru_007",
+      "tags": [
+        "random_hyorinmaru",
+        "random"
+      ],
+      "text": "I've spent years learning how to use my Zanpakutō properly. I'm not about to waste that experience.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_hyorinmaru_008",
+      "tags": [
+        "random_hyorinmaru",
+        "random"
+      ],
+      "text": "An ice dragon is rather impressive, isn't it?",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_hyorinmaru_009",
+      "tags": [
+        "random_hyorinmaru",
+        "random"
+      ],
+      "text": "I don't need to freeze everything in sight just to make a point.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_hyorinmaru_010",
+      "tags": [
+        "random_hyorinmaru",
+        "random"
+      ],
+      "text": "Hyōrinmaru is not simply a source of power. Understanding it is just as important.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_bankai_001",
+      "tags": [
+        "random_bankai",
+        "random"
+      ],
+      "text": "Daiguren Hyōrinmaru requires considerably more than simply releasing additional ice.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_bankai_002",
+      "tags": [
+        "random_bankai",
+        "random"
+      ],
+      "text": "The wings are useful, although getting used to their movement took some practice.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_bankai_003",
+      "tags": [
+        "random_bankai",
+        "random"
+      ],
+      "text": "People tend to focus on the appearance of my Bankai. They should pay more attention to what it can actually do.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_bankai_004",
+      "tags": [
+        "random_bankai",
+        "random"
+      ],
+      "text": "Those ice petals are not merely decorative.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_bankai_005",
+      "tags": [
+        "random_bankai",
+        "random"
+      ],
+      "text": "My Bankai has considerably more potential than most people initially assume.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_bankai_006",
+      "tags": [
+        "random_bankai",
+        "random"
+      ],
+      "text": "There's a reason I don't release it unless the situation calls for it.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_bankai_007",
+      "tags": [
+        "random_bankai",
+        "random"
+      ],
+      "text": "The amount of ice I can control in Bankai is considerably greater than in Shikai.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_bankai_008",
+      "tags": [
+        "random_bankai",
+        "random"
+      ],
+      "text": "An ice dragon, wings, and the full force of Hyōrinmaru. Quite an impressive combination.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_bankai_009",
+      "tags": [
+        "random_bankai",
+        "random"
+      ],
+      "text": "I prefer resolving a situation without needing to use my Bankai.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_bankai_010",
+      "tags": [
+        "random_bankai",
+        "random"
+      ],
+      "text": "Mastering Bankai takes time. More time than most people appreciate.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_bankai_011",
+      "tags": [
+        "random_bankai",
+        "random"
+      ],
+      "text": "The tail and wings provide more versatility than their appearance suggests.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_bankai_012",
+      "tags": [
+        "random_bankai",
+        "random"
+      ],
+      "text": "I would appreciate it if people stopped treating my Bankai like some sort of spectacle.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_complete_bankai_001",
+      "tags": [
+        "random_complete_bankai",
+        "random"
+      ],
+      "text": "My Bankai reached a level of maturity that I hadn't previously been able to access.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_complete_bankai_002",
+      "tags": [
+        "random_complete_bankai",
+        "random"
+      ],
+      "text": "That form is not something I can maintain through ordinary determination alone.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_complete_bankai_003",
+      "tags": [
+        "random_complete_bankai",
+        "random"
+      ],
+      "text": "There's a considerable difference between possessing Bankai and understanding its full potential.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_complete_bankai_004",
+      "tags": [
+        "random_complete_bankai",
+        "random"
+      ],
+      "text": "When my Bankai reaches completion, its freezing properties become considerably more advanced.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_complete_bankai_005",
+      "tags": [
+        "random_complete_bankai",
+        "random"
+      ],
+      "text": "My matured Bankai can affect more than the physical state of an object.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_complete_bankai_006",
+      "tags": [
+        "random_complete_bankai",
+        "random"
+      ],
+      "text": "I needed to understand the nature of Hyōrinmaru before I could reach that level.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_complete_bankai_007",
+      "tags": [
+        "random_complete_bankai",
+        "random"
+      ],
+      "text": "The change in my appearance is a consequence of my Bankai's completed state. It isn't something I particularly need to discuss.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_complete_bankai_008",
+      "tags": [
+        "random_complete_bankai",
+        "random"
+      ],
+      "text": "Power without control is meaningless. That lesson became especially clear during the war.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_complete_bankai_009",
+      "tags": [
+        "random_complete_bankai",
+        "random"
+      ],
+      "text": "The ice petals are an important part of understanding my Bankai's progression.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_complete_bankai_010",
+      "tags": [
+        "random_complete_bankai",
+        "random"
+      ],
+      "text": "I still have much to learn, regardless of how powerful my Bankai becomes.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_division_001",
+      "tags": [
+        "random_10th_division",
+        "random"
+      ],
+      "text": "The 10th Division has its own responsibilities. I intend to make sure they're handled.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_division_002",
+      "tags": [
+        "random_10th_division",
+        "random"
+      ],
+      "text": "A captain cannot afford to neglect his subordinates.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_division_003",
+      "tags": [
+        "random_10th_division",
+        "random"
+      ],
+      "text": "There's always another report waiting to be completed.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_division_004",
+      "tags": [
+        "random_10th_division",
+        "random"
+      ],
+      "text": "I wonder how many assignments Matsumoto has postponed today.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_division_005",
+      "tags": [
+        "random_10th_division",
+        "random"
+      ],
+      "text": "Managing a division would be considerably easier if everyone followed their schedules.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_division_006",
+      "tags": [
+        "random_10th_division",
+        "random"
+      ],
+      "text": "The Gotei 13 has enough problems without unnecessary confusion.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_division_007",
+      "tags": [
+        "random_10th_division",
+        "random"
+      ],
+      "text": "I take my position seriously. It wasn't handed to me.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_division_008",
+      "tags": [
+        "random_10th_division",
+        "random"
+      ],
+      "text": "A good captain should know when to lead and when to trust their subordinates.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_division_009",
+      "tags": [
+        "random_10th_division",
+        "random"
+      ],
+      "text": "I expect my division to maintain its standards.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_division_010",
+      "tags": [
+        "random_10th_division",
+        "random"
+      ],
+      "text": "Being a captain involves considerably more paperwork than most people imagine.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_rangiku_001",
+      "tags": [
+        "random_rangiku",
+        "random"
+      ],
+      "text": "Matsumoto has a remarkable talent for finding excuses to avoid paperwork.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_rangiku_002",
+      "tags": [
+        "random_rangiku",
+        "random"
+      ],
+      "text": "I sometimes wonder whether my lieutenant considers deadlines optional.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_rangiku_003",
+      "tags": [
+        "random_rangiku",
+        "random"
+      ],
+      "text": "Despite her habits, Matsumoto is a capable officer.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_rangiku_004",
+      "tags": [
+        "random_rangiku",
+        "random"
+      ],
+      "text": "I should probably check whether she's completed her reports.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_rangiku_005",
+      "tags": [
+        "random_rangiku",
+        "random"
+      ],
+      "text": "I wouldn't be surprised if she's taking another break.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_rangiku_006",
+      "tags": [
+        "random_rangiku",
+        "random"
+      ],
+      "text": "She can be troublesome, but I trust her abilities.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_rangiku_007",
+      "tags": [
+        "random_rangiku",
+        "random"
+      ],
+      "text": "I have no intention of doing her work for her again.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_rangiku_008",
+      "tags": [
+        "random_rangiku",
+        "random"
+      ],
+      "text": "Matsumoto has a way of making even the simplest assignment complicated.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_rangiku_009",
+      "tags": [
+        "random_rangiku",
+        "random"
+      ],
+      "text": "At least she knows when to take a serious situation seriously.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_rangiku_010",
+      "tags": [
+        "random_rangiku",
+        "random"
+      ],
+      "text": "I suppose the division wouldn't be the same without her.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_hinamori_001",
+      "tags": [
+        "random_hinamori",
+        "random"
+      ],
+      "text": "Hinamori and I have known each other for a very long time.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_hinamori_002",
+      "tags": [
+        "random_hinamori",
+        "random"
+      ],
+      "text": "I hope she's taking care of herself.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_hinamori_003",
+      "tags": [
+        "random_hinamori",
+        "random"
+      ],
+      "text": "She has always been rather stubborn about certain things.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_hinamori_004",
+      "tags": [
+        "random_hinamori",
+        "random"
+      ],
+      "text": "I sometimes forget how much time has passed since we grew up together.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_hinamori_005",
+      "tags": [
+        "random_hinamori",
+        "random"
+      ],
+      "text": "I don't want her putting herself in unnecessary danger.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_hinamori_006",
+      "tags": [
+        "random_hinamori",
+        "random"
+      ],
+      "text": "She's stronger than she gives herself credit for.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_hinamori_007",
+      "tags": [
+        "random_hinamori",
+        "random"
+      ],
+      "text": "I have always considered her someone worth protecting.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_hinamori_008",
+      "tags": [
+        "random_hinamori",
+        "random"
+      ],
+      "text": "I hope she's doing well in the 5th Division.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_hinamori_009",
+      "tags": [
+        "random_hinamori",
+        "random"
+      ],
+      "text": "Some things are more important than the responsibilities of a captain.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_hinamori_010",
+      "tags": [
+        "random_hinamori",
+        "random"
+      ],
+      "text": "I suppose old friendships don't simply disappear with time.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_ichigo_001",
+      "tags": [
+        "random_ichigo",
+        "random"
+      ],
+      "text": "Kurosaki certainly has a habit of involving himself in complicated situations.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_ichigo_002",
+      "tags": [
+        "random_ichigo",
+        "random"
+      ],
+      "text": "I wonder how much trouble he's managed to find this time.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_ichigo_003",
+      "tags": [
+        "random_ichigo",
+        "random"
+      ],
+      "text": "That man has an unusual ability to attract enemies.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_ichigo_004",
+      "tags": [
+        "random_ichigo",
+        "random"
+      ],
+      "text": "He's not particularly good at following instructions.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_ichigo_005",
+      "tags": [
+        "random_ichigo",
+        "random"
+      ],
+      "text": "I suppose his determination is admirable, even if his methods are questionable.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_ichigo_006",
+      "tags": [
+        "random_ichigo",
+        "random"
+      ],
+      "text": "Kurosaki has a habit of addressing people however he pleases.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_ichigo_007",
+      "tags": [
+        "random_ichigo",
+        "random"
+      ],
+      "text": "I should probably stop expecting him to follow formalities.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_ichigo_008",
+      "tags": [
+        "random_ichigo",
+        "random"
+      ],
+      "text": "Despite everything, I trust his ability to handle himself.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_ichigo_009",
+      "tags": [
+        "random_ichigo",
+        "random"
+      ],
+      "text": "I wonder whether he's managed to stay out of trouble for even one day.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_ichigo_010",
+      "tags": [
+        "random_ichigo",
+        "random"
+      ],
+      "text": "Working alongside him is rarely a quiet experience.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_ukitake_001",
+      "tags": [
+        "random_ukitake",
+        "random"
+      ],
+      "text": "Captain Ukitake has always been rather considerate.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_ukitake_002",
+      "tags": [
+        "random_ukitake",
+        "random"
+      ],
+      "text": "He has a habit of treating everyone with unusual kindness.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_ukitake_003",
+      "tags": [
+        "random_ukitake",
+        "random"
+      ],
+      "text": "I appreciate his advice, even if his methods of showing it can be embarrassing.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_ukitake_004",
+      "tags": [
+        "random_ukitake",
+        "random"
+      ],
+      "text": "I should probably visit the 13th Division sometime.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_ukitake_005",
+      "tags": [
+        "random_ukitake",
+        "random"
+      ],
+      "text": "He seems to have an endless supply of sweets.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_ukitake_006",
+      "tags": [
+        "random_ukitake",
+        "random"
+      ],
+      "text": "I still don't understand why he finds certain nicknames so entertaining.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_ukitake_007",
+      "tags": [
+        "random_ukitake",
+        "random"
+      ],
+      "text": "His experience is something I respect.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_ukitake_008",
+      "tags": [
+        "random_ukitake",
+        "random"
+      ],
+      "text": "I hope his health has been holding up.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_soul_society_001",
+      "tags": [
+        "random_soul_society",
+        "random"
+      ],
+      "text": "Soul Society has a rather complicated administrative structure.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_soul_society_002",
+      "tags": [
+        "random_soul_society",
+        "random"
+      ],
+      "text": "Captain-Commander Yamamoto never tolerated unnecessary disorder.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_soul_society_003",
+      "tags": [
+        "random_soul_society",
+        "random"
+      ],
+      "text": "The Gotei 13 has changed considerably over the years.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_soul_society_004",
+      "tags": [
+        "random_soul_society",
+        "random"
+      ],
+      "text": "There are more responsibilities involved in protecting Soul Society than most people realize.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_soul_society_005",
+      "tags": [
+        "random_soul_society",
+        "random"
+      ],
+      "text": "I sometimes wonder how the other captains are managing their divisions.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_soul_society_006",
+      "tags": [
+        "random_soul_society",
+        "random"
+      ],
+      "text": "The Seireitei is rarely as peaceful as it appears.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_soul_society_007",
+      "tags": [
+        "random_soul_society",
+        "random"
+      ],
+      "text": "A captain must be prepared for unexpected assignments.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_soul_society_008",
+      "tags": [
+        "random_soul_society",
+        "random"
+      ],
+      "text": "The other divisions certainly have their own peculiarities.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_soul_society_009",
+      "tags": [
+        "random_soul_society",
+        "random"
+      ],
+      "text": "I prefer a quiet day without emergency reports.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_soul_society_010",
+      "tags": [
+        "random_soul_society",
+        "random"
+      ],
+      "text": "There's always something happening in Soul Society.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_arrancar_001",
+      "tags": [
+        "random_arrancar",
+        "random"
+      ],
+      "text": "The Arrancar were considerably more troublesome than many people expected.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_arrancar_002",
+      "tags": [
+        "random_arrancar",
+        "random"
+      ],
+      "text": "Hueco Mundo is an unpleasant place to spend too much time.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_arrancar_003",
+      "tags": [
+        "random_arrancar",
+        "random"
+      ],
+      "text": "Harribel was a formidable opponent.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_arrancar_004",
+      "tags": [
+        "random_arrancar",
+        "random"
+      ],
+      "text": "I learned quite a bit from my encounters with the Arrancar.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_arrancar_005",
+      "tags": [
+        "random_arrancar",
+        "random"
+      ],
+      "text": "Never assume that an opponent's abilities are limited to their initial appearance.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_arrancar_006",
+      "tags": [
+        "random_arrancar",
+        "random"
+      ],
+      "text": "The Espada were not opponents to underestimate.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_arrancar_007",
+      "tags": [
+        "random_arrancar",
+        "random"
+      ],
+      "text": "I would rather avoid another extended conflict in the Human World.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_arrancar_008",
+      "tags": [
+        "random_arrancar",
+        "random"
+      ],
+      "text": "That battle taught me the importance of understanding an opponent before committing to an approach.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_aizen_001",
+      "tags": [
+        "random_aizen",
+        "random"
+      ],
+      "text": "Aizen was considerably more dangerous than his appearance suggested.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_aizen_002",
+      "tags": [
+        "random_aizen",
+        "random"
+      ],
+      "text": "I should have been more suspicious of certain things.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_aizen_003",
+      "tags": [
+        "random_aizen",
+        "random"
+      ],
+      "text": "His ability to manipulate the people around him was particularly disturbing.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_aizen_004",
+      "tags": [
+        "random_aizen",
+        "random"
+      ],
+      "text": "Some betrayals are difficult to anticipate.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_aizen_005",
+      "tags": [
+        "random_aizen",
+        "random"
+      ],
+      "text": "I've learned not to accept appearances as proof of someone's intentions.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_aizen_006",
+      "tags": [
+        "random_aizen",
+        "random"
+      ],
+      "text": "What happened with Hinamori is something I haven't forgotten.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_aizen_007",
+      "tags": [
+        "random_aizen",
+        "random"
+      ],
+      "text": "Aizen's actions affected far more people than he ever acknowledged.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_aizen_008",
+      "tags": [
+        "random_aizen",
+        "random"
+      ],
+      "text": "There are some individuals whose ambitions should never be underestimated.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_gin_001",
+      "tags": [
+        "random_gin",
+        "random"
+      ],
+      "text": "Ichimaru was never particularly easy to understand.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_gin_002",
+      "tags": [
+        "random_gin",
+        "random"
+      ],
+      "text": "That smile always made it difficult to determine what he was thinking.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_gin_003",
+      "tags": [
+        "random_gin",
+        "random"
+      ],
+      "text": "I had my suspicions about him, although understanding the entire situation was another matter.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_gin_004",
+      "tags": [
+        "random_gin",
+        "random"
+      ],
+      "text": "Some people conceal considerably more than they reveal.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_gin_005",
+      "tags": [
+        "random_gin",
+        "random"
+      ],
+      "text": "I learned that intuition alone is not always enough.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_gin_006",
+      "tags": [
+        "random_gin",
+        "random"
+      ],
+      "text": "I prefer dealing with opponents whose intentions are clear.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_quincywar_001",
+      "tags": [
+        "random_quincywar",
+        "random"
+      ],
+      "text": "The Quincy invasion changed considerably about how we approached our enemies.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_quincywar_002",
+      "tags": [
+        "random_quincywar",
+        "random"
+      ],
+      "text": "Losing access to my Bankai was not an experience I intend to repeat.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_quincywar_003",
+      "tags": [
+        "random_quincywar",
+        "random"
+      ],
+      "text": "The Wandenreich understood our abilities better than we initially expected.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_quincywar_004",
+      "tags": [
+        "random_quincywar",
+        "random"
+      ],
+      "text": "That conflict forced many of us to reconsider our limitations.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_quincywar_005",
+      "tags": [
+        "random_quincywar",
+        "random"
+      ],
+      "text": "I had to learn how to fight effectively under circumstances I hadn't anticipated.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_quincywar_006",
+      "tags": [
+        "random_quincywar",
+        "random"
+      ],
+      "text": "The Royal Palace training was demanding, but necessary.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_quincywar_007",
+      "tags": [
+        "random_quincywar",
+        "random"
+      ],
+      "text": "The war demonstrated that even a captain must continue improving.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_quincywar_008",
+      "tags": [
+        "random_quincywar",
+        "random"
+      ],
+      "text": "I have no intention of allowing another enemy to take me by surprise.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_quincywar_009",
+      "tags": [
+        "random_quincywar",
+        "random"
+      ],
+      "text": "The experience strengthened my understanding of Hyōrinmaru.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_quincywar_010",
+      "tags": [
+        "random_quincywar",
+        "random"
+      ],
+      "text": "Some lessons are difficult to learn. They're even more difficult to forget.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.1
+    },
+    {
+      "id": "hitsugaya_random_001",
       "tags": [
         "random"
       ],
-      "text": "Matsumoto would probably find a way to turn this into a celebration.",
+      "text": "I prefer a quiet environment. Is that unreasonable?",
       "cooldown": 900,
       "priority": 0
     },
     {
-      "id": "random_002",
-      "tags": [
-        "random"
-      ],
-      "text": "I wonder how much paperwork is waiting for me back in Soul Society.",
-      "cooldown": 900,
-      "priority": 0
-    },
-    {
-      "id": "random_003",
+      "id": "hitsugaya_random_002",
       "tags": [
         "random"
       ],
@@ -1083,16 +3307,7 @@
       "priority": 0
     },
     {
-      "id": "random_004",
-      "tags": [
-        "random"
-      ],
-      "text": "You seem distracted.",
-      "cooldown": 900,
-      "priority": 0
-    },
-    {
-      "id": "random_005",
+      "id": "hitsugaya_random_003",
       "tags": [
         "random"
       ],
@@ -1101,34 +3316,7 @@
       "priority": 0
     },
     {
-      "id": "random_006",
-      "tags": [
-        "random"
-      ],
-      "text": "Hmph.",
-      "cooldown": 900,
-      "priority": 0
-    },
-    {
-      "id": "random_007",
-      "tags": [
-        "random"
-      ],
-      "text": "What a pain.",
-      "cooldown": 900,
-      "priority": 0
-    },
-    {
-      "id": "random_008",
-      "tags": [
-        "random"
-      ],
-      "text": "Don't look so surprised. I can make conversation.",
-      "cooldown": 900,
-      "priority": 0
-    },
-    {
-      "id": "random_009",
+      "id": "hitsugaya_random_004",
       "tags": [
         "random"
       ],
@@ -1137,25 +3325,250 @@
       "priority": 0
     },
     {
-      "id": "random_010",
+      "id": "hitsugaya_random_005",
       "tags": [
         "random"
       ],
-      "text": "You should be grateful I'm helping you with this.",
+      "text": "Why does everyone seem to enjoy making unnecessary comments?",
       "cooldown": 900,
       "priority": 0
     },
     {
-      "id": "sleepy_001",
+      "id": "hitsugaya_random_006",
+      "tags": [
+        "random"
+      ],
+      "text": "I suppose you're not entirely difficult to tolerate.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_007",
+      "tags": [
+        "random"
+      ],
+      "text": "Hmph.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_008",
+      "tags": [
+        "random"
+      ],
+      "text": "I would appreciate a little less noise.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_009",
+      "tags": [
+        "random"
+      ],
+      "text": "There's always something that needs my attention.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_010",
+      "tags": [
+        "random"
+      ],
+      "text": "I wonder whether Matsumoto has finished her paperwork.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_011",
+      "tags": [
+        "random"
+      ],
+      "text": "I could use a watermelon right now.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_012",
+      "tags": [
+        "random"
+      ],
+      "text": "Summer is an entirely unnecessary season.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_013",
+      "tags": [
+        "random"
+      ],
+      "text": "Cold weather is considerably more tolerable.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_014",
+      "tags": [
+        "random"
+      ],
+      "text": "I prefer watermelon over most sweets.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_015",
+      "tags": [
+        "random"
+      ],
+      "text": "Amanattō is quite good. Dried persimmons, however, are another matter.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_016",
+      "tags": [
+        "random"
+      ],
+      "text": "I wonder if anyone has seen my grandmother recently.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_017",
+      "tags": [
+        "random"
+      ],
+      "text": "I have no intention of discussing my height.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_018",
+      "tags": [
+        "random"
+      ],
+      "text": "Why does everyone find that particular subject so amusing?",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_019",
+      "tags": [
+        "random"
+      ],
+      "text": "I would appreciate being addressed with the appropriate respect.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_020",
+      "tags": [
+        "random"
+      ],
+      "text": "Being a captain is not nearly as relaxing as people imagine.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_021",
+      "tags": [
+        "random"
+      ],
+      "text": "You seem unusually interested in my personal life.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_022",
+      "tags": [
+        "random"
+      ],
+      "text": "I suppose I can spare a few moments.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_023",
+      "tags": [
+        "random"
+      ],
+      "text": "I don't mind the company. Just don't become distracting.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_024",
+      "tags": [
+        "random"
+      ],
+      "text": "I would prefer not to have another emergency today.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_025",
+      "tags": [
+        "random"
+      ],
+      "text": "I should probably take a nap when we're finished.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_026",
+      "tags": [
+        "random"
+      ],
+      "text": "There's nothing wrong with wanting a little peace and quiet.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_027",
+      "tags": [
+        "random"
+      ],
+      "text": "I expect you to take your responsibilities as seriously as I take mine.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_028",
+      "tags": [
+        "random"
+      ],
+      "text": "You seem to be getting used to having me around.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_029",
+      "tags": [
+        "random"
+      ],
+      "text": "I hope you aren't planning to make today more complicated than necessary.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_random_030",
+      "tags": [
+        "random"
+      ],
+      "text": "Perhaps a quiet afternoon is not too much to ask.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_sleepy_001",
       "tags": [
         "random_sleepy"
       ],
-      "text": "A nap sounds rather appealing right now.",
+      "text": "A short nap sounds rather appealing.",
       "cooldown": 1200,
       "priority": 0
     },
     {
-      "id": "sleepy_002",
+      "id": "hitsugaya_sleepy_002",
       "tags": [
         "random_sleepy"
       ],
@@ -1164,29 +3577,110 @@
       "priority": 0
     },
     {
-      "id": "sleepy_003",
+      "id": "hitsugaya_sleepy_003",
       "tags": [
         "random_sleepy"
       ],
-      "text": "Even captains need their rest.",
+      "text": "I wasn't sleeping. I was resting.",
       "cooldown": 1200,
       "priority": 0
     },
     {
-      "id": "sleepy_004",
+      "id": "hitsugaya_sleepy_004",
       "tags": [
         "random_sleepy"
       ],
-      "text": "Five more minutes...",
+      "text": "Five more minutes should be sufficient.",
       "cooldown": 1200,
       "priority": 0
     },
     {
-      "id": "sleepy_005",
+      "id": "hitsugaya_sleepy_005",
       "tags": [
         "random_sleepy"
       ],
-      "text": "I wasn't sleeping. I was resting my eyes.",
+      "text": "I have no intention of explaining why afternoon naps are important.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_sleepy_006",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "You should get some rest as well.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_sleepy_007",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "I find it considerably easier to concentrate after sleeping.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_sleepy_008",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "Even captains need time to recover.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_sleepy_009",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "I was having a perfectly pleasant dream.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_sleepy_010",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "Don't tell Matsumoto I was sleeping.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_sleepy_011",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "I suppose I can rest for a little while.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_sleepy_012",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "If anyone needs me, I'll be unavailable.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_sleepy_013",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "I should probably sleep before tomorrow's responsibilities begin.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "hitsugaya_sleepy_014",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "A quiet afternoon and a watermelon. That's all I need.",
       "cooldown": 1200,
       "priority": 0
     }
