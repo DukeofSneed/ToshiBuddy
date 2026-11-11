@@ -246,6 +246,9 @@ html, body {
 #pet.skin.sheet.sleep #sprite { transform: none; }
 #pet.skin.sheet.talk #skin-img, #pet.skin.ultimate-sheet.talk #skin-ultimate { animation: none; }
 #pet.skin.sheet.idle #sprite { animation: none; }
+/* ...and their own reaction poses, so Kori's hops, shrug wobble, and squash stay off. */
+#pet.skin.sheet.surprised #sprite, #pet.skin.sheet.huff #sprite, #pet.skin.sheet.frost #sprite,
+#pet.skin.sheet.shrug #sprite, #pet.skin.sheet.land #sprite, #pet.skin.sheet.release #sprite { animation: none; }
 
 /* ---- speech bubble ---- */
 #bubble {

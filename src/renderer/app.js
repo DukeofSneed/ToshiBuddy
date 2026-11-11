@@ -115,7 +115,7 @@
         ultimate = await prepareImage(skin.ultimate.url, ucfg);
       } catch (e) { askin.log(`skin "${skin.name}" ultimate image failed: ${e.message}`); }
     }
-    return { name: skin.name, primary, ultimate, sheet, ultimateSheet, ultimateSeconds: Number(base.ultimateSeconds) || null };
+    return { name: skin.name, primary, ultimate, sheet, ultimateSheet, mods: base.mods, ultimateSeconds: Number(base.ultimateSeconds) || null };
   }
 
   const boot = await askin.getBootstrap();
@@ -142,6 +142,7 @@
   AskinSfx.setVolume(boot.settings.sfxVolume ?? 0.5);
 
   await AskinMods.loadAll(boot.mods);
+  if (AskinMods.skipped().length) askin.log(`mods not used on this character: ${AskinMods.skipped().join(', ')}`);
   AskinQuips.setFromMods(AskinMods.quips());
 
   AskinBrain.start({ workArea: boot.workArea });

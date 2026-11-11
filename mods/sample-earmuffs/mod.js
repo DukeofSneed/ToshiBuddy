@@ -3,6 +3,7 @@
 AskinMods.register({
   id: 'sample-earmuffs',
   name: 'Earmuffs and salute',
+  characters: ['kori'], // drawn for Kori's head and arm; skins don't get them
   quips: [
     { text: 'These are regulation earmuffs. They are not cute. Stop saying that.', tags: ['idle', 'earmuffs'] },
     { text: 'Salute received. Now get back to work.', tags: ['click', 'salute'] },

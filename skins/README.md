@@ -39,6 +39,9 @@ to whichever character is active.
      (0-255). Raise it if a gradient background leaves a halo; lower it if parts of
      the character disappear.
    - `ultimateSeconds`: how long the ultimate form lasts (5-600).
+   - `mods`: which upgrade mods this skin uses. Leave it out for all of them,
+     `false` for none, or a list of mod folder names, like `["party-hat"]`. Mods
+     made only for Kori (such as the sample earmuffs) never show on a skin.
    - `ultimate`: the same `scale`, `offsetX`, `offsetY`, `keyMode`, `keyColor`,
      `keyTolerance`, and `anchors` settings for the ultimate image.
    - `anchors`: where upgrades attach props, in pet units (the pet is 160 wide, the

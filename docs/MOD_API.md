@@ -65,6 +65,9 @@ AskinMods.register({
 
 ### Rules the loader enforces
 - `id`: required, 2-40 chars of `a-z0-9-`.
+- `characters`: optional, `['kori']`, `['skin']`, or both (the default). A mod
+  limited to `kori` is skipped entirely (props, animations, quips, behaviors) while
+  a user skin is active. Leave it out for upgrades: they should work on both.
 - `quips[].text` <= 240 chars; `tags` is an array. Useful tags: `idle`, `greet`,
   `lean`, `click`, `drag`, `drop`, `drop-hard`, `wake`, `hour`, `trick`, `upgrade`,
   `desk` (any desk session), `desk-writing`, `desk-lab`, `desk-enter`, `desk-exit`,

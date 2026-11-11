@@ -57,6 +57,23 @@
       }
     }
     if (def.onTick !== undefined) fail('onTick is not part of the API; use behaviors');
+    if (def.characters !== undefined && (!Array.isArray(def.characters) || !def.characters.every((c) => c === 'kori' || c === 'skin'))) fail('characters must be an array of "kori" and/or "skin"');
+  }
+
+  // Does this mod apply to the active character?
+  //  - a mod with characters: ['kori'] only runs on the built-in Kori;
+  //  - a skin's skin.json can set "mods": false (none) or a list of mod ids.
+  const skipped = [];
+  function allowed(def, slug) {
+    const skin = window.AskinApp && AskinApp.skin;
+    const who = skin ? 'skin' : 'kori';
+    if (def.characters && !def.characters.includes(who)) return false;
+    if (skin) {
+      const m = skin.mods;
+      if (m === false) return false;
+      if (Array.isArray(m) && !m.includes(slug) && !m.includes(def.id)) return false;
+    }
+    return true;
   }
 
   function register(def) {
@@ -66,6 +83,12 @@
       def.declaredId = def.id;
     }
     def.slug = currentSlug || def.id;
+    if (!allowed(def, def.slug)) {
+      // Loaded fine, just not for this character: no props, animations, quips, or behaviors.
+      skipped.push(def.slug);
+      currentRegistered = true;
+      return;
+    }
     registry.push({ slug: def.slug, def });
     currentRegistered = true;
     apply(def);
@@ -151,5 +174,5 @@
     });
   }
 
-  window.AskinMods = { register, loadAll, quips, animations, behaviors, setProp, list: () => registry.map((r) => r.slug) };
+  window.AskinMods = { register, loadAll, quips, animations, behaviors, setProp, list: () => registry.map((r) => r.slug), skipped: () => skipped.slice() };
 })();
