@@ -210,6 +210,29 @@
         }
       }
       g.putImageData(out, 0, 0);
+      // For flipBody: which pixels belong to the figure itself (mirrored) and
+      // which to marks beside it ("?", "!", swirls), which keep reading the right way.
+      const bits = (f.bits || []).map((c) => ({ minx: c.minx - f.minx, maxx: c.maxx - f.minx, id: c.id }));
+      const mirrored = () => {
+        const mc = document.createElement('canvas');
+        mc.width = fw; mc.height = fh;
+        const mg = mc.getContext('2d');
+        const o2 = mg.createImageData(fw, fh);
+        for (let y = 0; y < fh; y++) {
+          for (let x = 0; x < fw; x++) {
+            const p = (f.miny + y) * w + (f.minx + x);
+            const l = det.label[p];
+            if (l < 0 || det.frameOf[l] !== i) continue;
+            const bit = bits.find((b) => b.id === l);
+            // Body pixels mirror; a mark moves to the mirrored spot but isn't flipped.
+            const nx = bit ? x + (fw - 1 - bit.maxx) - bit.minx : fw - 1 - x;
+            const o = (y * fw + nx) * 4, s = (y * fw + x) * 4;
+            o2.data[o] = out.data[s]; o2.data[o + 1] = out.data[s + 1]; o2.data[o + 2] = out.data[s + 2]; o2.data[o + 3] = out.data[s + 3];
+          }
+        }
+        mg.putImageData(o2, 0, 0);
+        return mc.toDataURL('image/png');
+      };
       const base = det.baselines[f.row];
       // Horizontal anchor: the center of the head (top 30% of the figure), not the
       // bounding box. A swinging leg or an outstretched sword widens the box and
@@ -223,7 +246,9 @@
         }
       }
       const cx = Number.isFinite(hmin) ? (hmin + hmax) / 2 : (m.minx + m.maxx) / 2;
+      let flipUrl = null;
       return {
+        get flipUrl() { return flipUrl || (flipUrl = mirrored()); },
         row: f.row, col: f.col, url: c.toDataURL('image/png'), w: fw, h: fh,
         ox: cx - f.minx,   // head center, from the frame's left edge
         top: base - f.miny, // baseline to the frame's top
@@ -310,6 +335,7 @@
         frames: list,
         fps: Math.max(0.2, Math.min(30, Number(d.fps) || 6)),
         flip: !!d.flip,
+        flipBody: !!d.flipBody, // mirror the figure but not the marks beside it
         loop: d.loop !== false,
         loopFrom: Math.max(0, Math.min(list.length - 1, Number(d.loopFrom) || 0)),
         speed: Number(d.speed) > 0 ? Math.min(400, Number(d.speed)) : null, // walk: pixels per second
@@ -368,8 +394,9 @@
     function draw() {
       const a = sheet.anims[key];
       const f = sheet.frames[a.frames[i]];
-      const b = frameBox(sheet, f);
-      img.setAttribute('href', f.url);
+      const fb = a.flipBody;
+      const b = frameBox(sheet, fb ? { ...f, ox: f.w - f.ox } : f);
+      img.setAttribute('href', fb ? f.flipUrl : f.url);
       img.setAttribute('x', b.x.toFixed(1)); img.setAttribute('y', b.y.toFixed(1));
       img.setAttribute('width', b.w.toFixed(1)); img.setAttribute('height', b.h.toFixed(1));
       wrap.setAttribute('transform', a.flip ? 'translate(160 0) scale(-1 1)' : '');

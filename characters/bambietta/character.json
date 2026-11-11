@@ -25,12 +25,12 @@
       "think": {
         "frames": "3:2",
         "loop": false,
-        "flip": true
+        "flipBody": true
       },
       "surprised": {
         "frames": "3:3",
         "loop": false,
-        "flip": true
+        "flipBody": true
       },
       "huff": {
         "frames": "3:0",
@@ -42,7 +42,7 @@
       },
       "drag": {
         "frames": "3:5",
-        "flip": true
+        "flipBody": true
       },
       "sleep": {
         "frames": "3:8"
