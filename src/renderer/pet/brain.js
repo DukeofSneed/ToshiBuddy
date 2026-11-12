@@ -539,10 +539,10 @@
       if (st.mode === 'drag') { setMode('fall'); st.vy = 0; }
     }
   }
+  // Click-through is decided by the main process from the cursor position
+  // (app.js reports where the pet, bubble, and jar are). This only tracks hover.
   function setHover(on) {
-    if (on === hovering) return;
     hovering = on;
-    if (window.buddy) buddy.setIgnoreMouse(!on && !st.dragging);
   }
   function wire() {
     const el = pet();

@@ -152,6 +152,14 @@ function runSelftest(ctx, selftestDir) {
         visible: overlay.isVisible(),
         onTop: overlay.isAlwaysOnTop(),
       };
+      // Click-through by cursor position: a point on the pet is clickable, an
+      // empty spot isn't (asked of the same check the cursor poll uses).
+      await new Promise((r) => setTimeout(r, 300));
+      const petRect = JSON.parse(await overlay.webContents.executeJavaScript(`JSON.stringify((() => { const r = document.getElementById('pet').getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; })())`));
+      const cb = overlay.getContentBounds();
+      wake.hitAreas = ctx.hitAreas.rects.length;
+      wake.petClickable = ctx.overAt({ x: cb.x + petRect.x + petRect.w / 2, y: cb.y + petRect.y + petRect.h / 2 });
+      wake.emptySpotClickThrough = !ctx.overAt({ x: cb.x + 5, y: cb.y + 5 });
       fs.writeFileSync(path.join(selftestDir, 'wake.json'), JSON.stringify(wake, null, 1));
       const labels = (m) => m.items.flatMap((i) => [i.label, ...(i.submenu ? labels(i.submenu) : [])]).filter(Boolean);
       fs.writeFileSync(path.join(selftestDir, 'menu.json'), JSON.stringify({ name: charName(), tooltipName: `${charName()} Buddy`, menu: labels(buildMenu()) }, null, 1));

@@ -153,9 +153,33 @@ function start() {
   }
 
   // ---- overlay IPC ----
-  ipcMain.on('overlay:set-ignore', (_e, ignore) => {
-    if (overlay && !overlay.isDestroyed()) overlay.setIgnoreMouseEvents(ignore, { forward: true });
+  // Click-through: the overlay covers the whole screen and lets clicks pass,
+  // except over the pet, its bubble, and the jar. The page reports where those
+  // are; here the cursor position is checked ~20 times a second. This doesn't
+  // depend on Windows forwarding mouse moves to the window, which can stop after
+  // sleep or a lid close. The current state is also re-applied every 2 s.
+  let hitAreas = { rects: [], dragging: false };
+  let clickable = null;
+  let lastApplied = 0;
+  ipcMain.on('overlay:hit-areas', (_e, a) => {
+    if (a && Array.isArray(a.rects)) hitAreas = { rects: a.rects.slice(0, 10), dragging: !!a.dragging };
   });
+  // Is this screen point over something clickable?
+  function overAt(p) {
+    const b = overlay.getContentBounds();
+    const x = p.x - b.x, y = p.y - b.y;
+    return hitAreas.dragging || hitAreas.rects.some((r) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h);
+  }
+  setInterval(() => {
+    if (!overlay || overlay.isDestroyed()) return;
+    const over = overAt(screen.getCursorScreenPoint());
+    const now = Date.now();
+    if (over !== clickable || now - lastApplied > 2000) {
+      clickable = over;
+      lastApplied = now;
+      overlay.setIgnoreMouseEvents(!over, { forward: true });
+    }
+  }, 50);
   ipcMain.on('overlay:log', (_e, line) => log(`renderer: ${line}`));
 
   // After sleep, a locked screen, or a display change, Windows can drop the
@@ -166,6 +190,7 @@ function start() {
     if (!overlay || overlay.isDestroyed()) return;
     overlay.setAlwaysOnTop(true, 'screen-saver');
     overlay.setIgnoreMouseEvents(true, { forward: true });
+    clickable = null; // the cursor check re-applies the right state on its next tick
     if (!overlay.isVisible()) overlay.showInactive();
     overlay.webContents.send('pointer-reset');
     log(`overlay re-armed (${reason})`);
@@ -647,6 +672,7 @@ function start() {
   const testCtx = {
     app, screen, settings, ledger, guard, logLines, log, charName, buildMenu, openCustomize, openImport, activeCharacterId, reloadAndAwaitMods,
     listCharacters: () => listCharacters(PROJECT_ROOT),
+    overAt, get hitAreas() { return hitAreas; },
     get overlay() { return overlay; }, get jarWin() { return jarWin; },
     get customizeWin() { return customizeWin; }, get importWin() { return importWin; },
   };

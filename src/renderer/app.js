@@ -158,6 +158,23 @@
   buddy.on('jar-state', (s) => BuddyJarProp.update(s));
   BuddyBrain.start({ workArea: boot.workArea });
   buddy.on('pointer-reset', () => BuddyBrain.resetPointer());
+
+  // Tell the main process where the pet, its speech bubble, and the jar are, so
+  // it can let clicks through everywhere else. Sent only when something moved.
+  let lastHit = '';
+  const HIT_IDS = ['pet', 'bubble', 'jar-prop'];
+  setInterval(() => {
+    const rects = [];
+    for (const id of HIT_IDS) {
+      const el = document.getElementById(id);
+      if (!el || el.classList.contains('hidden') || getComputedStyle(el).display === 'none') continue;
+      const r = el.getBoundingClientRect();
+      if (r.width && r.height) rects.push({ x: Math.round(r.left), y: Math.round(r.top), w: Math.round(r.width), h: Math.round(r.height) });
+    }
+    const dragging = !!BuddyBrain.state.dragging;
+    const sig = JSON.stringify([rects, dragging]);
+    if (sig !== lastHit) { lastHit = sig; buddy.reportHitAreas(rects, dragging); }
+  }, 80);
   BuddyBrain.setPaused(!!boot.settings.paused);
   BuddyBrain.setDeskEnabled(boot.settings.deskMode !== false);
 

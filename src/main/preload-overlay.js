@@ -2,7 +2,8 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('buddy', {
-  setIgnoreMouse: (ignore) => ipcRenderer.send('overlay:set-ignore', !!ignore),
+  // Where the clickable things are (page coordinates) and whether a drag is on.
+  reportHitAreas: (rects, dragging) => ipcRenderer.send('overlay:hit-areas', { rects, dragging: !!dragging }),
   popupMenu: (x, y) => ipcRenderer.send('overlay:popup-menu', { x, y }),
   openJar: () => ipcRenderer.send('jar:open'),
   quickDonate: () => ipcRenderer.invoke('jar:quick-donate'),
