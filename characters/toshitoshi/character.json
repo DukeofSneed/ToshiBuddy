@@ -31,32 +31,14 @@
         "frames": "4:0-4",
         "fps": 6
       },
-      "think": {
-        "frames": "3:2",
-        "loop": false,
-        "flipBody": true
-      },
-      "surprised": {
-        "frames": "3:3",
-        "loop": false,
-        "flipBody": true
-      },
-      "huff": {
-        "frames": "3:1",
-        "loop": false
-      },
-      "shrug": {
-        "frames": "3:4",
-        "loop": false
-      },
-      "drag": {
-        "frames": "3:5",
-        "flipBody": true
-      },
       "sleep": {
         "frames": "3:6,3:7,3:8",
         "fps": 0.7,
         "loopFrom": 2
+      },
+      "drag": {
+        "frames": "3:5",
+        "flipBody": true
       },
       "fall": {
         "frames": "4:5"
@@ -66,8 +48,32 @@
         "fps": 4,
         "loop": false
       },
+      "working": {
+        "frames": "2:0,2:1",
+        "fps": 2
+      },
+      "think": {
+        "frames": "3:2",
+        "flipBody": true,
+        "loop": false
+      },
+      "surprised": {
+        "frames": "3:3",
+        "flip": true,
+        "flipBody": true,
+        "loop": false
+      },
+      "huff": {
+        "frames": "3:1",
+        "loop": false
+      },
+      "shrug": {
+        "frames": "3:4",
+        "loop": false
+      },
       "wave": {
         "frames": "4:8",
+        "flip": true,
         "loop": false
       },
       "frost": {
@@ -79,10 +85,6 @@
         "frames": "2:2,2:4,2:5,2:6,2:7,2:10",
         "fps": 5,
         "loop": false
-      },
-      "working": {
-        "frames": "2:0,2:1",
-        "fps": 2
       },
       "stamp": {
         "frames": "2:7"
