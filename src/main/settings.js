@@ -37,11 +37,14 @@ class Settings {
     try {
       if (fs.existsSync(this.file)) {
         // Strip a UTF-8 byte-order mark (Notepad and Windows PowerShell add one).
-        const text = fs.readFileSync(this.file, 'utf8').replace(/^﻿/, '');
+        const text = fs.readFileSync(this.file, 'utf8').replace(/^\uFEFF/, '');
         this.data = { ...DEFAULTS, ...JSON.parse(text) };
       }
     } catch (e) {
-      console.error('settings: failed to read, using defaults', e);
+      // Keep the unreadable file instead of overwriting it with defaults.
+      const keep = this.file.replace(/\.json$/, `.broken-${new Date().toISOString().replace(/[:.]/g, '-')}.json`);
+      try { fs.renameSync(this.file, keep); } catch (_) { /* nothing to keep */ }
+      console.error(`settings: could not read them (${e.message}); kept a copy at ${keep}, using defaults`);
     }
   }
   get(key) { return this.data[key]; }

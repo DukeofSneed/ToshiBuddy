@@ -1,5 +1,7 @@
 'use strict';
 const { execFile } = require('child_process');
+const fs = require('fs');
+const path = require('path');
 
 function git(cwd, args) {
   return new Promise((resolve, reject) => {
@@ -14,8 +16,15 @@ function git(cwd, args) {
   });
 }
 
+// Upgrade runs may only touch these folders, so that's all the jar ever checks,
+// cleans, or commits. Character packs and other files can have unsaved edits
+// (from Import or the animation mapper) without blocking or losing anything.
+const RUN_DIRS = ['mods', 'content'];
+
 class Git {
   constructor(cwd) { this.cwd = cwd; }
+  // Only folders that exist: a pathspec for a missing folder is an error.
+  dirs(dirs = RUN_DIRS) { return dirs.filter((d) => fs.existsSync(path.join(this.cwd, d))); }
   run(args) { return git(this.cwd, args); }
 
   async available() {
@@ -32,20 +41,25 @@ class Git {
     }
   }
 
-  async status() {
-    const out = await this.run(['status', '--porcelain', '--untracked-files=all']);
+  // dirs: limit to these folders; omitted = the whole project.
+  async status(dirs) {
+    const spec = dirs ? ['--', ...this.dirs(dirs)] : [];
+    if (dirs && spec.length === 1) return [];
+    const out = await this.run(['status', '--porcelain', '--untracked-files=all', ...spec]);
     return out.split(/\r?\n/).filter(Boolean).map((l) => ({ code: l.slice(0, 2), file: l.slice(3).replace(/^"|"$/g, '') }));
   }
 
-  async isClean() { return (await this.status()).length === 0; }
+  async isClean(dirs) { return (await this.status(dirs)).length === 0; }
 
   async hasCommits() {
     try { await this.run(['rev-parse', '--verify', 'HEAD']); return true; } catch (_) { return false; }
   }
 
-  async commitAll(message) {
-    await this.run(['add', '-A']);
-    await this.run(['commit', '-m', message, '--no-verify']);
+  // Commit everything (first snapshot) or only the given folders.
+  async commitAll(message, dirs) {
+    const spec = dirs ? ['--', ...this.dirs(dirs)] : [];
+    await this.run(['add', '-A', ...spec]);
+    await this.run(['commit', '-m', message, '--no-verify', ...spec]);
     return (await this.run(['rev-parse', 'HEAD'])).trim();
   }
 
@@ -55,9 +69,22 @@ class Git {
   }
 
   // Throw away everything a run left uncommitted under the directories it may touch.
-  async discardRunChanges(dirs = ['mods', 'content']) {
-    try { await this.run(['checkout', '--', '.']); } catch (_) { /* no HEAD yet */ }
-    await this.run(['clean', '-fd', '--', ...dirs]);
+  async discardRunChanges(dirs = RUN_DIRS) {
+    const spec = this.dirs(dirs);
+    if (!spec.length) return;
+    try { await this.run(['checkout', '--', ...spec]); } catch (_) { /* nothing tracked there yet */ }
+    await this.run(['clean', '-fd', '--', ...spec]);
+  }
+
+  // Put specific files back the way the last commit has them (deleting ones git
+  // doesn't track). Used for files a run changed outside its folders.
+  async restoreFiles(files) {
+    if (!files.length) return;
+    const tracked = new Set((await this.run(['ls-files', '--', ...files])).split(/\r?\n/).filter(Boolean));
+    for (const f of files) {
+      if (tracked.has(f)) await this.run(['checkout', '--', f]);
+      else { try { fs.unlinkSync(path.join(this.cwd, f)); } catch (_) { /* already gone */ } }
+    }
   }
 
   async log(n = 20) {
@@ -68,4 +95,4 @@ class Git {
   }
 }
 
-module.exports = { Git };
+module.exports = { Git, RUN_DIRS };

@@ -6,7 +6,7 @@ const { pathToFileURL } = require('url');
 
 // JSON files people edit by hand on Windows often start with a byte-order mark.
 function readJson(file) {
-  return JSON.parse(fs.readFileSync(file, 'utf8').replace(/^﻿/, ''));
+  return JSON.parse(fs.readFileSync(file, 'utf8').replace(/^\uFEFF/, ''));
 }
 
 function listMods(projectRoot, disabled = []) {
@@ -78,8 +78,20 @@ function readCharacterConfig(folder) {
   return {};
 }
 
+// The list is read from disk once and reused; invalidateCharacters() after an
+// import, a mapper save, or a reload (the only times packs change on disk).
+let charactersCache = null;
+function invalidateCharacters() { charactersCache = null; }
+
 function listCharacters(projectRoot) {
   const dir = charactersRoot(projectRoot);
+  if (charactersCache && charactersCache.dir === dir) return charactersCache.list;
+  const list = scanCharacters(dir);
+  charactersCache = { dir, list };
+  return list;
+}
+
+function scanCharacters(dir) {
   let entries = [];
   try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch (_) { return []; }
   const out = [];
@@ -130,4 +142,4 @@ function readCharacterDialogue(projectRoot, id) {
   }
 }
 
-module.exports = { listMods, readQuipPacks, readCharacterDialogue, readCharacterConfig, parseQuipList, listCharacters, charactersRoot, readJson, ID_RE, IMG_RE };
+module.exports = { listMods, readQuipPacks, readCharacterDialogue, readCharacterConfig, parseQuipList, listCharacters, invalidateCharacters, charactersRoot, readJson, ID_RE, IMG_RE };

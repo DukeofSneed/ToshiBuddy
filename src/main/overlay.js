@@ -32,7 +32,7 @@ function createOverlay() {
       preload: path.join(__dirname, 'preload-overlay.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false,
+      sandbox: true,
       backgroundThrottling: false,
       autoplayPolicy: 'no-user-gesture-required',
     },
@@ -81,7 +81,7 @@ function createJarWindow(parent) {
       preload: path.join(__dirname, 'preload-jar.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false,
+      sandbox: true,
     },
   });
   win.setAlwaysOnTop(true, 'floating');
@@ -113,7 +113,7 @@ function createCustomizeWindow() {
       preload: path.join(__dirname, 'preload-customize.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false,
+      sandbox: true,
     },
   });
   win.setMenu(null);
@@ -138,7 +138,7 @@ function createImportWindow(hash) {
       preload: path.join(__dirname, 'preload-import.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false,
+      sandbox: true,
     },
   });
   win.setMenu(null);

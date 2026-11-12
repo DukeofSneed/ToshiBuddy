@@ -36,10 +36,16 @@ class Ledger {
     this.listeners = new Set();
     try {
       if (fs.existsSync(this.file)) {
-        const loaded = JSON.parse(fs.readFileSync(this.file, 'utf8'));
+        // Notepad and Windows PowerShell can add a byte-order mark; it isn't data.
+        const loaded = JSON.parse(fs.readFileSync(this.file, 'utf8').replace(/^\uFEFF/, ''));
         this.data = { ...JSON.parse(JSON.stringify(EMPTY)), ...loaded };
       }
-    } catch (e) { console.error('ledger: failed to load', e); }
+    } catch (e) {
+      // Never overwrite an unreadable ledger: keep it next to the new one.
+      const keep = this.file.replace(/\.json$/, `.broken-${new Date().toISOString().replace(/[:.]/g, '-')}.json`);
+      try { fs.renameSync(this.file, keep); } catch (_) { /* nothing to keep */ }
+      console.error(`ledger: could not read it (${e.message}); kept a copy at ${keep} and started a new one`);
+    }
     // Older versions let fees push the balance below zero; that was a bug.
     if (!(this.data.balance >= 0)) this.data.balance = 0;
   }

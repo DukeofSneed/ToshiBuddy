@@ -1,4 +1,5 @@
 'use strict';
+const { RUN_DIRS } = require('./git');
 // Spends a funded goal: spawns a capped headless Claude Code run that writes a
 // mod, audits what it touched, commits or reverts, reloads the pet, and books
 // the real token usage.
@@ -153,7 +154,10 @@ class Upgrader {
     try {
       await this.git.ensureRepo();
       if (!(await this.git.hasCommits())) await this.git.commitAll('chore: initial snapshot before first upgrade');
-      if (!(await this.git.isClean())) return { ok: false, reason: 'the project has uncommitted changes; commit or discard them first' };
+      if (!(await this.git.isClean(RUN_DIRS))) return { ok: false, reason: 'mods/ or content/ has unsaved changes; finish or undo them first' };
+      // Files outside mods/ and content/ that already have unsaved changes (an
+      // imported character, a mapper save) are not the run's doing.
+      this.preRun = await this.dirtySnapshot();
     } catch (e) {
       return { ok: false, reason: `git not ready: ${e.message}` };
     }
@@ -217,14 +221,37 @@ class Upgrader {
     return this._finishFailure(g, res, tokens);
   }
 
+  // Unsaved files and their modification times, to tell the run's changes from
+  // edits that were already there.
+  async dirtySnapshot() {
+    const out = new Map();
+    for (const s of await this.git.status()) {
+      const file = s.file.replace(/\\/g, '/');
+      let mtime = 0;
+      try { mtime = fs.statSync(path.join(this.projectRoot, file)).mtimeMs; } catch (_) { /* deleted */ }
+      out.set(file, mtime);
+    }
+    return out;
+  }
+
   async _finishSuccess(goal, res, model, tokens) {
-    // Audit: only mods/ and content/ may change.
+    // Audit: only mods/ and content/ may change. A file outside them counts as
+    // the run's doing if it wasn't already unsaved before the run, or changed since.
     let changed = [];
-    try { changed = (await this.git.status()).map((s) => s.file.replace(/\\/g, '/')); } catch (_) { /* ignore */ }
-    const illegal = changed.filter((f) => !ALLOWED_PREFIXES.some((p) => f.startsWith(p)));
-    if (illegal.length) {
+    let outside = [];
+    try {
+      const before = this.preRun || new Map();
+      const now = await this.dirtySnapshot();
+      changed = [...now.keys()].filter((f) => ALLOWED_PREFIXES.some((p) => f.startsWith(p)));
+      outside = [...now.entries()].filter(([f, m]) => !ALLOWED_PREFIXES.some((p) => f.startsWith(p)) && (!before.has(f) || before.get(f) !== m)).map(([f]) => f);
+    } catch (_) { /* ignore */ }
+    if (outside.length) {
       await this.git.discardRunChanges();
-      return this._fail(goal, `run touched forbidden files: ${illegal.slice(0, 5).join(', ')}`);
+      // Undo the run's own changes there, but never an edit that was already
+      // unsaved before the run (that one is the user's).
+      const before = this.preRun || new Map();
+      try { await this.git.restoreFiles(outside.filter((f) => !before.has(f))); } catch (e) { this.log(`restore failed: ${e.message}`); }
+      return this._fail(goal, `run touched files outside mods/ and content/: ${outside.slice(0, 5).join(', ')}`);
     }
     if (!changed.length) {
       return this._fail(goal, 'run finished without changing any files');
@@ -241,7 +268,7 @@ class Upgrader {
     const slugs = [...new Set(changed.filter((f) => f.startsWith('mods/')).map((f) => f.split('/')[1]).filter(Boolean))];
     let hash;
     try {
-      hash = await this.git.commitAll(`upgrade: ${out.title || goal.title} (${tokens} tokens, ${model})`);
+      hash = await this.git.commitAll(`upgrade: ${out.title || goal.title} (${tokens} tokens, ${model})`, RUN_DIRS);
     } catch (e) {
       await this.git.discardRunChanges();
       return this._fail(goal, `commit failed: ${e.message}`);
@@ -305,7 +332,7 @@ class Upgrader {
     if (!up || up.reverted) return { ok: false, reason: 'nothing to undo' };
     if (this.active) return { ok: false, reason: 'wait for the running upgrade to finish' };
     try {
-      if (!(await this.git.isClean())) return { ok: false, reason: 'uncommitted changes in the project' };
+      if (!(await this.git.isClean(RUN_DIRS))) return { ok: false, reason: 'mods/ or content/ has unsaved changes' };
       const hash = await this.git.revert(up.commit);
       up.reverted = true;
       up.revertCommit = hash;

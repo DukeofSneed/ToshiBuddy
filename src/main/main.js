@@ -11,7 +11,7 @@ const { Guard } = require('./jar/guard');
 const { Upgrader } = require('./jar/upgrader');
 const { Git } = require('./jar/git');
 const { estimate } = require('./jar/estimator');
-const { listMods, readQuipPacks, readCharacterDialogue, listCharacters, charactersRoot } = require('./mods');
+const { listMods, readQuipPacks, readCharacterDialogue, listCharacters, invalidateCharacters, charactersRoot } = require('./mods');
 const { trayIcon } = require('./tray-icon');
 const { findClaude } = require('./jar/claude');
 const { ActivityWatcher, classify } = require('./activity');
@@ -27,52 +27,12 @@ if (!app.requestSingleInstanceLock()) {
   app.whenReady().then(start);
 }
 
-// Data from before the rename lived under the old package name's folder.
-// Copy it over once so balances, names, and edited quips survive.
-function migrateOldUserData(userData) {
-  try {
-    if (fs.existsSync(path.join(userData, 'settings.json'))) return;
-    const old = path.join(path.dirname(userData), ['ask', 'in-buddy'].join(''));
-    if (!fs.existsSync(path.join(old, 'settings.json'))) return;
-    fs.mkdirSync(userData, { recursive: true });
-    for (const f of fs.readdirSync(old)) {
-      if (f === 'settings.json' || f === 'ledger.json' || /^quips-custom.*\.json$/.test(f)) {
-        fs.copyFileSync(path.join(old, f), path.join(userData, f));
-      }
-    }
-  } catch (e) { console.error(`userData migration failed: ${e.message}`); }
-}
-
-// Skins became character packs: skins/my-skin -> characters/toshitoshi and the
-// built-in Kori -> characters/kori-test. Carry the choice, name, and quip edits over.
-function migrateSkinSettings(settings, userData) {
-  const MAP = { 'my-skin': 'toshitoshi', kori: 'kori-test' };
-  const all = settings.all();
-  if ('skin' in all) {
-    const old = all.skin;
-    if (!settings.get('character') && old) settings.set('character', MAP[old] || old);
-    const names = { ...(all.characterNames || {}) };
-    for (const [from, to] of Object.entries(MAP)) if (names[from] && !names[to]) { names[to] = names[from]; delete names[from]; }
-    settings.set('characterNames', names);
-    if (typeof settings.remove === 'function') settings.remove('skin');
-  }
-  try {
-    const from = path.join(userData, 'quips-custom-my-skin.json');
-    const to = path.join(userData, 'quips-custom-toshitoshi.json');
-    if (fs.existsSync(from) && !fs.existsSync(to)) {
-      fs.writeFileSync(to, fs.readFileSync(from, 'utf8').split('skin:my-skin|').join('character:toshitoshi|'));
-    }
-  } catch (e) { console.error(`quip edit migration failed: ${e.message}`); }
-}
-
 function start() {
   // Tests can point the app at a throwaway data folder (TOSHI_USERDATA).
   if (process.env.TOSHI_USERDATA) app.setPath('userData', process.env.TOSHI_USERDATA);
   const userData = app.getPath('userData');
-  migrateOldUserData(userData);
   try { app.setAppUserModelId('ToshiBuddy'); } catch (_) { /* Windows only */ }
   const settings = new Settings(userData);
-  migrateSkinSettings(settings, userData);
   const ledger = new Ledger(userData);
   const logLines = [];
   const log = (line) => {
@@ -114,6 +74,7 @@ function start() {
     if (status.ok === false) log(`mod ${status.slug} failed: ${status.error}`);
   });
   const reloadAndAwaitMods = (slugs, timeoutMs) => new Promise((resolve) => {
+    invalidateCharacters(); // a reload picks up edited or added character packs
     modStatuses.clear();
     const pending = slugs.map((slug) => new Promise((res) => {
       modWaiters.set(slug, res);
@@ -347,12 +308,14 @@ function start() {
   });
   ipcMain.handle('import:files', guarded((args) => {
     const id = characterImport.importFiles(PROJECT_ROOT, args);
+    invalidateCharacters();
     log(`character imported: ${id}`);
     switchCharacter(id);
     return { id };
   }));
   ipcMain.handle('import:pack', guarded(({ source }) => {
     const id = characterImport.importPack(PROJECT_ROOT, String(source || ''));
+    invalidateCharacters();
     log(`character pack imported: ${id}`);
     switchCharacter(id);
     return { id };
@@ -410,6 +373,7 @@ function start() {
   });
   ipcMain.handle('import:save', guarded(({ id, patch }) => {
     characterImport.saveCharacter(PROJECT_ROOT, String(id || ''), patch || {});
+    invalidateCharacters();
     if (id === activeCharacterId()) reloadAndAwaitMods([], 1500);
     return { ok: true };
   }));
@@ -634,31 +598,16 @@ function start() {
   } catch (e) { log(`tray failed: ${e.message}`); }
 
   // Launching again with --import (or --edit) opens the Characters window; otherwise the jar.
-  // --demo-poses: hold the confused, surprised, and dizzy poses for 5 s each on
-  // ToshiToshi and then Bambietta (with a label), then switch back.
-  async function demoPoses() {
-    const original = activeCharacterId();
-    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-    for (const id of ['toshitoshi', 'bambietta'].filter((x) => listCharacters(PROJECT_ROOT).some((c) => c.name === x))) {
-      settings.set('character', id);
-      await reloadAndAwaitMods([], 1500);
-      await wait(3500);
-      for (const pose of ['think', 'surprised', 'drag']) {
-        const label = { think: 'confused (row 4, spot 3)', surprised: 'surprised (row 4, spot 4)', drag: 'dizzy (row 4, spot 6)' }[pose];
-        await overlay.webContents.executeJavaScript(`(() => { BuddyBrain.setPaused(true); BuddyBubble.hide(); const p = document.getElementById('pet'); for (const m of ['idle','walk','lean','sleep','drag','fall','desk','think','surprised']) p.classList.remove(m); p.classList.add(${JSON.stringify(pose === 'drag' ? 'drag' : 'idle')}); ${pose === 'drag' ? '' : `p.classList.add('${pose}');`} BuddyBubble.toast(${JSON.stringify(id + ': ' + label)}, 5000); return 1; })()`);
-        await wait(5000);
-      }
-      await overlay.webContents.executeJavaScript(`(() => { const p = document.getElementById('pet'); for (const m of ['drag','think','surprised']) p.classList.remove(m); p.classList.add('idle'); BuddyBrain.setPaused(false); return 1; })()`);
-    }
-    settings.set('character', original);
-    await reloadAndAwaitMods([], 1500);
-  }
-  const openFromArgs = (argv) => { if (argv.includes('--import')) { openImport('import'); return true; } if (argv.includes('--edit')) { openImport('edit'); return true; } if (argv.includes('--demo-poses')) { demoPoses(); return true; } return false; };
+  const openFromArgs = (argv) => { if (argv.includes('--import')) { openImport('import'); return true; } if (argv.includes('--edit')) { openImport('edit'); return true; } if (argv.includes('--demo-poses')) { require('./selftest').demoPoses(testCtx); return true; } return false; };
   app.on('second-instance', (_e, argv) => { if (!openFromArgs(argv)) openJar(); });
   if (!process.env.TOSHI_SELFTEST) setTimeout(() => openFromArgs(process.argv), 2500);
   const firstRun = !settings.get('firstRunDone') && !settings.get('character');
   if (firstRun && !process.env.TOSHI_SELFTEST && listCharacters(PROJECT_ROOT).filter((c) => !c.test).length > 1) {
-    setTimeout(() => openImport('choose'), 3000);
+    setTimeout(() => {
+      openImport('choose');
+      // Closing the chooser without picking also counts: it shouldn't return every launch.
+      if (importWin) importWin.once('closed', () => settings.set('firstRunDone', true));
+    }, 3000);
   } else if (!settings.get('firstRunDone')) {
     settings.set('firstRunDone', true);
   }
@@ -673,6 +622,13 @@ function start() {
 
   // ---- self-test: TOSHI_SELFTEST=<dir> captures both windows and quits ----
   const selftestDir = process.env.TOSHI_SELFTEST;
+  // Everything the self-test and the pose demo need from here.
+  const testCtx = {
+    app, screen, settings, ledger, guard, logLines, log, charName, buildMenu, openCustomize, openImport, activeCharacterId, reloadAndAwaitMods,
+    listCharacters: () => listCharacters(PROJECT_ROOT),
+    get overlay() { return overlay; }, get jarWin() { return jarWin; },
+    get customizeWin() { return customizeWin; }, get importWin() { return importWin; },
+  };
   for (const [name, w] of [['overlay', overlay], ['jar', jarWin]]) {
     w.webContents.on('console-message', (ev) => {
       if (ev.level === 'error' || ev.level === 'warning') log(`${name} console: ${ev.message}`);
@@ -680,144 +636,7 @@ function start() {
     w.webContents.on('render-process-gone', (_e, d) => log(`${name} renderer gone: ${d.reason}`));
     w.webContents.on('did-fail-load', (_e, code, desc) => log(`${name} failed to load: ${code} ${desc}`));
   }
-  if (selftestDir) {
-    fs.mkdirSync(selftestDir, { recursive: true });
-    setTimeout(async () => {
-      try {
-        jarWin.showInactive();
-        await new Promise((r) => setTimeout(r, 1500));
-        const wa = screen.getPrimaryDisplay().workArea;
-        const ov = await overlay.webContents.capturePage({ x: 0, y: wa.height - 420, width: wa.width, height: 420 });
-        fs.writeFileSync(path.join(selftestDir, 'overlay.png'), ov.toPNG());
-        // Plain close-up at 3x: freeze him in idle with no bubble.
-        const pos = JSON.parse(await overlay.webContents.executeJavaScript(`BuddyBrain.setPaused(true); BuddyBubble.hide(); BuddyVoice.stop(); const p=document.getElementById('pet'); const keep=['skin','has-ultimate','sheet','ultimate-sheet'].filter(c=>p.classList.contains(c)); p.className=['idle','face-right',...keep].join(' '); document.querySelectorAll('#pet *').forEach(e=>e.style.animationPlayState='paused'); JSON.stringify({x: BuddyBrain.state.x, y: BuddyBrain.state.y})`));
-        await new Promise((r) => setTimeout(r, 400));
-        // A blink may still be in flight; wait it out.
-        await overlay.webContents.executeJavaScript(`document.getElementById('pet').classList.remove('blink'); 1`);
-        await new Promise((r) => setTimeout(r, 200));
-        if (process.env.TOSHI_SELFTEST_PROPS) {
-          // Show every hidden mod prop and the anchor markers for this capture.
-          await overlay.webContents.executeJavaScript(`document.querySelectorAll('[data-mod]').forEach(g => g.setAttribute('display','inline')); document.getElementById('pet').classList.add('show-anchors'); 1`);
-          await new Promise((r) => setTimeout(r, 200));
-        }
-        const plain = await overlay.webContents.capturePage({ x: Math.max(0, Math.round(pos.x)), y: Math.max(0, Math.round(pos.y)), width: 160, height: 200 });
-        fs.writeFileSync(path.join(selftestDir, 'plain.png'), plain.resize({ width: 480, quality: 'best' }).toPNG());
-        // Sprite-sheet skins: one capture per pet state, to check the frame mapping.
-        if (await overlay.webContents.executeJavaScript(`window.BUDDY_SHEET_DEBUG = true; document.getElementById('pet').classList.contains('sheet')`)) {
-          for (const [k, wait] of [['walk', 500], ['talk', 500], ['think', 300], ['surprised', 300], ['huff', 300], ['drag', 300], ['fall', 300], ['sleep', 3400], ['frost', 900]]) {
-            const mode = ['walk', 'sleep', 'drag', 'fall'].includes(k) ? k : 'idle';
-            const extra = mode === k ? '' : ` ${k}`;
-            await overlay.webContents.executeJavaScript(k === 'sleep'
-              ? `BuddyBrain.onIdleSeconds(400); BuddyBubble.hide(); 1` // a real nap, so the brain doesn't undo it
-              : `(() => { const p=document.getElementById('pet'); const keep=['skin','has-ultimate','sheet','ultimate-sheet'].filter(c=>p.classList.contains(c)); p.className=['${mode}${extra}','face-right',...keep].join(' '); return 1; })()`);
-            await new Promise((r) => setTimeout(r, wait));
-            const shot = await overlay.webContents.capturePage({ x: Math.max(0, Math.round(pos.x) - 40), y: Math.max(0, Math.round(pos.y) - 20), width: 240, height: 220 });
-            fs.writeFileSync(path.join(selftestDir, `state-${k}.png`), shot.toPNG());
-          }
-          await overlay.webContents.executeJavaScript(`BuddyBrain.onIdleSeconds(0); (() => { const p=document.getElementById('pet'); const keep=['skin','has-ultimate','sheet','ultimate-sheet'].filter(c=>p.classList.contains(c)); p.className=['idle','face-right',...keep].join(' '); return 1; })()`);
-        }
-        // Then a bubble and the ice-crystal trick, cropped wider.
-        await overlay.webContents.executeJavaScript(`document.querySelectorAll('#pet *').forEach(e=>e.style.animationPlayState=''); BuddyBrain.quip(['click']); BuddyBrain.playAnimation('frost'); 1`);
-        await new Promise((r) => setTimeout(r, 900));
-        const cx = Math.max(0, Math.round(pos.x) - 120);
-        const close = await overlay.webContents.capturePage({ x: cx, y: Math.max(0, Math.round(pos.y) - 130), width: 400, height: 330 });
-        fs.writeFileSync(path.join(selftestDir, 'closeup.png'), close.resize({ width: 800 }).toPNG());
-        // Desk mode with a full paper stack, mid-stamp.
-        await overlay.webContents.executeJavaScript(`BuddyBubble.hide(); BuddyBrain.enterDesk('lab'); document.getElementById('pet').dataset.papers='8'; 1`);
-        await new Promise((r) => setTimeout(r, 1500));
-        await overlay.webContents.executeJavaScript(`BuddyBrain.playAnimation('stamp'); 1`);
-        await new Promise((r) => setTimeout(r, 1000));
-        const desk = await overlay.webContents.capturePage({ x: cx, y: Math.max(0, Math.round(pos.y) - 130), width: 400, height: 330 });
-        fs.writeFileSync(path.join(selftestDir, 'desk.png'), desk.resize({ width: 800 }).toPNG());
-        // Frost Release, captured mid-transformation.
-        await overlay.webContents.executeJavaScript(`BuddyBubble.hide(); BuddyBrain.exitDesk({ quiet: true }); BuddyBrain.playAnimation('release'); 1`);
-        await new Promise((r) => setTimeout(r, 1700));
-        const rx = Math.max(0, Math.round(pos.x) - 220);
-        const rel = await overlay.webContents.capturePage({ x: rx, y: Math.max(0, Math.round(pos.y) - 260), width: 600, height: 460 });
-        fs.writeFileSync(path.join(selftestDir, 'release.png'), rel.toPNG());
-        // Ultimate form, captured while held after the release finishes.
-        await new Promise((r) => setTimeout(r, 3000));
-        await overlay.webContents.executeJavaScript(`BuddyBubble.hide(); BuddyBrain.enterUltimate(12); 1`);
-        await new Promise((r) => setTimeout(r, 5200));
-        const ult = await overlay.webContents.capturePage({ x: rx, y: Math.max(0, Math.round(pos.y) - 260), width: 600, height: 460 });
-        fs.writeFileSync(path.join(selftestDir, 'ultimate.png'), ult.toPNG());
-        const ultState = await overlay.webContents.executeJavaScript(`JSON.stringify({ classes: document.getElementById('pet').className, primaryShown: (() => { const e = document.getElementById('skin-img'); return e ? getComputedStyle(e).display : 'n/a'; })(), ultimateShown: (() => { const e = document.getElementById('skin-ultimate'); return e ? getComputedStyle(e).display : 'n/a'; })() })`);
-        fs.writeFileSync(path.join(selftestDir, 'ultimate.json'), ultState);
-        const jp = await jarWin.webContents.capturePage();
-        fs.writeFileSync(path.join(selftestDir, 'jar.png'), jp.toPNG());
-        openCustomize();
-        await new Promise((r) => setTimeout(r, 1500));
-        const cp = await customizeWin.webContents.capturePage();
-        fs.writeFileSync(path.join(selftestDir, 'customize.png'), cp.toPNG());
-        openImport('edit');
-        await new Promise((r) => setTimeout(r, 3500));
-        if (importWin) { const ip = await importWin.webContents.capturePage(); fs.writeFileSync(path.join(selftestDir, 'characters-edit.png'), ip.toPNG()); await importWin.webContents.executeJavaScript("document.querySelector('.tab[data-tab=import]').click(); 1"); await new Promise((r) => setTimeout(r, 400)); const ip2 = await importWin.webContents.capturePage(); fs.writeFileSync(path.join(selftestDir, 'characters-import.png'), ip2.toPNG()); await importWin.webContents.executeJavaScript("document.querySelector('.tab[data-tab=choose]').click(); 1"); await new Promise((r) => setTimeout(r, 1200)); const ip3 = await importWin.webContents.capturePage(); fs.writeFileSync(path.join(selftestDir, 'characters-choose.png'), ip3.toPNG()); }
-        const sfxCheck = await overlay.webContents.executeJavaScript(`JSON.stringify(BuddySfx.names.map((n) => { try { return [n, BuddySfx.play(n)]; } catch (e) { return [n, 'ERR ' + e.message]; } }))`);
-        fs.writeFileSync(path.join(selftestDir, 'sfx.json'), sfxCheck);
-        const probe = await overlay.webContents.executeJavaScript(`JSON.stringify({ mods: BuddyMods.list(), skippedMods: BuddyMods.skipped(), modProps: document.querySelectorAll('#pet [data-mod]').length, surprisedAnim: (() => { const p = document.getElementById('pet'); p.classList.add('surprised'); const a = getComputedStyle(document.getElementById('sprite')).animationName; p.classList.remove('surprised'); return a; })(), quips: BuddyQuips.all().length, mode: BuddyBrain.state.mode, x: BuddyBrain.state.x, y: BuddyBrain.state.y, bubble: BuddyBubble.isVisible(), text: document.getElementById('bubble-text').textContent, petClass: document.getElementById('pet').className, skin: document.getElementById('pet').classList.contains('skin'), skinImg: !!document.getElementById('skin-img'), ultimateImg: !!document.getElementById('skin-ultimate'), idle: BuddyBrain.state.idleSeconds })`);
-        fs.writeFileSync(path.join(selftestDir, 'state.json'), probe);
-        // Desk and dialogue, driven with simulated typing samples.
-        const deskProbe = await overlay.webContents.executeJavaScript(`(() => {
-          const B = BuddyBrain, st = B.state, txt = () => document.getElementById('bubble-text').textContent, r = {};
-          document.getElementById('pet').classList.remove('ultimate'); B.exitDesk({ quiet: true }); BuddyBubble.hide(); st.typingLog = [];
-          for (let i = 0; i < 30; i++) B.onActivity({ typing: 1, kind: 'writing' });
-          r.clickingAround = st.mode;
-          st.typingLog = [];
-          for (let i = 0; i < 10; i++) B.onActivity({ typing: 8, kind: 'coding' });
-          r.afterTyping = st.mode; r.deskKind = st.deskKind; r.spawnLine = txt();
-          BuddyBubble.hide(); st.bubblePriority = 0; st.lastTypingAt -= 30000; Math.random = () => 0.1;
-          B.onActivity({ typing: 0, kind: 'coding' });
-          r.pauseLine = txt(); r.stillAtDesk = st.mode;
-          BuddyBubble.hide(); st.lastTypingAt -= 100000; B.onActivity({ typing: 0 });
-          r.afterLongPause = st.mode; r.despawnLine = txt();
-          r.greet = BuddyQuips.pick(['greet']); r.idle = BuddyQuips.pick(['idle']); r.click = BuddyQuips.pick(['click']);
-          return JSON.stringify(r, null, 1);
-        })()`);
-        fs.writeFileSync(path.join(selftestDir, 'desk-dialogue.json'), deskProbe);
-        // Walk check: let the brain walk him for 3 s and record each frame shown.
-        const walkProbe = await overlay.webContents.executeJavaScript(`(async () => {
-          const B = BuddyBrain, st = B.state, p = document.getElementById('pet');
-          B.exitDesk({ quiet: true }); BuddyBubble.hide(); B.setPaused(false);
-          st.x = 300; st.nextDecision = performance.now() + 60000;
-          for (const m of ['idle', 'walk', 'lean', 'sleep', 'drag', 'fall', 'desk']) p.classList.remove(m);
-          p.classList.add('walk'); st.mode = 'walk';
-          const pl = BuddyApp.sheetPlayers && BuddyApp.sheetPlayers.base;
-          const seq = []; const t0 = performance.now(); const x0 = st.x;
-          while (performance.now() - t0 < 3000) {
-            const fr = pl ? pl.frame : -1;
-            if (!seq.length || seq[seq.length - 1].f !== fr) seq.push({ f: fr, t: Math.round(performance.now() - t0), key: pl && pl.key });
-            await new Promise((r) => setTimeout(r, 40));
-          }
-          B.setPaused(true);
-          return JSON.stringify({ moved: Math.round(st.x - x0), speed: BuddyApp.walkSpeed, seq });
-        })()`);
-        fs.writeFileSync(path.join(selftestDir, 'walk-probe.json'), walkProbe);
-        // The jar on screen: where it sits, and (only with a throwaway data
-        // folder) that a double-click donates the quick amount.
-        const jarRect = JSON.parse(await overlay.webContents.executeJavaScript(`JSON.stringify((() => { const r = document.getElementById('jar-prop').getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height, stageW: innerWidth, stageH: innerHeight, label: document.getElementById('jar-label').textContent, zone: BuddyApp.jarZone }; })())`));
-        const jarShot = await overlay.webContents.capturePage({ x: Math.max(0, Math.round(jarRect.x) - 260), y: Math.max(0, Math.round(jarRect.y) - 120), width: 360, height: 230 });
-        fs.writeFileSync(path.join(selftestDir, 'jar-prop.png'), jarShot.toPNG());
-        const jarTest = { rect: jarRect };
-        if (process.env.TOSHI_USERDATA) {
-          jarTest.before = ledger.data.balance;
-          jarTest.ceiling = guard.maxSafeDonation();
-          await overlay.webContents.executeJavaScript(`document.getElementById('jar-prop').dispatchEvent(new MouseEvent('dblclick', { bubbles: true })); 1`);
-          await new Promise((r) => setTimeout(r, 1500));
-          jarTest.after = ledger.data.balance;
-          jarTest.pledged = ledger.data.pledged;
-          jarTest.labelAfter = await overlay.webContents.executeJavaScript(`document.getElementById('jar-label').textContent`);
-        }
-        fs.writeFileSync(path.join(selftestDir, 'jar-prop.json'), JSON.stringify(jarTest, null, 1));
-        const labels = (m) => m.items.flatMap((i) => [i.label, ...(i.submenu ? labels(i.submenu) : [])]).filter(Boolean);
-        fs.writeFileSync(path.join(selftestDir, 'menu.json'), JSON.stringify({ name: charName(), tooltipName: `${charName()} Buddy`, menu: labels(buildMenu()) }, null, 1));
-        fs.writeFileSync(path.join(selftestDir, 'log.txt'), logLines.join('\n'));
-      } catch (e) {
-        fs.writeFileSync(path.join(selftestDir, 'log.txt'), logLines.join('\n') + `\nSELFTEST ERROR: ${e.stack}`);
-      }
-      if (jarWin) jarWin.__reallyClose = true;
-      app.exit(0);
-    }, 5000);
-  }
+  if (selftestDir) require('./selftest').runSelftest(testCtx, selftestDir);
 }
 
 function fmt(n) {

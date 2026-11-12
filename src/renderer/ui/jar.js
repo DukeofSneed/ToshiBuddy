@@ -14,17 +14,9 @@
   const esc = (s) => String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const time = (ms) => new Date(ms).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
 
-  // On a skin, text written for the built-in character (catalog ideas, older
-  // upgrades, log lines) shows the active character's name instead.
-  let NAME = 'Kori', ON_SKIN = false;
-  const nm = (s) => (ON_SKIN ? String(s == null ? '' : s).replace(/\bKori\b/g, NAME) : String(s == null ? '' : s));
-
   function render(state) {
     if (window.BuddyTheme) BuddyTheme.apply(state.theme);
     S = state;
-    NAME = state.settings.characterName || 'Kori';
-    const active = (state.characters || []).find((c) => c.id === state.activeCharacter);
-    ON_SKIN = !!active && active.id !== 'kori-test';
     const L = state.ledger;
     const G = state.guard;
 
@@ -64,7 +56,7 @@
     // Goals
     const goals = L.goals || [];
     $('goals').innerHTML = goals.length ? goals.map(goalHtml).join('') : '<div class="muted">No goals. Suggest something.</div>';
-    const charName = NAME;
+    const charName = state.settings.characterName || 'Kori';
     $('jar-title').textContent = `${charName}'s Donation Jar`;
     document.title = `${charName}'s Jar`;
     document.querySelectorAll('.char-name').forEach((el) => { el.textContent = charName; });
@@ -73,7 +65,7 @@
     // Upgrades
     const ups = L.upgrades || [];
     $('upgrades').innerHTML = ups.length
-      ? ups.map((up) => `<div class="upgrade ${up.reverted ? 'reverted' : ''}"><div><div class="t">${esc(nm(up.title))}</div><div class="muted" style="font-size:11px">${fmt(up.tokens)} tokens · ${esc(up.model)} · ${new Date(up.at).toLocaleDateString()}</div></div>${up.reverted ? '<span class="muted">undone</span>' : `<button class="small ghost" data-undo="${up.id}">Undo</button>`}</div>`).join('')
+      ? ups.map((up) => `<div class="upgrade ${up.reverted ? 'reverted' : ''}"><div><div class="t">${esc(up.title)}</div><div class="muted" style="font-size:11px">${fmt(up.tokens)} tokens · ${esc(up.model)} · ${new Date(up.at).toLocaleDateString()}</div></div>${up.reverted ? '<span class="muted">undone</span>' : `<button class="small ghost" data-undo="${up.id}">Undo</button>`}</div>`).join('')
       : 'None yet.';
 
     // Settings
@@ -101,7 +93,7 @@
     BuddySfx.setEnabled(sfxOn);
     BuddySfx.setVolume(vol / 100);
 
-    $('log').textContent = nm((state.log || []).join('\n'));
+    $('log').textContent = (state.log || []).join('\n');
   }
 
   function goalHtml(g) {
@@ -125,11 +117,11 @@
       actions += `<button class="small ghost" data-remove="${g.id}" title="Remove; unspent tokens go back to the jar">✕</button>`;
     }
     return `<div class="goal ${g.status}">
-      <div class="head"><div class="title">${esc(nm(g.title))}</div><span class="badge ${g.status}">${g.status}${g.size ? ' · ' + g.size : ''}</span></div>
-      <div class="summary">${esc(nm(g.summary))}</div>
+      <div class="head"><div class="title">${esc(g.title)}</div><span class="badge ${g.status}">${g.status}${g.size ? ' · ' + g.size : ''}</span></div>
+      <div class="summary">${esc(g.summary)}</div>
       <div class="bar"><div style="width:${pct}%"></div></div>
       <div class="meta"><span>${fmt(shown)} / ${fmt(target)} tokens${['paused', 'failed'].includes(g.status) ? ' to continue' : ''}</span><span>${g.spent ? `spent ${fmt(g.spent)}` : g.source === 'catalog' ? 'catalog idea' : 'your idea'}</span></div>
-      ${g.note ? `<div class="note">${esc(nm(g.note))}</div>` : ''}
+      ${g.note ? `<div class="note">${esc(g.note)}</div>` : ''}
       <div class="actions">${actions}</div>
     </div>`;
   }
@@ -210,7 +202,7 @@
   jar.on('jar:changed', render);
   jar.on('jar:run-log', (line) => {
     const pre = $('log');
-    pre.textContent += (pre.textContent ? '\n' : '') + nm(line);
+    pre.textContent += (pre.textContent ? '\n' : '') + line;
     pre.scrollTop = pre.scrollHeight;
   });
   jar.state().then(render);

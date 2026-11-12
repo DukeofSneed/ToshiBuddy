@@ -6,7 +6,8 @@
   "main": "src/main/main.js",
   "private": true,
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "test": "node tests/run.js"
   },
   "devDependencies": {
     "electron": "^45.3.0"

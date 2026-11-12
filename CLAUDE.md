@@ -17,6 +17,11 @@ upgrade runs that write mods. Kori (`characters/kori-test`, drawn in
 ## If you are a developer session
 - `Setup ToshiBuddy.cmd` installs and makes the desktop shortcut; `npm.cmd start` (or
   `start.cmd`) runs the app. No build step. Zero runtime dependencies.
+- `npm.cmd test` runs tests/*.test.js (jar and guard, importer checks, dialogue engine,
+  upgrade audit). The app self-test lives in `src/main/selftest.js` (`TOSHI_SELFTEST=<dir>`,
+  with `TOSHI_USERDATA=<dir>` so it never touches real data).
+- Upgrade runs only ever check, clean, and commit `mods/` and `content/` (`RUN_DIRS` in
+  `src/main/jar/git.js`); never widen that to the whole project.
 - Main process: `src/main/` (windows, tray, activity watcher for desk mode, ledger,
   guard, estimator, upgrader, git).
 - Renderer: `src/renderer/` (SVG sprite, animation CSS, brain, quips, animalese

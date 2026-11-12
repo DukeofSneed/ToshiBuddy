@@ -302,8 +302,43 @@
     return out;
   }
 
-  async function prepare(url, cfg, opts = {}) {
-    cfg = cfg || {};
+  // ---- cache of sliced sheets ----
+  // Slicing a big sheet takes about a second; reloads (switching characters,
+  // saving in the mapper) reuse the result. The key is the sheet's path; the
+  // signature is its file version plus the settings that affect slicing.
+  const DB_NAME = 'toshibuddy-sheets';
+  function openDb() {
+    return new Promise((resolve, reject) => {
+      const r = indexedDB.open(DB_NAME, 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('sheets');
+      r.onsuccess = () => resolve(r.result);
+      r.onerror = () => reject(r.error);
+    });
+  }
+  async function cacheGet(key) {
+    try {
+      const db = await openDb();
+      return await new Promise((resolve) => {
+        const q = db.transaction('sheets').objectStore('sheets').get(key);
+        q.onsuccess = () => resolve(q.result || null);
+        q.onerror = () => resolve(null);
+      });
+    } catch (_) { return null; }
+  }
+  async function cachePut(key, value) {
+    try {
+      const db = await openDb();
+      await new Promise((resolve) => {
+        const tx = db.transaction('sheets', 'readwrite');
+        tx.objectStore('sheets').put(value, key);
+        tx.oncomplete = resolve;
+        tx.onerror = resolve;
+      });
+    } catch (_) { /* cache is optional */ }
+  }
+
+  // Load, remove the background, find and cut the frames, draw the index preview.
+  async function slice(url, cfg) {
     const img = await loadImage(url);
     const w = img.naturalWidth, h = img.naturalHeight;
     const canvas = document.createElement('canvas');
@@ -323,13 +358,15 @@
     const det = detectFrames(px, w, h, cfg.moveMarks);
     if (!det.frames.length) throw new Error('no figures found on the sheet');
     const frames = cutFrames(px, w, det);
-    const sheet = { frames, rows: det.rows, cfg };
+    return { w, h, removed, rows: det.rows, frames, index: indexImage(canvas, frames, det) };
+  }
 
+  function buildAnims(cfg, rows, sheet) {
     const anims = {};
-    const defs = cfg.animations || { idle: { row: 0, frames: `0-${det.rows[0] - 1}`, fps: 4 } };
+    const defs = cfg.animations || { idle: { row: 0, frames: `0-${rows[0] - 1}`, fps: 4 } };
     for (const [key, d] of Object.entries(defs)) {
       if (!d) continue;
-      const list = parseFrames(d.frames == null ? `0-${(det.rows[Number(d.row) || 0] || 1) - 1}` : d.frames, d.row, sheet);
+      const list = parseFrames(d.frames == null ? `0-${(rows[Number(d.row) || 0] || 1) - 1}` : d.frames, d.row, sheet);
       if (!list.length) continue;
       anims[key] = {
         frames: list,
@@ -342,20 +379,53 @@
       };
     }
     if (!anims.idle) anims.idle = { frames: [0], fps: 1, flip: false, loop: true, loopFrom: 0 };
-    sheet.anims = anims;
+    return anims;
+  }
+
+  async function prepare(url, cfg, opts = {}) {
+    cfg = cfg || {};
+    const key = url.split('?')[0];
+    const sig = JSON.stringify([url, cfg.keyMode, cfg.keyTolerance, cfg.keyMax, cfg.moveMarks]);
+    const flipBodyFrames = (sheet) => [...new Set(Object.values(sheet.anims).filter((a) => a.flipBody).flatMap((a) => a.frames))];
+
+    let sliced = null;
+    let fromCache = false;
+    const hit = await cacheGet(key);
+    if (hit && hit.sig === sig) { sliced = hit.data; fromCache = true; }
+    if (!sliced) sliced = await slice(url, cfg);
+
+    const sheet = { frames: sliced.frames, rows: sliced.rows, cfg };
+    sheet.anims = buildAnims(cfg, sliced.rows, sheet);
+    // A cached copy lacks body-only mirrors for frames newly set to flipBody: slice again.
+    if (fromCache && flipBodyFrames(sheet).some((i) => !sheet.frames[i].flipUrl)) {
+      sliced = await slice(url, cfg);
+      fromCache = false;
+      sheet.frames = sliced.frames;
+      sheet.anims = buildAnims(cfg, sliced.rows, sheet);
+    }
+    if (!fromCache) {
+      // Store plain data: body-only mirrors only for the frames that need them.
+      const need = new Set(flipBodyFrames(sheet));
+      const frames = sliced.frames.map((fr, i) => {
+        const o = { row: fr.row, col: fr.col, url: fr.url, w: fr.w, h: fr.h, ox: fr.ox, top: fr.top };
+        if (need.has(i)) o.flipUrl = fr.flipUrl;
+        return o;
+      });
+      cachePut(key, { sig, data: { ...sliced, frames } });
+    }
 
     // Size: the first idle frame is `scale` x 188 pet units tall.
-    const f0 = frames[anims.idle.frames[0]];
+    const f0 = sheet.frames[sheet.anims.idle.frames[0]];
     const scale = Number(cfg.scale) || Number(opts.scale) || 1;
     sheet.u = (188 * scale) / f0.top;
     sheet.offX = Number(cfg.offsetX) || 0;
     sheet.offY = Number(cfg.offsetY) || 0;
 
-    const name = decodeURIComponent(url.split('?')[0].split('/').pop());
-    const animList = Object.keys(anims).join(', ');
-    buddy.log(`sheet ${name}: ${w}x${h}, ${removed == null ? 'already transparent' : `background ${Math.round(removed * 100)}% removed`}, ${det.rows.length} rows [${det.rows.join(', ')}] = ${frames.length} frames; animations: ${animList}`);
+    const name = decodeURIComponent(key.split('/').pop());
+    const { w, h, removed, rows } = sliced;
+    buddy.log(`sheet ${name}: ${w}x${h}, ${fromCache ? 'from cache' : removed == null ? 'already transparent' : `background ${Math.round(removed * 100)}% removed`}, ${rows.length} rows [${rows.join(', ')}] = ${sheet.frames.length} frames; animations: ${Object.keys(sheet.anims).join(', ')}`);
     if (opts.indexKind && opts.skinName) {
-      try { buddy.saveSheetIndex(opts.skinName, opts.indexKind, indexImage(canvas, frames, det), det.rows); } catch (_) { /* preview only */ }
+      try { buddy.saveSheetIndex(opts.skinName, opts.indexKind, sliced.index, rows); } catch (_) { /* preview only */ }
     }
     return sheet;
   }
@@ -396,7 +466,7 @@
       const f = sheet.frames[a.frames[i]];
       const fb = a.flipBody;
       const b = frameBox(sheet, fb ? { ...f, ox: f.w - f.ox } : f);
-      img.setAttribute('href', fb ? f.flipUrl : f.url);
+      img.setAttribute('href', fb && f.flipUrl ? f.flipUrl : f.url);
       img.setAttribute('x', b.x.toFixed(1)); img.setAttribute('y', b.y.toFixed(1));
       img.setAttribute('width', b.w.toFixed(1)); img.setAttribute('height', b.h.toFixed(1));
       wrap.setAttribute('transform', a.flip ? 'translate(160 0) scale(-1 1)' : '');

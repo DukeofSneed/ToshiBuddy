@@ -1,4 +1,4 @@
-// The behavior loop: where Kori walks, when he naps, when he does paperwork at
+// The behavior loop: where the character walks, when it naps, when he does paperwork at
 // his desk, what he says, and how he reacts to being poked, dragged, or dropped.
 (function () {
   const PET_W = 160;
@@ -93,11 +93,8 @@
       if (animate) playAnimation(animate);
       return false;
     }
-    // {name} is the active character's name; on a skin, older text that says
-    // "Kori" (catalog ideas, older mods) uses the skin's name instead.
-    const nm = vars().name;
-    text = String(text).replace(/\{name\}/g, nm);
-    if (window.BuddyApp && BuddyApp.skin) text = text.replace(/\bKori\b/g, nm);
+    // {name} is the active character's name.
+    text = String(text).replace(/\{name\}/g, vars().name);
     st.bubblePriority = priority;
     BuddyBubble.show(text, { ms });
     pet().classList.add('talk');
