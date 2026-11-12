@@ -143,20 +143,22 @@ function runSelftest(ctx, selftestDir) {
       fs.writeFileSync(path.join(selftestDir, 'jar-prop.json'), JSON.stringify(jarTest, null, 1));
       // Wake from sleep: a drag stuck from before sleeping must be cleared and the
       // overlay re-armed (same handlers the system's resume event runs).
-      await overlay.webContents.executeJavaScript(`(() => { BuddyBrain.state.dragging = { sx: 0, sy: 0, ox: 0, oy: 0, moved: true, t: 0 }; return 1; })()`);
+      const oldOverlay = ctx.overlay;
       require('electron').powerMonitor.emit('resume');
-      await new Promise((r) => setTimeout(r, 800));
+      await new Promise((r) => setTimeout(r, 7000)); // recreate after 1.5 s, page load, old one closed at +2 s
+      const fresh = ctx.overlay;
       const wake = {
-        rearmed: logLines.some((l) => l.includes('overlay re-armed (resume)')),
-        dragCleared: await overlay.webContents.executeJavaScript('BuddyBrain.state.dragging === null'),
-        visible: overlay.isVisible(),
-        onTop: overlay.isAlwaysOnTop(),
+        recreated: fresh !== oldOverlay && logLines.some((l) => l.includes('overlay recreated (resume)')),
+        oldClosed: oldOverlay.isDestroyed(),
+        petLoaded: await fresh.webContents.executeJavaScript('!!(window.BuddyBrain && document.getElementById("pet") && document.querySelector("#pet svg"))'),
+        visible: fresh.isVisible(),
+        onTop: fresh.isAlwaysOnTop(),
       };
       // Click-through by cursor position: a point on the pet is clickable, an
       // empty spot isn't (asked of the same check the cursor poll uses).
       await new Promise((r) => setTimeout(r, 300));
-      const petRect = JSON.parse(await overlay.webContents.executeJavaScript(`JSON.stringify((() => { const r = document.getElementById('pet').getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; })())`));
-      const cb = overlay.getContentBounds();
+      const petRect = JSON.parse(await ctx.overlay.webContents.executeJavaScript(`JSON.stringify((() => { const r = document.getElementById('pet').getBoundingClientRect(); return { x: r.left, y: r.top, w: r.width, h: r.height }; })())`));
+      const cb = ctx.overlay.getContentBounds();
       wake.hitAreas = ctx.hitAreas.rects.length;
       wake.petClickable = ctx.overAt({ x: cb.x + petRect.x + petRect.w / 2, y: cb.y + petRect.y + petRect.h / 2 });
       wake.emptySpotClickThrough = !ctx.overAt({ x: cb.x + 5, y: cb.y + 5 });

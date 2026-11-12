@@ -567,7 +567,9 @@
         }
       }
     });
+    let lastPressLog = 0;
     el.addEventListener('mousedown', (e) => {
+      if (Date.now() - lastPressLog > 5000) { lastPressLog = Date.now(); if (window.buddy) buddy.log('pet got a mouse press'); }
       if (e.button !== 0) return;
       if (st.mode === 'sleep') wake();
       st.dragging = { sx: e.clientX, sy: e.clientY, ox: st.x, oy: st.y, moved: false, t: now() };

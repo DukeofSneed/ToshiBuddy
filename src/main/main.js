@@ -40,6 +40,13 @@ function start() {
     logLines.push(entry);
     if (logLines.length > 400) logLines.shift();
     console.log(entry);
+    // Also kept on disk (userData/toshibuddy.log, ~512 KB, then rotated) so a
+    // problem after sleep or a crash can be read back later.
+    try {
+      const file = path.join(userData, 'toshibuddy.log');
+      try { if (fs.statSync(file).size > 512 * 1024) fs.renameSync(file, file + '.old'); } catch (_) { /* new file */ }
+      fs.appendFileSync(file, `${new Date().toISOString()} ${line}\n`);
+    } catch (_) { /* logging must never break the app */ }
     if (jarWin && !jarWin.isDestroyed()) jarWin.webContents.send('jar:run-log', entry);
   };
   const git = new Git(PROJECT_ROOT);
@@ -175,6 +182,10 @@ function start() {
     const over = overAt(screen.getCursorScreenPoint());
     const now = Date.now();
     if (over !== clickable || now - lastApplied > 2000) {
+      if (over !== clickable && clickable !== null) {
+        const p = screen.getCursorScreenPoint();
+        log(`clicks ${over ? 'on' : 'off'} at ${p.x},${p.y} (${hitAreas.rects.length} areas${hitAreas.dragging ? ', dragging' : ''})`);
+      }
       clickable = over;
       lastApplied = now;
       overlay.setIgnoreMouseEvents(!over, { forward: true });
@@ -186,6 +197,14 @@ function start() {
   // overlay's always-on-top level and stop forwarding mouse moves to a
   // click-through window, so the pet never notices the cursor and can't be
   // clicked. Re-apply both, and have the pet forget any stale hover/drag state.
+  function wireWindowLogging(w, name) {
+    w.webContents.on('console-message', (ev) => {
+      if (ev.level === 'error' || ev.level === 'warning') log(`${name} console: ${ev.message}`);
+    });
+    w.webContents.on('render-process-gone', (_e, d) => log(`${name} renderer gone: ${d.reason}`));
+    w.webContents.on('did-fail-load', (_e, code, desc) => log(`${name} failed to load: ${code} ${desc}`));
+    w.webContents.on('unresponsive', () => log(`${name} is not responding`));
+  }
   function rearmOverlay(reason) {
     if (!overlay || overlay.isDestroyed()) return;
     overlay.setAlwaysOnTop(true, 'screen-saver');
@@ -195,14 +214,35 @@ function start() {
     overlay.webContents.send('pointer-reset');
     log(`overlay re-armed (${reason})`);
   }
-  for (const ev of ['resume', 'unlock-screen']) {
+  // Waking or unlocking: repairing the old window wasn't enough (Windows can
+  // leave a transparent click-through window unable to take clicks), so replace
+  // it with a new one. Both events often fire together; recreate once.
+  let lastRecreate = 0;
+  function recreateOverlay(reason) {
+    if (Date.now() - lastRecreate < 5000) return;
+    lastRecreate = Date.now();
+    const old = overlay;
+    overlay = createOverlay();
+    wireWindowLogging(overlay, 'overlay');
+    hitAreas = { rects: [], dragging: false };
+    clickable = null;
+    log(`overlay recreated (${reason})`);
+    // Close the old one once the new one has had time to appear.
+    if (old && !old.isDestroyed()) setTimeout(() => { if (!old.isDestroyed()) old.destroy(); }, 2000);
+  }
+  for (const ev of ['suspend', 'resume', 'lock-screen', 'unlock-screen']) {
     powerMonitor.on(ev, () => {
-      rearmOverlay(ev);
-      // The desktop isn't always settled right after waking; do it once more.
-      setTimeout(() => rearmOverlay(`${ev}, again`), 3000);
+      log(`power: ${ev}`);
+      if (ev === 'resume' || ev === 'unlock-screen') setTimeout(() => recreateOverlay(ev), 1500);
     });
   }
-  screen.on('display-metrics-changed', () => setTimeout(() => rearmOverlay('display change'), 500));
+  for (const ev of ['display-metrics-changed', 'display-added', 'display-removed']) {
+    screen.on(ev, () => {
+      const wa = screen.getPrimaryDisplay().workArea;
+      log(`display: ${ev} (work area ${wa.x},${wa.y} ${wa.width}x${wa.height})`);
+      setTimeout(() => rearmOverlay(ev), 500);
+    });
+  }
   // Which character is active: settings.character (or TOSHI_CHARACTER), else
   // ToshiToshi, else the first regular character, else the first test character.
   const activeCharacterId = () => {
@@ -676,13 +716,8 @@ function start() {
     get overlay() { return overlay; }, get jarWin() { return jarWin; },
     get customizeWin() { return customizeWin; }, get importWin() { return importWin; },
   };
-  for (const [name, w] of [['overlay', overlay], ['jar', jarWin]]) {
-    w.webContents.on('console-message', (ev) => {
-      if (ev.level === 'error' || ev.level === 'warning') log(`${name} console: ${ev.message}`);
-    });
-    w.webContents.on('render-process-gone', (_e, d) => log(`${name} renderer gone: ${d.reason}`));
-    w.webContents.on('did-fail-load', (_e, code, desc) => log(`${name} failed to load: ${code} ${desc}`));
-  }
+  wireWindowLogging(overlay, 'overlay');
+  wireWindowLogging(jarWin, 'jar');
   if (selftestDir) require('./selftest').runSelftest(testCtx, selftestDir);
 }
 
