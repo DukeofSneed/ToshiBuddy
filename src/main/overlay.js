@@ -79,6 +79,7 @@ function createJarWindow(parent) {
     backgroundColor: '#00000000',
     webPreferences: {
       preload: path.join(__dirname, 'preload-jar.js'),
+      backgroundThrottling: false, // keep drawing while it sits behind other windows
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,

@@ -7,13 +7,20 @@ const path = require('path');
 
 function runSelftest(ctx, selftestDir) {
   const { app, screen, ledger, guard, logLines, charName, buildMenu, openCustomize, openImport, overlay, jarWin } = ctx;
+  // A window that hasn't drawn yet can make capturePage wait forever; give up
+  // after 10 s with an empty image so the test always finishes.
+  const { nativeImage } = require('electron');
+  const capture = (win, rect) => new Promise((resolve) => {
+    const timer = setTimeout(() => { ctx.log('selftest: a window capture timed out'); resolve(nativeImage.createEmpty()); }, 10000);
+    win.webContents.capturePage(rect).then((img) => { clearTimeout(timer); resolve(img); }, () => { clearTimeout(timer); resolve(nativeImage.createEmpty()); });
+  });
   fs.mkdirSync(selftestDir, { recursive: true });
   setTimeout(async () => {
     try {
       jarWin.showInactive();
       await new Promise((r) => setTimeout(r, 1500));
       const wa = screen.getPrimaryDisplay().workArea;
-      const ov = await overlay.webContents.capturePage({ x: 0, y: wa.height - 420, width: wa.width, height: 420 });
+      const ov = await capture(overlay, { x: 0, y: wa.height - 420, width: wa.width, height: 420 });
       fs.writeFileSync(path.join(selftestDir, 'overlay.png'), ov.toPNG());
       // Plain close-up at 3x: freeze him in idle with no bubble.
       const pos = JSON.parse(await overlay.webContents.executeJavaScript(`BuddyBrain.setPaused(true); BuddyBubble.hide(); BuddyVoice.stop(); const p=document.getElementById('pet'); const keep=['skin','has-ultimate','sheet','ultimate-sheet'].filter(c=>p.classList.contains(c)); p.className=['idle','face-right',...keep].join(' '); document.querySelectorAll('#pet *').forEach(e=>e.style.animationPlayState='paused'); JSON.stringify({x: BuddyBrain.state.x, y: BuddyBrain.state.y})`));
@@ -26,7 +33,7 @@ function runSelftest(ctx, selftestDir) {
         await overlay.webContents.executeJavaScript(`document.querySelectorAll('[data-mod]').forEach(g => g.setAttribute('display','inline')); document.getElementById('pet').classList.add('show-anchors'); 1`);
         await new Promise((r) => setTimeout(r, 200));
       }
-      const plain = await overlay.webContents.capturePage({ x: Math.max(0, Math.round(pos.x)), y: Math.max(0, Math.round(pos.y)), width: 160, height: 200 });
+      const plain = await capture(overlay, { x: Math.max(0, Math.round(pos.x)), y: Math.max(0, Math.round(pos.y)), width: 160, height: 200 });
       fs.writeFileSync(path.join(selftestDir, 'plain.png'), plain.resize({ width: 480, quality: 'best' }).toPNG());
       // Sprite-sheet skins: one capture per pet state, to check the frame mapping.
       if (await overlay.webContents.executeJavaScript(`window.BUDDY_SHEET_DEBUG = true; document.getElementById('pet').classList.contains('sheet')`)) {
@@ -37,7 +44,7 @@ function runSelftest(ctx, selftestDir) {
             ? `BuddyBrain.onIdleSeconds(400); BuddyBubble.hide(); 1` // a real nap, so the brain doesn't undo it
             : `(() => { const p=document.getElementById('pet'); const keep=['skin','has-ultimate','sheet','ultimate-sheet'].filter(c=>p.classList.contains(c)); p.className=['${mode}${extra}','face-right',...keep].join(' '); return 1; })()`);
           await new Promise((r) => setTimeout(r, wait));
-          const shot = await overlay.webContents.capturePage({ x: Math.max(0, Math.round(pos.x) - 40), y: Math.max(0, Math.round(pos.y) - 20), width: 240, height: 220 });
+          const shot = await capture(overlay, { x: Math.max(0, Math.round(pos.x) - 40), y: Math.max(0, Math.round(pos.y) - 20), width: 240, height: 220 });
           fs.writeFileSync(path.join(selftestDir, `state-${k}.png`), shot.toPNG());
         }
         await overlay.webContents.executeJavaScript(`BuddyBrain.onIdleSeconds(0); (() => { const p=document.getElementById('pet'); const keep=['skin','has-ultimate','sheet','ultimate-sheet'].filter(c=>p.classList.contains(c)); p.className=['idle','face-right',...keep].join(' '); return 1; })()`);
@@ -46,38 +53,38 @@ function runSelftest(ctx, selftestDir) {
       await overlay.webContents.executeJavaScript(`document.querySelectorAll('#pet *').forEach(e=>e.style.animationPlayState=''); BuddyBrain.quip(['click']); BuddyBrain.playAnimation('frost'); 1`);
       await new Promise((r) => setTimeout(r, 900));
       const cx = Math.max(0, Math.round(pos.x) - 120);
-      const close = await overlay.webContents.capturePage({ x: cx, y: Math.max(0, Math.round(pos.y) - 130), width: 400, height: 330 });
+      const close = await capture(overlay, { x: cx, y: Math.max(0, Math.round(pos.y) - 130), width: 400, height: 330 });
       fs.writeFileSync(path.join(selftestDir, 'closeup.png'), close.resize({ width: 800 }).toPNG());
       // Desk mode with a full paper stack, mid-stamp.
       await overlay.webContents.executeJavaScript(`BuddyBubble.hide(); BuddyBrain.enterDesk('lab'); document.getElementById('pet').dataset.papers='8'; 1`);
       await new Promise((r) => setTimeout(r, 1500));
       await overlay.webContents.executeJavaScript(`BuddyBrain.playAnimation('stamp'); 1`);
       await new Promise((r) => setTimeout(r, 1000));
-      const desk = await overlay.webContents.capturePage({ x: cx, y: Math.max(0, Math.round(pos.y) - 130), width: 400, height: 330 });
+      const desk = await capture(overlay, { x: cx, y: Math.max(0, Math.round(pos.y) - 130), width: 400, height: 330 });
       fs.writeFileSync(path.join(selftestDir, 'desk.png'), desk.resize({ width: 800 }).toPNG());
       // Frost Release, captured mid-transformation.
       await overlay.webContents.executeJavaScript(`BuddyBubble.hide(); BuddyBrain.exitDesk({ quiet: true }); BuddyBrain.playAnimation('release'); 1`);
       await new Promise((r) => setTimeout(r, 1700));
       const rx = Math.max(0, Math.round(pos.x) - 220);
-      const rel = await overlay.webContents.capturePage({ x: rx, y: Math.max(0, Math.round(pos.y) - 260), width: 600, height: 460 });
+      const rel = await capture(overlay, { x: rx, y: Math.max(0, Math.round(pos.y) - 260), width: 600, height: 460 });
       fs.writeFileSync(path.join(selftestDir, 'release.png'), rel.toPNG());
       // Ultimate form, captured while held after the release finishes.
       await new Promise((r) => setTimeout(r, 3000));
       await overlay.webContents.executeJavaScript(`BuddyBubble.hide(); BuddyBrain.enterUltimate(12); 1`);
       await new Promise((r) => setTimeout(r, 5200));
-      const ult = await overlay.webContents.capturePage({ x: rx, y: Math.max(0, Math.round(pos.y) - 260), width: 600, height: 460 });
+      const ult = await capture(overlay, { x: rx, y: Math.max(0, Math.round(pos.y) - 260), width: 600, height: 460 });
       fs.writeFileSync(path.join(selftestDir, 'ultimate.png'), ult.toPNG());
       const ultState = await overlay.webContents.executeJavaScript(`JSON.stringify({ classes: document.getElementById('pet').className, primaryShown: (() => { const e = document.getElementById('skin-img'); return e ? getComputedStyle(e).display : 'n/a'; })(), ultimateShown: (() => { const e = document.getElementById('skin-ultimate'); return e ? getComputedStyle(e).display : 'n/a'; })() })`);
       fs.writeFileSync(path.join(selftestDir, 'ultimate.json'), ultState);
-      const jp = await jarWin.webContents.capturePage();
+      const jp = await capture(jarWin);
       fs.writeFileSync(path.join(selftestDir, 'jar.png'), jp.toPNG());
       openCustomize();
       await new Promise((r) => setTimeout(r, 1500));
-      const cp = await ctx.customizeWin.webContents.capturePage();
+      const cp = await capture(ctx.customizeWin);
       fs.writeFileSync(path.join(selftestDir, 'customize.png'), cp.toPNG());
       openImport('edit');
       await new Promise((r) => setTimeout(r, 3500));
-      if (ctx.importWin) { const ip = await ctx.importWin.webContents.capturePage(); fs.writeFileSync(path.join(selftestDir, 'characters-edit.png'), ip.toPNG()); await ctx.importWin.webContents.executeJavaScript("document.querySelector('.tab[data-tab=import]').click(); 1"); await new Promise((r) => setTimeout(r, 400)); const ip2 = await ctx.importWin.webContents.capturePage(); fs.writeFileSync(path.join(selftestDir, 'characters-import.png'), ip2.toPNG()); await ctx.importWin.webContents.executeJavaScript("document.querySelector('.tab[data-tab=choose]').click(); 1"); await new Promise((r) => setTimeout(r, 1200)); const ip3 = await ctx.importWin.webContents.capturePage(); fs.writeFileSync(path.join(selftestDir, 'characters-choose.png'), ip3.toPNG()); }
+      if (ctx.importWin) { const ip = await capture(ctx.importWin); fs.writeFileSync(path.join(selftestDir, 'characters-edit.png'), ip.toPNG()); await ctx.importWin.webContents.executeJavaScript("document.querySelector('.tab[data-tab=import]').click(); 1"); await new Promise((r) => setTimeout(r, 400)); const ip2 = await capture(ctx.importWin); fs.writeFileSync(path.join(selftestDir, 'characters-import.png'), ip2.toPNG()); await ctx.importWin.webContents.executeJavaScript("document.querySelector('.tab[data-tab=choose]').click(); 1"); await new Promise((r) => setTimeout(r, 1200)); const ip3 = await capture(ctx.importWin); fs.writeFileSync(path.join(selftestDir, 'characters-choose.png'), ip3.toPNG()); }
       const sfxCheck = await overlay.webContents.executeJavaScript(`JSON.stringify(BuddySfx.names.map((n) => { try { return [n, BuddySfx.play(n)]; } catch (e) { return [n, 'ERR ' + e.message]; } }))`);
       fs.writeFileSync(path.join(selftestDir, 'sfx.json'), sfxCheck);
       const probe = await overlay.webContents.executeJavaScript(`JSON.stringify({ mods: BuddyMods.list(), skippedMods: BuddyMods.skipped(), modProps: document.querySelectorAll('#pet [data-mod]').length, surprisedAnim: (() => { const p = document.getElementById('pet'); p.classList.add('surprised'); const a = getComputedStyle(document.getElementById('sprite')).animationName; p.classList.remove('surprised'); return a; })(), quips: BuddyQuips.all().length, mode: BuddyBrain.state.mode, x: BuddyBrain.state.x, y: BuddyBrain.state.y, bubble: BuddyBubble.isVisible(), text: document.getElementById('bubble-text').textContent, petClass: document.getElementById('pet').className, skin: document.getElementById('pet').classList.contains('skin'), skinImg: !!document.getElementById('skin-img'), ultimateImg: !!document.getElementById('skin-ultimate'), idle: BuddyBrain.state.idleSeconds })`);
@@ -121,7 +128,7 @@ function runSelftest(ctx, selftestDir) {
       // The jar on screen: where it sits, and (only with a throwaway data
       // folder) that a double-click donates the quick amount.
       const jarRect = JSON.parse(await overlay.webContents.executeJavaScript(`JSON.stringify((() => { const r = document.getElementById('jar-prop').getBoundingClientRect(); return { x: r.x, y: r.y, w: r.width, h: r.height, stageW: innerWidth, stageH: innerHeight, label: document.getElementById('jar-label').textContent, zone: BuddyApp.jarZone }; })())`));
-      const jarShot = await overlay.webContents.capturePage({ x: Math.max(0, Math.round(jarRect.x) - 260), y: Math.max(0, Math.round(jarRect.y) - 120), width: 360, height: 230 });
+      const jarShot = await capture(overlay, { x: Math.max(0, Math.round(jarRect.x) - 260), y: Math.max(0, Math.round(jarRect.y) - 120), width: 360, height: 230 });
       fs.writeFileSync(path.join(selftestDir, 'jar-prop.png'), jarShot.toPNG());
       const jarTest = { rect: jarRect };
       if (process.env.TOSHI_USERDATA) {
@@ -134,6 +141,18 @@ function runSelftest(ctx, selftestDir) {
         jarTest.labelAfter = await overlay.webContents.executeJavaScript(`document.getElementById('jar-label').textContent`);
       }
       fs.writeFileSync(path.join(selftestDir, 'jar-prop.json'), JSON.stringify(jarTest, null, 1));
+      // Wake from sleep: a drag stuck from before sleeping must be cleared and the
+      // overlay re-armed (same handlers the system's resume event runs).
+      await overlay.webContents.executeJavaScript(`(() => { BuddyBrain.state.dragging = { sx: 0, sy: 0, ox: 0, oy: 0, moved: true, t: 0 }; return 1; })()`);
+      require('electron').powerMonitor.emit('resume');
+      await new Promise((r) => setTimeout(r, 800));
+      const wake = {
+        rearmed: logLines.some((l) => l.includes('overlay re-armed (resume)')),
+        dragCleared: await overlay.webContents.executeJavaScript('BuddyBrain.state.dragging === null'),
+        visible: overlay.isVisible(),
+        onTop: overlay.isAlwaysOnTop(),
+      };
+      fs.writeFileSync(path.join(selftestDir, 'wake.json'), JSON.stringify(wake, null, 1));
       const labels = (m) => m.items.flatMap((i) => [i.label, ...(i.submenu ? labels(i.submenu) : [])]).filter(Boolean);
       fs.writeFileSync(path.join(selftestDir, 'menu.json'), JSON.stringify({ name: charName(), tooltipName: `${charName()} Buddy`, menu: labels(buildMenu()) }, null, 1));
       fs.writeFileSync(path.join(selftestDir, 'log.txt'), logLines.join('\n'));

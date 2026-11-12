@@ -529,6 +529,16 @@
 
   // ---- pointer interaction ----
   let hovering = false;
+  // After the computer wakes: the window went back to click-through, so drop any
+  // hover or drag that was in progress when it slept; the next mouse move over
+  // the pet turns clicks back on.
+  function resetPointer() {
+    hovering = false;
+    if (st.dragging) {
+      st.dragging = null;
+      if (st.mode === 'drag') { setMode('fall'); st.vy = 0; }
+    }
+  }
   function setHover(on) {
     if (on === hovering) return;
     hovering = on;
@@ -637,6 +647,6 @@
 
   window.BuddyBrain = {
     start, resize, say, quip, playAnimation, fire, setPaused, setWorking, setDeskEnabled,
-    onIdleSeconds, onActivity, enterDesk, exitDesk, enterUltimate, exitUltimate, armIntervals, state: st,
+    onIdleSeconds, onActivity, enterDesk, exitDesk, enterUltimate, exitUltimate, armIntervals, resetPointer, state: st,
   };
 })();

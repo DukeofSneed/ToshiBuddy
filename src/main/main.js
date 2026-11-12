@@ -157,6 +157,27 @@ function start() {
     if (overlay && !overlay.isDestroyed()) overlay.setIgnoreMouseEvents(ignore, { forward: true });
   });
   ipcMain.on('overlay:log', (_e, line) => log(`renderer: ${line}`));
+
+  // After sleep, a locked screen, or a display change, Windows can drop the
+  // overlay's always-on-top level and stop forwarding mouse moves to a
+  // click-through window, so the pet never notices the cursor and can't be
+  // clicked. Re-apply both, and have the pet forget any stale hover/drag state.
+  function rearmOverlay(reason) {
+    if (!overlay || overlay.isDestroyed()) return;
+    overlay.setAlwaysOnTop(true, 'screen-saver');
+    overlay.setIgnoreMouseEvents(true, { forward: true });
+    if (!overlay.isVisible()) overlay.showInactive();
+    overlay.webContents.send('pointer-reset');
+    log(`overlay re-armed (${reason})`);
+  }
+  for (const ev of ['resume', 'unlock-screen']) {
+    powerMonitor.on(ev, () => {
+      rearmOverlay(ev);
+      // The desktop isn't always settled right after waking; do it once more.
+      setTimeout(() => rearmOverlay(`${ev}, again`), 3000);
+    });
+  }
+  screen.on('display-metrics-changed', () => setTimeout(() => rearmOverlay('display change'), 500));
   // Which character is active: settings.character (or TOSHI_CHARACTER), else
   // ToshiToshi, else the first regular character, else the first test character.
   const activeCharacterId = () => {

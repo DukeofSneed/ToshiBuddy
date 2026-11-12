@@ -157,6 +157,7 @@
   BuddyJarProp.mount(boot.jar);
   buddy.on('jar-state', (s) => BuddyJarProp.update(s));
   BuddyBrain.start({ workArea: boot.workArea });
+  buddy.on('pointer-reset', () => BuddyBrain.resetPointer());
   BuddyBrain.setPaused(!!boot.settings.paused);
   BuddyBrain.setDeskEnabled(boot.settings.deskMode !== false);
 
