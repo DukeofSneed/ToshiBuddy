@@ -144,11 +144,15 @@ function runSelftest(ctx, selftestDir) {
       // Wake from sleep: a drag stuck from before sleeping must be cleared and the
       // overlay re-armed (same handlers the system's resume event runs).
       const oldOverlay = ctx.overlay;
+      // Put the pet somewhere specific so we can check it stays put.
+      const before = JSON.parse(await oldOverlay.webContents.executeJavaScript(`(() => { BuddyBrain.setPaused(true); BuddyBrain.state.x = 640; BuddyBrain.state.dir = -1; return JSON.stringify({ x: BuddyBrain.state.x, dir: BuddyBrain.state.dir }); })()`));
       require('electron').powerMonitor.emit('resume');
       await new Promise((r) => setTimeout(r, 7000)); // recreate after 1.5 s, page load, old one closed at +2 s
       const fresh = ctx.overlay;
       const wake = {
-        recreated: fresh !== oldOverlay && logLines.some((l) => l.includes('overlay recreated (resume)')),
+        recreated: fresh !== oldOverlay && logLines.some((l) => l.includes('overlay recreated (resume, drawn)')),
+        samePosition: await fresh.webContents.executeJavaScript(`Math.round(BuddyBrain.state.startX) === ${before.x}`),
+        noGreeting: await fresh.webContents.executeJavaScript('!BuddyBubble.isVisible()'),
         oldClosed: oldOverlay.isDestroyed(),
         petLoaded: await fresh.webContents.executeJavaScript('!!(window.BuddyBrain && document.getElementById("pet") && document.querySelector("#pet svg"))'),
         visible: fresh.isVisible(),

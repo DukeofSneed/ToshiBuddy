@@ -217,18 +217,39 @@ function start() {
   // Waking or unlocking: repairing the old window wasn't enough (Windows can
   // leave a transparent click-through window unable to take clicks), so replace
   // it with a new one. Both events often fire together; recreate once.
+  // The swap is seamless: the old window first saves where the pet stands and
+  // which way it faces; the new one loads hidden at that spot; when its first
+  // frame is drawn, the old one hides and the new one shows in the same moment.
   let lastRecreate = 0;
-  function recreateOverlay(reason) {
+  async function recreateOverlay(reason) {
     if (Date.now() - lastRecreate < 5000) return;
     lastRecreate = Date.now();
     const old = overlay;
-    overlay = createOverlay();
-    wireWindowLogging(overlay, 'overlay');
-    hitAreas = { rects: [], dragging: false };
-    clickable = null;
-    log(`overlay recreated (${reason})`);
-    // Close the old one once the new one has had time to appear.
-    if (old && !old.isDestroyed()) setTimeout(() => { if (!old.isDestroyed()) old.destroy(); }, 2000);
+    if (old && !old.isDestroyed()) {
+      try {
+        await Promise.race([
+          old.webContents.executeJavaScript(`localStorage.setItem('buddy.pos', JSON.stringify({ x: BuddyBrain.state.x, dir: BuddyBrain.state.dir })); 1`),
+          new Promise((r) => setTimeout(r, 1000)),
+        ]);
+      } catch (_) { /* the old page may not answer; the last saved spot is used */ }
+    }
+    const fresh = createOverlay({ resumed: true });
+    wireWindowLogging(fresh, 'overlay');
+    let swapped = false;
+    const swap = (why) => {
+      if (swapped || fresh.isDestroyed()) return;
+      swapped = true;
+      ipcMain.removeListener('overlay:ready', onReady);
+      overlay = fresh;
+      hitAreas = { rects: [], dragging: false };
+      clickable = null;
+      fresh.showInactive();
+      if (old && !old.isDestroyed()) { old.hide(); setTimeout(() => { if (!old.isDestroyed()) old.destroy(); }, 500); }
+      log(`overlay recreated (${reason}, ${why})`);
+    };
+    const onReady = (e) => { if (e.sender === fresh.webContents) swap('drawn'); };
+    ipcMain.on('overlay:ready', onReady);
+    setTimeout(() => swap('timeout'), 6000); // never leave the pet missing
   }
   for (const ev of ['suspend', 'resume', 'lock-screen', 'unlock-screen']) {
     powerMonitor.on(ev, () => {

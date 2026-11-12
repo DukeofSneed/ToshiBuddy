@@ -611,7 +611,8 @@
   }
 
   // ---- public ----
-  function start({ workArea }) {
+  // quiet: no greeting (a window swapped in after sleep, not a fresh start).
+  function start({ workArea, quiet = false }) {
     st.stageW = workArea.width;
     st.stageH = workArea.height;
     try {
@@ -619,6 +620,7 @@
       if (saved && typeof saved.x === 'number') { st.x = Math.max(0, Math.min(rightBound(), saved.x)); if (saved.dir) st.dir = saved.dir; }
     } catch (_) { /* ignore */ }
     st.y = floor();
+    st.startX = st.x; // where this window placed the pet (checked by the self-test)
     face(st.dir);
     place();
     setMode('idle');
@@ -630,7 +632,7 @@
     requestAnimationFrame(tick);
     setTimeout(blinkLoop, 1500);
     st.timeParts.add(BuddyQuips.timeTag()); // the greeting covers this part of the day
-    if (!fire('wake', {})) setTimeout(() => quip(['greet'], { animate: 'wave' }), 1200); // a bow or wave with the greeting
+    if (!quiet && !fire('wake', {})) setTimeout(() => quip(['greet'], { animate: 'wave' }), 1200); // a bow or wave with the greeting
   }
   function resize(workArea) {
     st.stageW = workArea.width;

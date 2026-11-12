@@ -7,7 +7,9 @@ const path = require('path');
 const RENDERER = path.join(__dirname, '..', 'renderer');
 const ICON = path.join(__dirname, '..', '..', 'assets', 'icon.png');
 
-function createOverlay() {
+// opts.resumed: a replacement window after sleep. It stays hidden until its
+// page says the pet is drawn (main.js swaps it in then), and skips the greeting.
+function createOverlay(opts = {}) {
   const { workArea } = screen.getPrimaryDisplay();
   const win = new BrowserWindow({
     icon: ICON,
@@ -41,8 +43,8 @@ function createOverlay() {
   win.setMenu(null);
   // Click-through by default; the renderer toggles this while the cursor is over the pet.
   win.setIgnoreMouseEvents(true, { forward: true });
-  win.loadFile(path.join(RENDERER, 'index.html'));
-  win.once('ready-to-show', () => win.showInactive());
+  win.loadFile(path.join(RENDERER, 'index.html'), opts.resumed ? { query: { resumed: '1' } } : undefined);
+  if (!opts.resumed) win.once('ready-to-show', () => win.showInactive());
 
   // Keep the overlay matched to the work area if the taskbar or resolution changes.
   const refit = () => {

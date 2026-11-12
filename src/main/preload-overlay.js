@@ -8,6 +8,8 @@ contextBridge.exposeInMainWorld('buddy', {
   openJar: () => ipcRenderer.send('jar:open'),
   quickDonate: () => ipcRenderer.invoke('jar:quick-donate'),
   getBootstrap: () => ipcRenderer.invoke('overlay:bootstrap'),
+  // The pet has drawn its first frame (used to swap windows without a flicker).
+  ready: () => ipcRenderer.send('overlay:ready'),
   getContent: () => ipcRenderer.invoke('overlay:content'),
   reportMod: (status) => ipcRenderer.send('overlay:mod-status', status),
   saveSheetIndex: (skin, kind, dataUrl, rows) => ipcRenderer.send('overlay:sheet-index', { skin, kind, dataUrl, rows }),

@@ -156,7 +156,11 @@
 
   BuddyJarProp.mount(boot.jar);
   buddy.on('jar-state', (s) => BuddyJarProp.update(s));
-  BuddyBrain.start({ workArea: boot.workArea });
+  // A replacement window after sleep starts quietly where the pet was.
+  const resumed = new URLSearchParams(location.search).get('resumed') === '1';
+  BuddyBrain.start({ workArea: boot.workArea, quiet: resumed });
+  // Two animation frames: the pet is on screen in this window now.
+  requestAnimationFrame(() => requestAnimationFrame(() => buddy.ready()));
   buddy.on('pointer-reset', () => BuddyBrain.resetPointer());
 
   // Tell the main process where the pet, its speech bubble, and the jar are, so
