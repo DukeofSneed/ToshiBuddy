@@ -1,14 +1,11 @@
 # ToshiBuddy
 
-A BonziBuddy-style desktop buddy. **ToshiToshi** walks your taskbar in frame-by-frame
-sprite animation, naps when you're idle, mutters in Animal Crossing-style gibberish,
-and pulls out a desk when you type for a while. A **donation jar** of Claude tokens
-sits in the corner of your screen: donations trigger his ultimate form, and the
-tokens pay for headless Claude Code runs that teach him new tricks.
+A BonziBuddy-style desktop buddy. ToshiToshi walks your taskbar in frame-by-frame
+sprite animatio. A donation jar of Claude tokens sits in the corner of your screen and the tokens pay for headless Claude Code runs that teach him new tricks.
 
 Bring your own characters too: a sprite sheet, a personality, and quips are all it takes.
 
-## Install (you or a friend)
+## Install
 
 1. Get the ToshiBuddy folder (zip it and send it; unzip it anywhere).
 2. Double-click **Setup ToshiBuddy.cmd** once. It installs Node.js if needed (asking
@@ -63,23 +60,13 @@ in the app's data folder, so the pack files stay untouched.
 ## The jar
 
 1. **Install Git and Claude Code, and log in once.** Run `claude` in a terminal and finish `/login` with your
-   subscription. Upgrade runs use that login, never an API key.
+   subscription. Upgrade runs use that login.
 2. **Check plan usage** in the jar. A tiny probe reads your plan's usage window.
 3. **Donate tokens.** The jar never accepts more than your plan can safely spend
    right now. The rest becomes a pledge that unlocks as your usage window resets.
 4. **Suggest an upgrade.** He prices it and adds a goal bar.
 5. **Fill a goal and press Build it.** A capped headless run writes a mod under
    `mods/`, which is checked, committed to git, and loaded live. Undo reverts it.
-
-### The guard
-- Refuses to start a run without a fresh usage reading, or above the cap
-  (default 80% of the plan window, 70% if usage credits are on).
-- Kills a run on any plan-limit warning, at the cap, or when it spends more than
-  its funded tokens. `--max-budget-usd` is a second hard stop.
-- Upgrade runs cannot use Bash or the web, and anything they write outside
-  `mods/` and `content/` is reverted.
-- The only absolute guarantee against overage is turning **usage credits off** at
-  claude.ai → Settings → Usage.
 
 ## Files
 - `src/main/` Electron main process: overlay window, tray, activity watcher, jar
