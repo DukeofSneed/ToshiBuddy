@@ -182,14 +182,14 @@ class Ledger {
     this.save();
     return entry;
   }
-  // Fees (usage checks, estimates) come out of whatever is in the jar, never
-  // below zero; the full amount is still logged as a spend.
+  // Overhead (usage checks, estimates) is logged as a spend but never taken out
+  // of donations: its token count is mostly Claude Code's cached system prompt,
+  // which barely moves plan usage, and it used to wipe out small donations.
+  // The plan-limit guard reads real plan usage, so this doesn't loosen it.
   chargeFee(tokens, kind) {
     tokens = Math.max(0, Math.floor(tokens || 0));
     if (!tokens) return;
-    const paid = Math.min(tokens, Math.max(0, this.data.balance));
-    this.data.balance -= paid;
-    this.recordSpend({ kind, tokens, paid, goalId: null });
+    this.recordSpend({ kind, tokens, paid: 0, goalId: null });
   }
   recordUpgrade(up) {
     const entry = { id: id(), at: Date.now(), reverted: false, ...up };

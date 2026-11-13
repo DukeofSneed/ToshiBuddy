@@ -78,3 +78,13 @@ check('usage-endpoint readings are already percents', () => {
   assert.strictEqual(guard.status().utilization, 0.8);
 });
 console.log(`${passed} passed, 0 failed`);
+// Usage checks and estimates never eat donations.
+{
+  const d2 = fs.mkdtempSync(path.join(os.tmpdir(), 'toshi-fee-'));
+  const l2 = new Ledger(d2);
+  l2.donate(2000);
+  l2.chargeFee(16249, 'probe');
+  assert.strictEqual(l2.data.balance, 2000);
+  assert.strictEqual(l2.data.spends[0].tokens, 16249);
+  console.log('fee check passed');
+}
