@@ -7,6 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const { execFile } = require('child_process');
 const { runClaude } = require('./claude');
+const { normalizeRateLimit } = require('./guard');
 const { capUsdForTokens } = require('./pricing');
 
 const RESULT_SCHEMA = {
@@ -212,10 +213,8 @@ class Upgrader {
     g.sessionId = res.sessionId || g.sessionId;
     g.history.push({ at: Date.now(), subtype: res.subtype, tokens, usd: res.totalCostUsd, killReason: res.killReason });
     this.ledger.recordSpend({ kind: 'upgrade', goalId, tokens, usd: res.totalCostUsd, model, sessionId: res.sessionId, subtype: res.subtype });
-    if (res.rateLimit && typeof res.rateLimit.utilization === 'number') {
-      const after = res.rateLimit.utilization <= 1 ? res.rateLimit.utilization * 100 : res.rateLimit.utilization;
-      this.guard.learn(utilBefore, after, tokens);
-    }
+    const after = res.rateLimit ? normalizeRateLimit(res.rateLimit) : null;
+    if (after && after.utilization !== null) this.guard.learn(utilBefore, after.utilization, tokens);
 
     if (res.ok) return this._finishSuccess(g, res, model, tokens);
     return this._finishFailure(g, res, tokens);

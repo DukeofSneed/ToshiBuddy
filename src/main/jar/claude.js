@@ -155,7 +155,8 @@ function runClaude(opts) {
         case 'rate_limit_event': {
           const info = msg.rate_limit_info || {};
           state.rateLimit = { ...info, at: Date.now() };
-          log(`rate limit: status=${info.status} utilization=${info.utilization ?? '?'} overage=${info.overageEnabled ?? '?'}`);
+          const uw = info.unifiedWindows ? Object.entries(info.unifiedWindows).map(([k, w]) => `${k}=${Math.round((w.utilization || 0) * 100)}%`).join(' ') : `utilization=${info.utilization ?? '?'}`;
+          log(`rate limit: status=${info.status} ${uw}`);
           if (opts.onRateLimit) opts.onRateLimit(state.rateLimit);
           break;
         }

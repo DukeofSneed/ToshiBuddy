@@ -9,7 +9,7 @@ const { Guard } = require(path.join(root, 'jar/guard.js'));
 const { Settings } = require(path.join(root, 'settings.js'));
 const { capUsdForTokens } = require(path.join(root, 'jar/pricing.js'));
 
-const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'askin-test-'));
+const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'toshi-test-'));
 const settings = new Settings(dir);
 const ledger = new Ledger(dir);
 const guard = new Guard({ ledger, settings, projectRoot: dir, log: () => {} });

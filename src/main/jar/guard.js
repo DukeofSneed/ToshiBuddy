@@ -9,6 +9,40 @@ const path = require('path');
 const { runClaude } = require('./claude');
 
 const FRESH_MS = 15 * 60 * 1000;
+const STATUS_RANK = { allowed: 0, allowed_warning: 1, rejected: 2 };
+const toMs = (t) => (t ? (t < 1e12 ? t * 1000 : t) : null);
+
+// One shape for every usage reading. Claude Code reports either a single
+// utilization number (older builds; a fraction or a percent) or, now, per-window
+// fractions in unifiedWindows (five_hour, seven_day, ...). The binding window is
+// the fullest one, and the worst status of any window counts.
+function normalizeRateLimit(info) {
+  if (!info) return null;
+  let status = info.status || null;
+  let utilization = null;
+  let resetsAt = toMs(info.resetsAt || info.resets_at || null);
+  let windows = info.windows || null;
+  const uw = info.unifiedWindows;
+  if (uw && typeof uw === 'object') {
+    windows = {};
+    let top = -1;
+    for (const [name, w] of Object.entries(uw)) {
+      if (!w || typeof w.utilization !== 'number') continue;
+      const pct = w.utilization * 100; // unifiedWindows are always fractions
+      windows[name] = { utilization: pct, resetsAt: toMs(w.resetsAt), status: w.status || null };
+      if (pct > top) { top = pct; utilization = pct; resetsAt = toMs(w.resetsAt) || resetsAt; }
+      if (w.status && (STATUS_RANK[w.status] || 0) > (STATUS_RANK[status] || 0)) status = w.status;
+    }
+    if (!Object.keys(windows).length) windows = null;
+  }
+  if (utilization === null && typeof info.utilization === 'number') {
+    utilization = info.utilization <= 1 && info._source !== 'usage_endpoint' ? info.utilization * 100 : info.utilization;
+  }
+  let overageEnabled = typeof info.overageEnabled === 'boolean' ? info.overageEnabled : null;
+  if (overageEnabled === null && typeof info.overageStatus === 'string') overageEnabled = info.overageStatus !== 'rejected';
+  if (info.isUsingOverage === true) overageEnabled = true;
+  return { status, utilization, resetsAt, overageEnabled, errorCode: info.errorCode || null, windows };
+}
 
 class Guard {
   constructor({ ledger, settings, projectRoot, log }) {
@@ -50,22 +84,20 @@ class Guard {
 
   // Record a rate_limit_event (or endpoint reading) as the current truth.
   observe(info, source = 'rate_limit_event') {
-    if (!info) return;
+    const n = normalizeRateLimit(source === 'usage_endpoint' ? { ...info, _source: source } : info);
+    if (!n) return;
     const prev = this.ledger.data.guard.last;
-    let utilization = typeof info.utilization === 'number' ? info.utilization : null;
-    // The event reports utilization as a fraction on some builds and a percent on others.
-    if (utilization !== null && utilization <= 1 && source === 'rate_limit_event') utilization = utilization * 100;
-    let resetsAt = info.resetsAt || info.resets_at || null;
-    if (resetsAt && resetsAt < 1e12) resetsAt = resetsAt * 1000; // epoch seconds -> ms
+    const hasReading = n.utilization !== null;
     const last = {
-      at: Date.now(),
+      // A reading without a usage number must not make an old number look fresh.
+      at: hasReading || !prev ? Date.now() : prev.at,
       source,
-      status: info.status || (prev && prev.status) || 'allowed',
-      utilization: utilization !== null ? utilization : (prev ? prev.utilization : null),
-      resetsAt: resetsAt || (prev ? prev.resetsAt : null),
-      overageEnabled: typeof info.overageEnabled === 'boolean' ? info.overageEnabled : (prev ? prev.overageEnabled : null),
-      errorCode: info.errorCode || null,
-      windows: info.windows || (prev ? prev.windows : null),
+      status: n.status || (prev && prev.status) || 'allowed',
+      utilization: hasReading ? n.utilization : (prev ? prev.utilization : null),
+      resetsAt: n.resetsAt || (prev ? prev.resetsAt : null),
+      overageEnabled: n.overageEnabled !== null ? n.overageEnabled : (prev ? prev.overageEnabled : null),
+      errorCode: n.errorCode,
+      windows: n.windows || (hasReading ? null : (prev ? prev.windows : null)),
     };
     this.ledger.data.guard.last = last;
     if (last.status === 'rejected' || last.errorCode === 'credits_required') {
@@ -78,12 +110,12 @@ class Guard {
   }
 
   // Why a run must stop right now, or null.
-  killReason(info) {
+  killReason(raw) {
+    const info = normalizeRateLimit(raw);
     if (!info) return null;
     if (info.status === 'rejected' || info.errorCode === 'credits_required') return 'plan limit reached';
     if (info.status === 'allowed_warning') return 'plan usage warning from Claude';
-    let u = typeof info.utilization === 'number' ? info.utilization : null;
-    if (u !== null && u <= 1) u = u * 100;
+    const u = info.utilization;
     if (u !== null && u >= this.maxUtilization) return `plan usage ${u.toFixed(0)}% >= cap ${this.maxUtilization}%`;
     return null;
   }
@@ -204,4 +236,4 @@ class Guard {
   }
 }
 
-module.exports = { Guard };
+module.exports = { Guard, normalizeRateLimit };
