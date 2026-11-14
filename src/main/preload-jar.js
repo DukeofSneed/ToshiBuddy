@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld('jar', {
   theme: () => ipcRenderer.invoke('app:theme'),
   donate: (tokens, goalId) => ipcRenderer.invoke('jar:donate', { tokens, goalId }),
   suggest: (text) => ipcRenderer.invoke('jar:suggest', { text }),
+  ideas: () => ipcRenderer.invoke('jar:ideas'),
   fund: (goalId, tokens) => ipcRenderer.invoke('jar:fund', { goalId, tokens }),
   build: (goalId) => ipcRenderer.invoke('jar:build', { goalId }),
   resume: (goalId) => ipcRenderer.invoke('jar:resume', { goalId }),

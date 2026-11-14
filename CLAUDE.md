@@ -17,8 +17,8 @@ upgrade runs that write mods. Kori (`characters/kori-test`, drawn in
 ## If you are a developer session
 - `Setup ToshiBuddy.cmd` installs and makes the desktop shortcut; `npm.cmd start` (or
   `start.cmd`) runs the app. No build step. Zero runtime dependencies.
-- `npm.cmd test` runs tests/*.test.js (jar and guard, importer checks, dialogue engine,
-  upgrade audit). The app self-test lives in `src/main/selftest.js` (`TOSHI_SELFTEST=<dir>`,
+- `npm.cmd test` runs tests/*.test.js (jar and guard, usage readings, waiting queue,
+  importer checks, character check and auto-map, profiles, dialogue engine, upgrade audit). The app self-test lives in `src/main/selftest.js` (`TOSHI_SELFTEST=<dir>`,
   with `TOSHI_USERDATA=<dir>` so it never touches real data).
 - Upgrade runs only ever check, clean, and commit `mods/` and `content/` (`RUN_DIRS` in
   `src/main/jar/git.js`); never widen that to the whole project.
@@ -29,8 +29,21 @@ upgrade runs that write mods. Kori (`characters/kori-test`, drawn in
 - State lives in Electron's userData folder (`settings.json`, `ledger.json`), not in the repo.
 - `characters/<id>/` packs (character.json, quips.json, images) are tracked so a
   shared folder includes ToshiToshi. Never read their images, sheets, or quips into
-  upgrade-run prompts; only the name and `personality` text from character.json go to
-  estimates and upgrade runs (see `characterInfo()` in `src/main/main.js`).
+  upgrade-run prompts; only the name, the `personality` text from character.json, and
+  the stored profile notes go to estimates and upgrade runs (see `characterInfo()` in
+  `src/main/main.js`).
+- Profile notes and upgrade ideas come from one search-only run per character
+  (`src/main/jar/profile.js`): its only tool is WebSearch, it runs in an empty temp
+  folder, it is told to search for the name only, and its answer is cleaned and capped
+  before it is stored in userData (`profiles/<id>.json`, never in the repo). Upgrade
+  runs themselves stay offline.
+- Goals and built tricks belong to a character (`characterId` on goals and upgrade
+  records): the jar shows, builds, and retries only the active character's goals, and
+  `modsFor()` in `src/main/mods.js` loads a trick only for the character it was built for.
+- A funded goal the guard refuses is marked `waiting` and retried after the plan resets
+  (`src/main/jar/waiting.js`); it must only ever start through `guard.canStart()`.
+- New sheets are mapped automatically from row counts (`src/main/character-check.js`:
+  `autoMap`, `checkCharacter`); it never looks at the image.
 - Character import (`src/main/character-import.js`) validates everything: allowed file
   names, image magic bytes, size caps, whitelisted config keys. Keep it that way.
 - Never draw new art based on a user's character images.

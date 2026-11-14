@@ -111,6 +111,7 @@ class Ledger {
     const goal = {
       id: id(),
       createdAt: Date.now(),
+      characterId: g.characterId || null, // whose goal this is (null: older goal, any character)
       title: g.title || 'Untitled upgrade',
       summary: g.summary || '',
       request: g.request || '',

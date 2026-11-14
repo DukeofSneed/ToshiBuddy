@@ -9,13 +9,14 @@ const DEFAULT_MS = 30 * 60 * 1000;
 const MAX_MS = 6 * 60 * 60 * 1000;
 
 class WaitingQueue {
-  constructor({ ledger, guard, upgrader, settings, log, onStart, timers, now }) {
+  constructor({ ledger, guard, upgrader, settings, log, onStart, filter, timers, now }) {
     this.ledger = ledger;
     this.guard = guard;
     this.upgrader = upgrader;
     this.settings = settings;
     this.log = log || (() => {});
     this.onStart = onStart || (() => {});
+    this.filter = filter || (() => true); // which goals count right now (the active character's)
     this.timers = timers || { set: (fn, ms) => setTimeout(fn, ms), clear: (t) => clearTimeout(t) };
     this.now = now || Date.now;
     this.timer = null;
@@ -26,7 +27,7 @@ class WaitingQueue {
   enabled() { return this.settings.get('autoRetry') !== false; }
 
   goals() {
-    return this.ledger.data.goals.filter((g) => g.waiting && !g.touchesCore && ['funded', 'paused', 'failed'].includes(g.status));
+    return this.ledger.data.goals.filter((g) => g.waiting && !g.touchesCore && ['funded', 'paused', 'failed'].includes(g.status) && this.filter(g));
   }
 
   // Just after the plan window resets (or the freeze ends) when that time is

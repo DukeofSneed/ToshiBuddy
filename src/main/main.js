@@ -5,6 +5,7 @@ const fs = require('fs');
 const { createOverlay, createJarWindow, createCustomizeWindow, createImportWindow } = require('./overlay');
 const characterImport = require('./character-import');
 const characterCheck = require('./character-check');
+const characterProfile = require('./jar/profile');
 const { QuipStore } = require('./quip-store');
 const { Settings } = require('./settings');
 const { Ledger } = require('./jar/ledger');
@@ -13,7 +14,7 @@ const { Upgrader } = require('./jar/upgrader');
 const { WaitingQueue } = require('./jar/waiting');
 const { Git } = require('./jar/git');
 const { estimate } = require('./jar/estimator');
-const { listMods, readQuipPacks, readCharacterDialogue, listCharacters, invalidateCharacters, charactersRoot } = require('./mods');
+const { listMods, modsFor, readQuipPacks, readCharacterDialogue, listCharacters, invalidateCharacters, charactersRoot } = require('./mods');
 const { trayIcon } = require('./tray-icon');
 const { findClaude } = require('./jar/claude');
 const { ActivityWatcher, classify } = require('./activity');
@@ -128,7 +129,8 @@ function start() {
   }
   function jarState() {
     return {
-      ledger: ledger.snapshot(),
+      ledger: { ...ledger.snapshot(), goals: ledger.data.goals.filter(isActiveGoal) },
+      ideas: ideasState(),
       guard: guard.status(),
       settings: publicSettings(),
       busy: upgrader.isBusy(),
@@ -155,9 +157,23 @@ function start() {
     try {
       const catalog = JSON.parse(fs.readFileSync(path.join(PROJECT_ROOT, 'content', 'catalog.json'), 'utf8'));
       // addGoal puts new goals first, so seed in reverse to keep the catalog order.
-      for (const item of catalog.slice().reverse()) ledger.addGoal({ ...item, source: 'catalog' });
+      for (const item of catalog.slice().reverse()) ledger.addGoal({ ...item, source: 'catalog', characterId: 'kori-test' });
     } catch (e) { log(`catalog seed failed: ${e.message}`); }
     ledger.data.seeded = true;
+    ledger.data.perCharacter = true;
+    ledger.save();
+  }
+  // Goals and tricks used to be shared by every character. Once: the fixed
+  // catalog goes to the test character it was written for; goals with tokens in
+  // them and the user's own ideas stay with whoever is active now.
+  if (!ledger.data.perCharacter) {
+    const now = settings.get('character') || 'toshitoshi';
+    for (const g of ledger.data.goals) {
+      if (g.characterId) continue;
+      const untouched = g.source === 'catalog' && !g.funded && !g.spent && g.status === 'open';
+      g.characterId = untouched ? 'kori-test' : now;
+    }
+    ledger.data.perCharacter = true;
     ledger.save();
   }
 
@@ -282,12 +298,16 @@ function start() {
   // Display name: the user's rename for this character, else character.json "name".
   const displayNameOf = (c) => String(((settings.get('characterNames') || {})[c.name]) || '').trim() || c.displayName || c.name;
   const charName = () => { const c = activeCharacter(); return c ? displayNameOf(c) : 'Kori'; };
-  // What upgrade runs and estimates are told about the character: its name and the
-  // personality text from character.json. Never images, sheets, or quips.
+  // What upgrade runs and estimates are told about the character: its name, the
+  // personality text from character.json, and the stored profile notes. Never
+  // images, sheets, or quips.
   const characterInfo = () => {
     const c = activeCharacter();
-    const personality = c && typeof c.config.personality === 'string' ? c.config.personality.replace(/s+/g, ' ').trim().slice(0, 600) : '';
-    return { name: charName(), isSkin: !isBuiltinActive(), personality };
+    const personality = c && typeof c.config.personality === 'string' ? c.config.personality.replace(/\s+/g, ' ').trim().slice(0, 600) : '';
+    const who = { id: activeCharacterId(), name: charName(), isSkin: !isBuiltinActive(), personality };
+    // Notes from the search-only profile run (src/main/jar/profile.js), if they
+    // were made for this name and personality.
+    return { ...who, profile: who.isSkin ? characterProfile.profileText(userData, who.id, who) : '' };
   };
   const publicSettings = () => ({ ...settings.all(), characterName: charName() });
   const ownQuipsOnly = () => { const c = activeCharacter(); return !!(c && c.config && c.config.ownQuipsOnly); };
@@ -321,6 +341,11 @@ function start() {
       }
     } catch (e) { log(`sheet index not saved: ${e.message}`); }
   });
+  // A trick built for one character loads only for that character. Mods with no
+  // recorded owner (bundled samples, older tricks) load for everyone, as before.
+  const modsForActive = () => modsFor(PROJECT_ROOT, ledger.data.disabledMods, ledger.data.upgrades, activeCharacterId());
+  // Goals belong to a character; only the active one's are shown, built, or retried.
+  function isActiveGoal(g) { return !g.characterId || g.characterId === activeCharacterId(); }
   // IPC handlers that answer { error } instead of throwing.
   const guarded = (fn) => (_e, args) => {
     try { return fn(args || {}); } catch (e) { return { error: e.message }; }
@@ -398,13 +423,13 @@ function start() {
     skin: currentSkin(),
     style: characterStyle(),
     jar: jarPropState(),
-    mods: listMods(PROJECT_ROOT, ledger.data.disabledMods),
+    mods: modsForActive(),
     quips: quipsForPet(),
     level: ledger.level(),
     balance: ledger.data.balance,
   }));
   ipcMain.handle('overlay:content', () => ({
-    mods: listMods(PROJECT_ROOT, ledger.data.disabledMods),
+    mods: modsForActive(),
     quips: quipsForPet(),
     level: ledger.level(),
     balance: ledger.data.balance,
@@ -643,11 +668,11 @@ function start() {
     if (r.rateLimit) guard.observe(r.rateLimit);
     if (!r.ok) { notify(`Couldn't price that one: ${r.error}`, 7000); return { ok: false, error: r.error, state: jarState() }; }
     if (!r.goal.feasible || r.goal.touchesCore) {
-      const goal = ledger.addGoal({ ...r.goal, touchesCore: true });
+      const goal = ledger.addGoal({ ...r.goal, touchesCore: true, characterId: activeCharacterId() });
       notify('That idea needs changes to the app itself, which upgrades cannot make.', 7000);
       return { ok: true, goal, reply: r.reply, infeasible: true, state: jarState() };
     }
-    const goal = ledger.addGoal(r.goal);
+    const goal = ledger.addGoal({ ...r.goal, characterId: activeCharacterId() });
     notify(`New goal: ${goal.title}. Estimated cost ${fmt(goal.goalTokens)} tokens.`, 7000);
     return { ok: true, goal, reply: r.reply, state: jarState() };
   });
@@ -668,9 +693,67 @@ function start() {
     return { ...r, state: jarState() };
   });
 
+  // ---- ideas tailored to the active character ----
+  // One small search-only run (src/main/jar/profile.js) looks up the character's
+  // name, writes short background notes, and proposes upgrades that suit it.
+  let ideasBusy = false;
+  function ideasState() {
+    const id = activeCharacterId();
+    const c = activeCharacter();
+    if (!c || c.builtin) return { available: false };
+    const p = characterProfile.readProfile(userData, id);
+    const info = characterInfo();
+    return {
+      available: true, busy: ideasBusy, has: !!p, found: !!(p && p.found), at: p ? p.at : null,
+      stale: !!p && p.signature !== characterProfile.signature(info),
+      profile: p ? p.profile : '',
+    };
+  }
+  async function getIdeas() {
+    const id = activeCharacterId();
+    const c = activeCharacter();
+    if (!c || c.builtin) return { ok: false, error: 'The test character uses the fixed list.' };
+    if (ideasBusy) return { ok: false, error: 'Already looking.' };
+    if (!findClaude()) return { ok: false, error: 'Claude Code is not installed or not logged in' };
+    if (upgrader.isBusy()) return { ok: false, error: 'An upgrade is running; try again when it finishes.' };
+    await guard.refresh();
+    const gate = guard.canStart();
+    if (!gate.ok) return { ok: false, error: `Your plan has no room right now (${gate.reason}).` };
+    const info = characterInfo();
+    ideasBusy = true;
+    pushJar();
+    notify(`Looking up ideas for ${info.name}…`, 5000);
+    let r;
+    try {
+      r = await characterProfile.research({
+        userData, id, name: info.name, personality: info.personality, log,
+        onRateLimit: (rl) => guard.observe(rl),
+      });
+    } catch (e) { r = { ok: false, error: e.message }; } finally { ideasBusy = false; }
+    if (r.tokens) ledger.chargeFee(r.tokens, 'ideas');
+    if (r.rateLimit) guard.observe(r.rateLimit);
+    if (!r.ok) { notify(`Couldn't get ideas: ${r.error}`, 7000); pushJar(); return { ok: false, error: r.error }; }
+    // Replace this character's untouched earlier ideas; keep anything with tokens in it.
+    ledger.data.goals = ledger.data.goals.filter((g) => !(g.characterId === id && g.source === 'ideas' && !g.funded && !g.spent && g.status === 'open'));
+    const have = new Set(ledger.data.goals.filter((g) => g.characterId === id).map((g) => g.title.toLowerCase()));
+    let added = 0;
+    for (const idea of r.profile.ideas.slice().reverse()) {
+      if (have.has(idea.title.toLowerCase())) continue;
+      ledger.addGoal({ ...idea, source: 'ideas', characterId: id });
+      added++;
+    }
+    ledger.save();
+    log(`ideas for ${id}: ${added} goals, ${r.profile.found ? 'character found by name' : 'from the personality text only'}`);
+    notify(`${added} new idea${added === 1 ? '' : 's'} for ${info.name}. Open the jar to see them.`, 7000);
+    pushJar();
+    return { ok: true, added, found: r.profile.found };
+  }
+  ipcMain.handle('jar:ideas', async () => ({ ...(await getIdeas()), state: jarState() }));
+
   // Goals the plan had no room for start by themselves after it resets.
   const waiting = new WaitingQueue({
     ledger, guard, upgrader, settings, log,
+    filter: isActiveGoal,
     onStart: (goal) => notify(`Your plan has room again. Starting "${goal.title}".`, 7000),
   });
   ledger.onChange(() => waiting.schedule());
@@ -680,7 +763,7 @@ function start() {
   // room in the plan are left to the waiting queue.
   ledger.onChange(() => {
     if (!settings.get('autoBuild') || upgrader.isBusy()) return;
-    const next = ledger.data.goals.find((g) => g.status === 'funded' && !g.touchesCore && !g.waiting);
+    const next = ledger.data.goals.find((g) => g.status === 'funded' && !g.touchesCore && !g.waiting && isActiveGoal(g));
     if (next) setTimeout(() => { if (!upgrader.isBusy()) upgrader.build(next.id); }, 1500);
   });
 
@@ -817,6 +900,7 @@ function start() {
     app, screen, settings, ledger, guard, logLines, log, charName, buildMenu, openCustomize, openImport, activeCharacterId, reloadAndAwaitMods,
     listCharacters: () => listCharacters(PROJECT_ROOT),
     overAt, get hitAreas() { return hitAreas; }, waiting,
+    getIdeas, ideasState, modsForActive: () => modsForActive(),
     checkActive: () => { const c = activeCharacter(); return c && !c.builtin ? checkOf(c) : null; },
     get overlay() { return overlay; }, get jarWin() { return jarWin; },
     get customizeWin() { return customizeWin; }, get importWin() { return importWin; },

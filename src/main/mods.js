@@ -27,6 +27,17 @@ function listMods(projectRoot, disabled = []) {
   return out;
 }
 
+// A trick built for one character loads only for that character. Mods with no
+// recorded owner (bundled samples, older tricks) load for everyone.
+function modsFor(projectRoot, disabled, upgrades, characterId) {
+  const owner = new Map();
+  for (const u of upgrades || []) {
+    if (u.reverted || !u.characterId) continue;
+    for (const s of u.slugs || []) owner.set(s, u.characterId);
+  }
+  return listMods(projectRoot, disabled).filter((m) => !owner.has(m.slug) || owner.get(m.slug) === characterId);
+}
+
 // A quip pack is an array, or { quips: [...] }. Entries are strings or
 // { id?, text, tags?, weight?, cooldown? (seconds), priority? }.
 function parseQuipList(data, pack) {
@@ -142,4 +153,4 @@ function readCharacterDialogue(projectRoot, id) {
   }
 }
 
-module.exports = { listMods, readQuipPacks, readCharacterDialogue, readCharacterConfig, parseQuipList, listCharacters, invalidateCharacters, charactersRoot, readJson, ID_RE, IMG_RE };
+module.exports = { listMods, modsFor, readQuipPacks, readCharacterDialogue, readCharacterConfig, parseQuipList, listCharacters, invalidateCharacters, charactersRoot, readJson, ID_RE, IMG_RE };

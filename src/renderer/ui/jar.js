@@ -57,6 +57,18 @@
     const goals = L.goals || [];
     $('goals').innerHTML = goals.length ? goals.map(goalHtml).join('') : '<div class="muted">No goals. Suggest something.</div>';
     const charName = state.settings.characterName || 'Kori';
+    // Ideas tailored to this character (a web lookup of the name + the personality text).
+    const I = state.ideas || {};
+    $('ideas-row').classList.toggle('hidden', !I.available);
+    if (I.available) {
+      $('ideas-btn').disabled = !!I.busy || !!state.busy;
+      $('ideas-btn').textContent = I.busy ? 'Looking…' : I.has ? 'Refresh ideas' : `Get ideas for ${charName}`;
+      $('ideas-text').textContent = I.busy ? `Looking up ${charName}…`
+        : !I.has ? `No ideas made for ${charName} yet.`
+        : I.stale ? 'The name or personality changed since these ideas were made.'
+        : I.found ? `Ideas based on a web lookup of "${charName}" and the personality you wrote.` : `Nothing found for "${charName}" online; ideas come from the personality you wrote.`;
+      $('ideas-text').title = I.profile || '';
+    }
     $('jar-title').textContent = `${charName}'s Donation Jar`;
     document.title = `${charName}'s Jar`;
     document.querySelectorAll('.char-name').forEach((el) => { el.textContent = charName; });
@@ -121,7 +133,7 @@
       <div class="head"><div class="title">${esc(g.title)}</div><span class="badge ${g.status}">${g.waiting && g.status !== 'building' ? 'waiting' : g.status}${g.size ? ' · ' + g.size : ''}</span></div>
       <div class="summary">${esc(g.summary)}</div>
       <div class="bar"><div style="width:${pct}%"></div></div>
-      <div class="meta"><span>${fmt(shown)} / ${fmt(target)} tokens${['paused', 'failed'].includes(g.status) ? ' to continue' : ''}</span><span>${g.spent ? `spent ${fmt(g.spent)}` : g.source === 'catalog' ? 'catalog idea' : 'your idea'}</span></div>
+      <div class="meta"><span>${fmt(shown)} / ${fmt(target)} tokens${['paused', 'failed'].includes(g.status) ? ' to continue' : ''}</span><span>${g.spent ? `spent ${fmt(g.spent)}` : g.source === 'catalog' ? 'catalog idea' : g.source === 'ideas' ? 'made for this character' : 'your idea'}</span></div>
       ${g.note ? `<div class="note">${esc(g.note)}</div>` : ''}
       <div class="actions">${actions}</div>
     </div>`;
@@ -162,6 +174,13 @@
     } finally { $('suggest-btn').disabled = false; }
   };
   $('suggest-text').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('suggest-btn').click(); });
+  $('ideas-btn').onclick = async () => {
+    $('ideas-btn').disabled = true;
+    $('ideas-text').textContent = 'Looking… this takes a minute.';
+    const r = await jar.ideas();
+    if (r.state) { S = r.state; render(S); }
+    if (!r.ok && r.error) $('ideas-text').textContent = r.error;
+  };
   $('auto-retry').onchange = (e) => act(jar.updateSettings({ autoRetry: e.target.checked }).then((s) => ({ state: s })));
   $('auto-build').onchange = (e) => act(jar.updateSettings({ autoBuild: e.target.checked }).then((s) => ({ state: s })));
   $('maxutil').oninput = (e) => { $('maxutil-val').textContent = e.target.value; };
