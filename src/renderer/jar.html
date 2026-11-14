@@ -54,6 +54,13 @@
         <input id="suggest-text" type="text" maxlength="600" placeholder="Suggest a new trick, prop, or reaction" />
         <button id="suggest-btn">Price it</button>
       </div>
+      <div class="row attach-row">
+        <span class="muted">Add a picture:</span>
+        <button class="small ghost" id="attach-asset" title="The picture itself is shown, for example a photo on his desk. Nothing is redrawn.">To show as-is</button>
+        <button class="small ghost" id="attach-ref" title="Something for the upgrade to look at, to understand what you mean. It is not kept.">As a reference</button>
+      </div>
+      <div id="attach-list" class="attach-list"></div>
+      <div class="muted attach-note">Attached pictures are sent to Claude when that upgrade is built.</div>
       <div id="suggest-msg" class="muted"></div>
     </section>
 

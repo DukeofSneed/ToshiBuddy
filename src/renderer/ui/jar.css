@@ -77,3 +77,13 @@ details summary { cursor: pointer; font-weight: 600; }
 details label { display: block; margin-top: 8px; color: var(--muted); }
 details input[type=range] { width: 100%; }
 #log { max-height: 220px; overflow: auto; font: 11px Consolas, monospace; color: #cbbfe6; white-space: pre-wrap; word-break: break-all; margin: 8px 0 0; }
+
+/* Pictures attached to an upgrade */
+.attach-row { margin-top: 6px; gap: 6px; align-items: center; }
+.attach-list { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+.attach { font-size: 11px; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 2px 4px 2px 8px; color: var(--text); }
+.attach em { color: var(--muted); font-style: normal; margin-left: 3px; }
+.attach-note { font-size: 10.5px; margin-top: 4px; }
+button.x { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 11px; padding: 0 4px; }
+button.x:hover { color: var(--text); }
+button.x.add { border: 1px dashed var(--line); border-radius: 10px; padding: 2px 8px; }

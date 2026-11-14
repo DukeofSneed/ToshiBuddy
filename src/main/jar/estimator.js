@@ -37,7 +37,7 @@ function listModSlugs(projectRoot) {
   } catch (_) { return []; }
 }
 
-function buildPrompt(projectRoot, request, ledger, character = { name: 'Kori', isSkin: false }) {
+function buildPrompt(projectRoot, request, ledger, character = { name: 'Kori', isSkin: false }, extra = '') {
   const { name, isSkin, personality, profile, abilities } = character;
   const api = fs.readFileSync(path.join(projectRoot, 'docs', 'MOD_API.md'), 'utf8');
   const mods = listModSlugs(projectRoot);
@@ -61,12 +61,13 @@ function buildPrompt(projectRoot, request, ledger, character = { name: 'Kori', i
     abilities ? `## What ${name} already does\n${abilities}\n${ABILITY_RULE} If the suggestion is mostly something on this list, set feasible to false and say in risk_note which existing behavior it repeats, or narrow the title and summary to the part that is new.\n` : '',
     '## The suggestion',
     request,
+    extra,
   ].join('\n');
 }
 
-async function estimate({ projectRoot, ledger, request, log, character }) {
+async function estimate({ projectRoot, ledger, request, log, character, extra }) {
   const run = runClaude({
-    prompt: buildPrompt(projectRoot, request, ledger, character),
+    prompt: buildPrompt(projectRoot, request, ledger, character, extra || ''),
     cwd: projectRoot,
     args: ['--model', 'haiku', '--effort', 'low', '--max-turns', '1', '--max-budget-usd', '0.05',
       '--disallowedTools', 'Bash,PowerShell,Edit,Write,Read,Glob,Grep,WebFetch,WebSearch,Agent,NotebookEdit',

@@ -7,6 +7,8 @@ contextBridge.exposeInMainWorld('jar', {
   donate: (tokens, goalId) => ipcRenderer.invoke('jar:donate', { tokens, goalId }),
   suggest: (text) => ipcRenderer.invoke('jar:suggest', { text }),
   ideas: () => ipcRenderer.invoke('jar:ideas'),
+  attachPending: (args) => ipcRenderer.invoke('jar:attach-pending', args || {}),
+  attach: (args) => ipcRenderer.invoke('jar:attach', args || {}),
   fund: (goalId, tokens) => ipcRenderer.invoke('jar:fund', { goalId, tokens }),
   build: (goalId) => ipcRenderer.invoke('jar:build', { goalId }),
   resume: (goalId) => ipcRenderer.invoke('jar:resume', { goalId }),

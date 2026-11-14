@@ -5,6 +5,8 @@
   const registry = []; // { slug, def }
   let currentSlug = null;
   let currentRegistered = false;
+  let currentBase = null; // URL of the folder the mod being loaded lives in
+  const IMAGE_FILE = /^[a-z0-9][a-z0-9-]{0,39}\.(png|webp|gif|jpg)$/;
   const ANCHORS = new Set(['head', 'hand-r', 'hand-l', 'back', 'front', 'desk']);
   const TRIGGERS = new Set(['idle', 'click', 'dblclick', 'drop', 'hour', 'wake', 'sleep', 'interval', 'donate', 'upgrade', 'lean', 'desk', 'ultimate']);
   const RESERVED_ANIMS = new Set(['idle', 'walk', 'lean', 'sleep', 'drag', 'fall', 'land', 'talk', 'blink', 'face-left', 'face-right',
@@ -36,9 +38,19 @@
     if (def.props !== undefined) {
       if (!Array.isArray(def.props) || def.props.length > 20) fail('props must be an array (max 20)');
       for (const p of def.props) {
-        if (!p || typeof p.svg !== 'string' || p.svg.length > 20000) fail('each prop needs svg (<=20k chars)');
+        if (!p || (p.svg === undefined && !p.image)) fail('each prop needs svg and/or image');
+        if (p.svg !== undefined && (typeof p.svg !== 'string' || p.svg.length > 20000)) fail('prop svg must be a string (<=20k chars)');
         if (!ANCHORS.has(p.anchor)) fail(`prop anchor must be one of ${[...ANCHORS].join(', ')}`);
-        if (/<script|<foreignObject|on\w+=|href\s*=|url\(/i.test(p.svg)) fail('prop svg may not contain scripts, links, or urls');
+        if (p.svg && /<script|<foreignObject|on\w+=|href\s*=|url\(/i.test(p.svg)) fail('prop svg may not contain scripts, links, or urls');
+        if (p.image !== undefined) {
+          // A picture the user attached to the upgrade, in the mod's own assets folder.
+          const im = p.image;
+          if (!im || typeof im !== 'object' || !IMAGE_FILE.test(String(im.file))) fail('prop image.file must be a picture file name in the mod\'s assets folder');
+          for (const k of ['x', 'y']) if (!(Number(im[k]) >= -200 && Number(im[k]) <= 400)) fail(`prop image.${k} must be a number from -200 to 400`);
+          for (const k of ['width', 'height']) if (!(Number(im[k]) >= 1 && Number(im[k]) <= 300)) fail(`prop image.${k} must be 1-300`);
+          if (im.fit !== undefined && im.fit !== 'contain' && im.fit !== 'cover') fail('prop image.fit must be "contain" or "cover"');
+          if (im.rotate !== undefined && !(Number(im.rotate) >= -180 && Number(im.rotate) <= 180)) fail('prop image.rotate must be -180 to 180');
+        }
         if (p.id !== undefined && !/^[a-z0-9-]{2,40}$/.test(p.id)) fail('prop id must be a-z, 0-9, -');
       }
     }
@@ -83,6 +95,7 @@
       def.declaredId = def.id;
     }
     def.slug = currentSlug || def.id;
+    def.base = currentBase;
     if (!allowed(def, def.slug)) {
       // Loaded fine, just not for this character: no props, animations, quips, or behaviors.
       skipped.push(def.slug);
@@ -110,7 +123,17 @@
         wrap.setAttribute('data-mod', slug);
         if (p.id) wrap.setAttribute('id', `prop-${slug}-${p.id}`);
         if (p.hidden) wrap.setAttribute('display', 'none');
-        wrap.innerHTML = p.svg;
+        wrap.innerHTML = p.svg || '';
+        if (p.image && def.base) {
+          // Built here, never from mod-written markup: the file name was checked
+          // and can only point into this mod's own assets folder.
+          const im = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+          im.setAttribute('href', `${def.base}assets/${p.image.file}`);
+          for (const k of ['x', 'y', 'width', 'height']) im.setAttribute(k, String(Number(p.image[k])));
+          im.setAttribute('preserveAspectRatio', p.image.fit === 'cover' ? 'xMidYMid slice' : 'xMidYMid meet');
+          if (p.image.rotate) im.setAttribute('transform', `rotate(${Number(p.image.rotate)} ${Number(p.image.x) + Number(p.image.width) / 2} ${Number(p.image.y) + Number(p.image.height) / 2})`);
+          wrap.appendChild(im);
+        }
         g.appendChild(wrap);
       }
     }
@@ -153,6 +176,7 @@
     if (!mod.enabled) return Promise.resolve();
     return new Promise((resolve) => {
       currentSlug = mod.slug;
+      currentBase = String(mod.url).split('?')[0].replace(/[^/]*$/, '');
       currentRegistered = false;
       let error = null;
       const onError = (ev) => { error = (ev.error && ev.error.message) || ev.message || 'script error'; };
@@ -166,6 +190,7 @@
         const status = { slug: mod.slug, ok: !error, error };
         if (window.buddy) window.buddy.reportMod(status);
         currentSlug = null;
+        currentBase = null;
         resolve(status);
       };
       s.onload = () => setTimeout(done, 0);

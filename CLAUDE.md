@@ -35,6 +35,11 @@ upgrade runs that write mods. Kori (`characters/kori-test`, drawn in
 - Prompts also get a list of what the character already does (`src/main/abilities.js`:
   app behaviors, the names of its mapped animations, built tricks, listed ideas) with a
   rule not to repeat or imitate them. Animation names only; never what a pose looks like.
+- A user can attach pictures to a goal (`src/main/jar/attachments.js`): validated like
+  character images, kept in userData, copied into `mods/<slug>/assets/` (shown as-is by
+  a picture prop) or `mods/<slug>/reference/` (removed after the run). These are the
+  only images an upgrade run may see, and only because the user attached them to that
+  goal. Mods can show only attached pictures (`props[].image`; the loader builds the tag).
 - Profile notes and upgrade ideas come from one search-only run per character
   (`src/main/jar/profile.js`): its only tool is WebSearch, it runs in an empty temp
   folder, it is told to search for the name only, and its answer is cleaned and capped

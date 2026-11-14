@@ -134,6 +134,7 @@
       <div class="summary">${esc(g.summary)}</div>
       <div class="bar"><div style="width:${pct}%"></div></div>
       <div class="meta"><span>${fmt(shown)} / ${fmt(target)} tokens${['paused', 'failed'].includes(g.status) ? ' to continue' : ''}</span><span>${g.spent ? `spent ${fmt(g.spent)}` : g.source === 'catalog' ? 'catalog idea' : g.source === 'ideas' ? 'made for this character' : 'your idea'}</span></div>
+      ${(g.attachments || []).length || !['done', 'building'].includes(g.status) ? `<div class="attach-list">${(g.attachments || []).map((a) => `<span class="attach">${esc(a.file)} <em>${a.use === 'asset' ? 'shown as-is' : 'reference'}</em>${['done', 'building'].includes(g.status) ? '' : `<button class="x" data-unattach="${g.id}" data-file="${esc(a.file)}" title="Remove">✕</button>`}</span>`).join('')}${['done', 'building'].includes(g.status) || g.touchesCore ? '' : `<button class="x add" data-attach="${g.id}" data-use="asset" title="Add a picture that is shown as-is, like a photo on the desk">+ picture</button><button class="x add" data-attach="${g.id}" data-use="reference" title="Add a picture for the upgrade to look at">+ reference</button>`}</div>` : ''}
       ${g.note ? `<div class="note">${esc(g.note)}</div>` : ''}
       <div class="actions">${actions}</div>
     </div>`;
@@ -160,6 +161,21 @@
   document.querySelectorAll('.chip').forEach((c) => {
     c.onclick = () => { $('donate-amount').value = c.dataset.amt === 'max' ? Math.max(0, S ? S.guard.maxSafeDonation : 0) : c.dataset.amt; };
   });
+  // Pictures chosen for the suggestion being typed.
+  const useLabel = { asset: 'shown as-is', reference: 'reference' };
+  function renderPending(list) {
+    $('attach-list').innerHTML = (list || []).map((p, i) => `<span class="attach">${esc(p.name)} <em>${useLabel[p.use]}</em><button class="x" data-unpend="${i}" title="Remove">✕</button></span>`).join('');
+  }
+  async function pend(args) {
+    const r = await jar.attachPending(args);
+    renderPending(r.pending);
+    if (!r.ok && r.error) $('suggest-msg').textContent = r.error;
+  }
+  $('attach-asset').onclick = () => pend({ use: 'asset' });
+  $('attach-ref').onclick = () => pend({ use: 'reference' });
+  $('attach-list').addEventListener('click', (e) => { const b = e.target.closest('[data-unpend]'); if (b) pend({ remove: Number(b.dataset.unpend) }); });
+  pend({ remove: -1 }); // show whatever is already waiting
+
   $('suggest-btn').onclick = async () => {
     const text = $('suggest-text').value.trim();
     if (!text) return;
@@ -170,7 +186,7 @@
       $('suggest-msg').textContent = r.ok
         ? (r.infeasible ? `Not doable as a mod: ${r.goal.risk || 'needs core changes'}` : `Priced at ${fmt(r.goal.goalTokens)} tokens (${r.goal.size}). Goal added below.`)
         : `Couldn't price it: ${r.error}`;
-      if (r.ok) $('suggest-text').value = '';
+      if (r.ok) { $('suggest-text').value = ''; pend({ remove: -1 }); }
     } finally { $('suggest-btn').disabled = false; }
   };
   $('suggest-text').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('suggest-btn').click(); });
@@ -212,7 +228,11 @@
       b.disabled = true;
       const g = S.ledger.goals.find((x) => x.id === b.dataset.build);
       act(g && g.sessionId ? jar.resume(b.dataset.build) : jar.build(b.dataset.build));
-    } else if (b.dataset.remove) await act(jar.removeGoal(b.dataset.remove));
+    } else if (b.dataset.attach) {
+      const r = await act(jar.attach({ goalId: b.dataset.attach, use: b.dataset.use }));
+      if (r && !r.ok && r.error) $('suggest-msg').textContent = r.error;
+    } else if (b.dataset.unattach) await act(jar.attach({ goalId: b.dataset.unattach, remove: b.dataset.file }));
+    else if (b.dataset.remove) await act(jar.removeGoal(b.dataset.remove));
     else if (b.dataset.cancel) render(await jar.cancelRun());
   });
   $('upgrades').addEventListener('click', async (e) => {

@@ -1,5 +1,5 @@
 'use strict';
-const { app, Menu, Tray, ipcMain, powerMonitor, screen, shell, dialog } = require('electron');
+const { app, Menu, Tray, ipcMain, powerMonitor, screen, shell, dialog, nativeImage } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { createOverlay, createJarWindow, createCustomizeWindow, createImportWindow } = require('./overlay');
@@ -7,6 +7,7 @@ const characterImport = require('./character-import');
 const characterCheck = require('./character-check');
 const characterProfile = require('./jar/profile');
 const abilities = require('./abilities');
+const attachments = require('./jar/attachments');
 const { QuipStore } = require('./quip-store');
 const { Settings } = require('./settings');
 const { Ledger } = require('./jar/ledger');
@@ -98,7 +99,7 @@ function start() {
   });
 
   const upgrader = new Upgrader({
-    projectRoot: PROJECT_ROOT, ledger, guard, settings, git, log,
+    projectRoot: PROJECT_ROOT, ledger, guard, settings, git, log, userData,
     character: () => characterInfo(),
     emit: (ev) => {
       if (overlay && !overlay.isDestroyed()) overlay.webContents.send('upgrade-event', ev);
@@ -655,7 +656,52 @@ function start() {
     if (r && r.moved > 0 && overlay && !overlay.isDestroyed()) overlay.webContents.send('quip', { tags: ['jar-grow'] });
     return { ...r, state: jarState() };
   });
-  ipcMain.handle('jar:remove-goal', (_e, { goalId }) => ({ ok: ledger.removeGoal(goalId), state: jarState() }));
+  ipcMain.handle('jar:remove-goal', (_e, { goalId }) => {
+    const ok = ledger.removeGoal(goalId);
+    if (ok) attachments.removeAll(userData, String(goalId));
+    return { ok, state: jarState() };
+  });
+  // ---- pictures attached to an upgrade (shown as a prop, or just to look at) ----
+  const sizeOfImage = (file) => nativeImage.createFromPath(file).getSize();
+  async function pickPicture() {
+    const r = await dialog.showOpenDialog(jarWin && !jarWin.isDestroyed() ? jarWin : undefined, {
+      title: 'Choose a picture for this upgrade', properties: ['openFile'],
+      filters: [{ name: 'Pictures', extensions: ['png', 'webp', 'gif', 'jpg', 'jpeg'] }],
+    });
+    return r.canceled ? null : r.filePaths[0];
+  }
+  // Pictures chosen in the "Suggest an upgrade" box wait here until the goal exists.
+  let pendingPictures = []; // { source, use, name }
+  const pendingView = () => pendingPictures.map((p) => ({ name: p.name, use: p.use }));
+  ipcMain.handle('jar:attach-pending', async (_e, { use, remove } = {}) => {
+    if (remove !== undefined) { pendingPictures = pendingPictures.filter((_p, i) => i !== Number(remove)); return { ok: true, pending: pendingView() }; }
+    if (!attachments.USES.includes(use)) return { ok: false, error: 'Choose how the picture is used.', pending: pendingView() };
+    if (pendingPictures.length >= attachments.MAX_PER_GOAL) return { ok: false, error: `Up to ${attachments.MAX_PER_GOAL} pictures.`, pending: pendingView() };
+    const source = await pickPicture();
+    if (!source) return { ok: true, pending: pendingView() };
+    try {
+      // Validate now (a throwaway goal object), copy later when the goal exists.
+      const st = fs.statSync(source);
+      if (st.size > attachments.MAX_BYTES) throw new Error(`The picture is larger than ${attachments.MAX_BYTES / 1048576} MB.`);
+      if (!/\.(png|webp|gif|jpe?g)$/i.test(source) || !attachments.kindOf(source)) throw new Error('That file is not a valid image.');
+      pendingPictures.push({ source, use, name: path.basename(source).slice(0, 60) });
+      return { ok: true, pending: pendingView() };
+    } catch (e) { return { ok: false, error: e.message, pending: pendingView() }; }
+  });
+  ipcMain.handle('jar:attach', async (_e, { goalId, use, remove } = {}) => {
+    const goal = ledger.goal(String(goalId || ''));
+    if (!goal || ['building', 'done'].includes(goal.status)) return { ok: false, error: 'That goal can\'t take pictures now.', state: jarState() };
+    try {
+      if (remove) attachments.remove({ userData, goal, file: String(remove) });
+      else {
+        const source = await pickPicture();
+        if (!source) return { ok: true, state: jarState() };
+        attachments.add({ userData, goal, source, use, sizeOf: sizeOfImage });
+      }
+      ledger.save();
+      return { ok: true, state: jarState() };
+    } catch (e) { return { ok: false, error: e.message, state: jarState() }; }
+  });
   ipcMain.handle('jar:settings', (_e, patch) => {
     const allowed = ['muted', 'sfx', 'sfxVolume', 'paused', 'autostart', 'deskMode', 'slackNudges', 'character', 'maxUtilization', 'calibrationRunTokens', 'autoBuild', 'autoRetry', 'allowUsageEndpointFallback', 'upgradeModel', 'upgradeEffort', 'maxTurns', 'showJarProp', 'quickDonateTokens'];
     const clean = {};
@@ -688,7 +734,8 @@ function start() {
     if (!text) return { ok: false, error: 'empty suggestion' };
     if (!findClaude()) return { ok: false, error: 'Claude Code is not installed or not logged in' };
     notify('Pricing your suggestion…', 4000);
-    const r = await estimate({ projectRoot: PROJECT_ROOT, ledger, request: text, log, character: characterInfo() });
+    const pictures = pendingPictures;
+    const r = await estimate({ projectRoot: PROJECT_ROOT, ledger, request: text, log, character: characterInfo(), extra: attachments.pricingLine(pictures) });
     if (r.rateLimit) guard.observe(r.rateLimit);
     if (!r.ok) { notify(`Couldn't price that one: ${r.error}`, 7000); return { ok: false, error: r.error, state: jarState() }; }
     if (!r.goal.feasible || r.goal.touchesCore) {
@@ -697,6 +744,14 @@ function start() {
       return { ok: true, goal, reply: r.reply, infeasible: true, state: jarState() };
     }
     const goal = ledger.addGoal({ ...r.goal, characterId: activeCharacterId() });
+    // The pictures chosen with the suggestion now belong to the goal.
+    let skipped = 0;
+    for (const p of pictures) {
+      try { attachments.add({ userData, goal, source: p.source, use: p.use, sizeOf: sizeOfImage }); } catch (e) { skipped++; log(`picture not attached: ${e.message}`); }
+    }
+    pendingPictures = [];
+    ledger.save();
+    if (skipped) notify(`${skipped} picture${skipped === 1 ? '' : 's'} could not be attached.`, 6000);
     notify(`New goal: ${goal.title}. Estimated cost ${fmt(goal.goalTokens)} tokens.`, 7000);
     return { ok: true, goal, reply: r.reply, state: jarState() };
   });

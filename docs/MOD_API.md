@@ -92,6 +92,16 @@ BuddyMods.register({
   (131, 138); put desk ornaments around y 110-136 on `desk`. The pet faces right by
   default; the whole sprite is mirrored when walking left.
   `hidden: true` starts the prop invisible; toggle it from a behavior.
+- **Picture props.** When the human attached a picture to the upgrade, it is already in
+  `mods/<slug>/assets/` and the prompt names it. Show it with `image` on a prop,
+  alone or together with `svg` (the svg is drawn first, the picture on top, so a
+  frame or stand goes in `svg`):
+  `{ id: 'photo', anchor: 'desk', svg: '<rect x="93" y="107" width="24" height="20" rx="1.5" fill="#6b4a2f"/>', image: { file: 'photo.png', x: 95, y: 109, width: 20, height: 16 } }`
+  `file` is the bare file name; `x`, `y`, `width`, `height` are in the same 160x200
+  coordinates; `fit` is `'contain'` (default, whole picture) or `'cover'` (fills the
+  box, cropped); `rotate` is optional degrees. Keep the picture's proportions: pick
+  `width`/`height` from its pixel size. Only attached pictures can be shown; a mod
+  cannot add image files of its own, and must never redraw an attached picture.
 - `behaviors[]`: `trigger` is one of `idle`, `click`, `dblclick`, `drop`, `hour`,
   `wake`, `sleep`, `lean`, `desk` (Kori sits down at the desk), `ultimate` (the
   ultimate form begins), `donate`, `upgrade`, `interval` (needs `every` >= 30000 ms). `chance` 0-1 (default 1). `action` may
