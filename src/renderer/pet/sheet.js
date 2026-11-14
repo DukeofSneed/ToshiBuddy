@@ -247,8 +247,12 @@
       }
       const cx = Number.isFinite(hmin) ? (hmin + hmax) / 2 : (m.minx + m.maxx) / 2;
       let flipUrl = null;
+      // Marks beside the figure ("?", "!", a swirl): these must read the right
+      // way whichever way the pet faces.
+      const marks = (f.bits || []).some((b) => { const bx = (b.minx + b.maxx) / 2; return bx < f.main.minx || bx > f.main.maxx; });
       return {
         get flipUrl() { return flipUrl || (flipUrl = mirrored()); },
+        marks,
         row: f.row, col: f.col, url: c.toDataURL('image/png'), w: fw, h: fh,
         ox: cx - f.minx,   // head center, from the frame's left edge
         top: base - f.miny, // baseline to the frame's top
@@ -385,8 +389,13 @@
   async function prepare(url, cfg, opts = {}) {
     cfg = cfg || {};
     const key = url.split('?')[0];
-    const sig = JSON.stringify([url, cfg.keyMode, cfg.keyTolerance, cfg.keyMax, cfg.moveMarks]);
-    const flipBodyFrames = (sheet) => [...new Set(Object.values(sheet.anims).filter((a) => a.flipBody).flatMap((a) => a.frames))];
+    const sig = JSON.stringify(['marks-v1', url, cfg.keyMode, cfg.keyTolerance, cfg.keyMax, cfg.moveMarks]);
+    // Frames that need the figure-only mirror: flipBody poses, and any pose with
+    // marks (used when the pet faces left, so the marks still read correctly).
+    const flipBodyFrames = (sheet) => [...new Set([
+      ...Object.values(sheet.anims).filter((a) => a.flipBody).flatMap((a) => a.frames),
+      ...sheet.frames.map((fr, i) => (fr.marks ? i : -1)).filter((i) => i >= 0),
+    ])];
 
     let sliced = null;
     let fromCache = false;
@@ -407,7 +416,7 @@
       // Store plain data: body-only mirrors only for the frames that need them.
       const need = new Set(flipBodyFrames(sheet));
       const frames = sliced.frames.map((fr, i) => {
-        const o = { row: fr.row, col: fr.col, url: fr.url, w: fr.w, h: fr.h, ox: fr.ox, top: fr.top };
+        const o = { row: fr.row, col: fr.col, url: fr.url, w: fr.w, h: fr.h, ox: fr.ox, top: fr.top, marks: !!fr.marks };
         if (need.has(i)) o.flipUrl = fr.flipUrl;
         return o;
       });
@@ -464,12 +473,18 @@
     function draw() {
       const a = sheet.anims[key];
       const f = sheet.frames[a.frames[i]];
-      const fb = a.flipBody;
+      // Facing left mirrors the whole pet (CSS on #flip), which would turn a
+      // "?" or swirl backwards. For a frame with marks, mirror once more here
+      // and swap to the other figure-only mirror: the body still faces left and
+      // the marks read the right way.
+      const fix = !!(f.marks && f.flipUrl && pet.classList.contains('face-left'));
+      const fb = !!a.flipBody !== fix;
+      const mirror = !!a.flip !== fix;
       const b = frameBox(sheet, fb ? { ...f, ox: f.w - f.ox } : f);
       img.setAttribute('href', fb && f.flipUrl ? f.flipUrl : f.url);
       img.setAttribute('x', b.x.toFixed(1)); img.setAttribute('y', b.y.toFixed(1));
       img.setAttribute('width', b.w.toFixed(1)); img.setAttribute('height', b.h.toFixed(1));
-      wrap.setAttribute('transform', a.flip ? 'translate(160 0) scale(-1 1)' : '');
+      wrap.setAttribute('transform', mirror ? 'translate(160 0) scale(-1 1)' : '');
     }
     function step() {
       const a = sheet.anims[key];
@@ -480,9 +495,12 @@
       draw();
       timer = setTimeout(step, 1000 / a.fps);
     }
+    let facing = null;
     function update(force) {
       const k = resolveKey(pet, sheet.anims);
-      if (k === key && !force) return;
+      const left = pet.classList.contains('face-left');
+      if (k === key && !force) { if (left !== facing) { facing = left; draw(); } return; }
+      facing = left;
       if (window.BUDDY_SHEET_DEBUG) buddy.log(`sheet ${imageId}: ${key} -> ${k} (${pet.className})`);
       key = k; i = 0;
       clearTimeout(timer);

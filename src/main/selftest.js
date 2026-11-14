@@ -47,6 +47,14 @@ function runSelftest(ctx, selftestDir) {
           const shot = await capture(overlay, { x: Math.max(0, Math.round(pos.x) - 40), y: Math.max(0, Math.round(pos.y) - 20), width: 240, height: 220 });
           fs.writeFileSync(path.join(selftestDir, `state-${k}.png`), shot.toPNG());
         }
+        // The poses with marks ("?", "!", swirl) facing left too: the marks must still read the right way.
+        for (const k of ['think', 'surprised', 'drag']) {
+          const mode = k === 'drag' ? 'drag' : 'idle';
+          await overlay.webContents.executeJavaScript(`(() => { const p=document.getElementById('pet'); const keep=['skin','has-ultimate','sheet','ultimate-sheet'].filter(c=>p.classList.contains(c)); p.className=['${mode}${mode === k ? '' : ' ' + k}','face-left',...keep].join(' '); return 1; })()`);
+          await new Promise((r) => setTimeout(r, 300));
+          const shot = await capture(overlay, { x: Math.max(0, Math.round(pos.x) - 40), y: Math.max(0, Math.round(pos.y) - 20), width: 240, height: 220 });
+          fs.writeFileSync(path.join(selftestDir, `state-${k}-left.png`), shot.toPNG());
+        }
         await overlay.webContents.executeJavaScript(`BuddyBrain.onIdleSeconds(0); (() => { const p=document.getElementById('pet'); const keep=['skin','has-ultimate','sheet','ultimate-sheet'].filter(c=>p.classList.contains(c)); p.className=['idle','face-right',...keep].join(' '); return 1; })()`);
       }
       // Then a bubble and the ice-crystal trick, cropped wider.
