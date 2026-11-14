@@ -106,3 +106,28 @@ check('upgrade prompts get the name, personality and notes, and nothing from the
   for (const p of prompts) { assert.ok(p.includes('falls asleep after a while')); assert.match(p, /never fake a pose the character already has drawn/); }
   console.log('overlap checks passed');
 }
+
+// Nothing built for one character reaches another.
+{
+  const { modsFor, readQuipPacks } = require(path.join(root, 'mods.js'));
+  const d = fs.mkdtempSync(path.join(os.tmpdir(), 'toshi-own-'));
+  const mod = (slug, owner) => { fs.mkdirSync(path.join(d, 'mods', slug), { recursive: true }); fs.writeFileSync(path.join(d, 'mods', slug, 'mod.js'), '//'); if (owner) fs.writeFileSync(path.join(d, 'mods', slug, 'owner.json'), JSON.stringify({ character: owner })); };
+  mod('toshi-tea', 'toshitoshi'); mod('bambi-boom', 'bambietta'); mod('shared-sample'); mod('bad-owner'); fs.writeFileSync(path.join(d, 'mods', 'bad-owner', 'owner.json'), '{ "character": "../x" }');
+  const slugs = (id, ups = []) => modsFor(d, [], ups, id).map((m) => m.slug).sort();
+  // With no jar record at all (the project copied to a friend), the owner file decides.
+  assert.deepStrictEqual(slugs('toshitoshi'), ['bad-owner', 'shared-sample', 'toshi-tea']);
+  assert.deepStrictEqual(slugs('bambietta'), ['bad-owner', 'bambi-boom', 'shared-sample']);
+  assert.deepStrictEqual(slugs('kori-test'), ['bad-owner', 'shared-sample']);
+  // The jar's record wins over the file.
+  assert.deepStrictEqual(slugs('bambietta', [{ slugs: ['toshi-tea'], characterId: 'bambietta' }]), ['bad-owner', 'bambi-boom', 'shared-sample', 'toshi-tea']);
+  // Quip packs written by an upgrade stay with its character.
+  fs.mkdirSync(path.join(d, 'content', 'quips'), { recursive: true });
+  fs.writeFileSync(path.join(d, 'content', 'quips', 'tea.json'), JSON.stringify(['Tea time.']));
+  fs.writeFileSync(path.join(d, 'content', 'quips', 'common.json'), JSON.stringify(['Hello.']));
+  const ups = [{ characterId: 'toshitoshi', slugs: ['toshi-tea'], files: ['mods/toshi-tea/mod.js', 'content/quips/tea.json'] }];
+  const lines = (id) => readQuipPacks(d, { upgrades: ups, characterId: id }).map((q) => q.text).sort();
+  assert.deepStrictEqual(lines('toshitoshi'), ['Hello.', 'Tea time.']);
+  assert.deepStrictEqual(lines('bambietta'), ['Hello.']);
+  fs.rmSync(d, { recursive: true, force: true });
+  console.log('ownership checks passed');
+}

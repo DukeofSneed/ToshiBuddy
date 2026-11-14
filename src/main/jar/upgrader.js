@@ -275,6 +275,14 @@ class Upgrader {
     }
     const out = res.structuredOutput || {};
     const slugs = [...new Set(changed.filter((f) => f.startsWith('mods/')).map((f) => f.split('/')[1]).filter(Boolean))];
+    // Mark whose trick this is inside the mod folder, so it stays with that
+    // character even when the project is copied to another computer.
+    const ownerId = goal.characterId || this.character().id || null;
+    if (ownerId) {
+      for (const s of slugs) {
+        try { fs.writeFileSync(path.join(this.projectRoot, 'mods', s, 'owner.json'), JSON.stringify({ character: ownerId }) + '\n'); } catch (_) { /* the jar's record still applies */ }
+      }
+    }
     let hash;
     try {
       hash = await this.git.commitAll(`upgrade: ${out.title || goal.title} (${tokens} tokens, ${model})`, RUN_DIRS);
@@ -295,7 +303,7 @@ class Upgrader {
     goal.funded = goal.spent;
     const upgrade = this.ledger.recordUpgrade({
       goalId: goal.id,
-      characterId: goal.characterId || (this.character().id || null), // the mod loads only for this character
+      characterId: ownerId, // the mod and its lines load only for this character
       title: out.title || goal.title,
       summary: out.summary || goal.summary,
       slugs,

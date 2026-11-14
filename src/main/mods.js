@@ -29,13 +29,37 @@ function listMods(projectRoot, disabled = []) {
 
 // A trick built for one character loads only for that character. Mods with no
 // recorded owner (bundled samples, older tricks) load for everyone.
-function modsFor(projectRoot, disabled, upgrades, characterId) {
+// Ownership comes from the jar's record of the upgrade, or from the owner.json
+// the upgrade leaves in the mod's folder (so it survives sharing the project).
+function modOwners(projectRoot, upgrades) {
   const owner = new Map();
-  for (const u of upgrades || []) {
+  for (const m of listMods(projectRoot)) {
+    try {
+      const o = readJson(path.join(projectRoot, 'mods', m.slug, 'owner.json'));
+      if (o && typeof o.character === 'string' && ID_RE.test(o.character)) owner.set(m.slug, o.character);
+    } catch (_) { /* no owner file: a shared mod */ }
+  }
+  for (const u of (upgrades || []).slice().reverse()) {
     if (u.reverted || !u.characterId) continue;
     for (const s of u.slugs || []) owner.set(s, u.characterId);
   }
+  return owner;
+}
+function modsFor(projectRoot, disabled, upgrades, characterId) {
+  const owner = modOwners(projectRoot, upgrades);
   return listMods(projectRoot, disabled).filter((m) => !owner.has(m.slug) || owner.get(m.slug) === characterId);
+}
+// Quip packs an upgrade wrote under content/quips/ belong to that upgrade's character.
+function quipPackOwners(upgrades) {
+  const owner = new Map();
+  for (const u of (upgrades || []).slice().reverse()) {
+    if (u.reverted || !u.characterId) continue;
+    for (const f of u.files || []) {
+      const m = /^content\/quips\/([^/]+\.json)$/.exec(String(f).replace(/\\/g, '/'));
+      if (m) owner.set(m[1], u.characterId);
+    }
+  }
+  return owner;
 }
 
 // A quip pack is an array, or { quips: [...] }. Entries are strings or
@@ -56,11 +80,12 @@ function parseQuipList(data, pack) {
 }
 
 // content/quips/*.json: quip packs added by upgrades. They apply to every character.
-function readQuipPacks(projectRoot) {
+function readQuipPacks(projectRoot, { upgrades = [], characterId = null } = {}) {
+  const owner = quipPackOwners(upgrades);
   const dir = path.join(projectRoot, 'content', 'quips');
   const quips = [];
   let files = [];
-  try { files = fs.readdirSync(dir).filter((f) => f.endsWith('.json')); } catch (_) { return quips; }
+  try { files = fs.readdirSync(dir).filter((f) => f.endsWith('.json') && (!owner.has(f) || owner.get(f) === characterId)); } catch (_) { return quips; }
   for (const f of files) {
     try { quips.push(...parseQuipList(readJson(path.join(dir, f)), f)); } catch (e) { console.error(`quips: bad pack ${f}: ${e.message}`); }
   }
@@ -153,4 +178,4 @@ function readCharacterDialogue(projectRoot, id) {
   }
 }
 
-module.exports = { listMods, modsFor, readQuipPacks, readCharacterDialogue, readCharacterConfig, parseQuipList, listCharacters, invalidateCharacters, charactersRoot, readJson, ID_RE, IMG_RE };
+module.exports = { listMods, modsFor, modOwners, quipPackOwners, readQuipPacks, readCharacterDialogue, readCharacterConfig, parseQuipList, listCharacters, invalidateCharacters, charactersRoot, readJson, ID_RE, IMG_RE };

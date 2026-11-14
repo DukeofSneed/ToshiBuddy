@@ -66,7 +66,7 @@ function start() {
   const activePacks = () => {
     const d = readCharacterDialogue(PROJECT_ROOT, activeCharacterId());
     // "ownQuipsOnly": true in character.json: only the character's own file.
-    return [...(d ? d.quips : []), ...(ownQuipsOnly() ? [] : readQuipPacks(PROJECT_ROOT))];
+    return [...(d ? d.quips : []), ...(ownQuipsOnly() ? [] : readQuipPacks(PROJECT_ROOT, { upgrades: ledger.data.upgrades, characterId: activeCharacterId() }))];
   };
   const quipsForPet = () => quipStore().merged(activePacks());
 
@@ -130,7 +130,7 @@ function start() {
   }
   function jarState() {
     return {
-      ledger: { ...ledger.snapshot(), goals: ledger.data.goals.filter(isActiveGoal) },
+      ledger: { ...ledger.snapshot(), goals: ledger.data.goals.filter(isActiveGoal), upgrades: ledger.data.upgrades.filter(isActiveGoal).slice(0, 50) },
       ideas: ideasState(),
       guard: guard.status(),
       settings: publicSettings(),
@@ -162,6 +162,21 @@ function start() {
     } catch (e) { log(`catalog seed failed: ${e.message}`); }
     ledger.data.seeded = true;
     ledger.data.perCharacter = true;
+    ledger.save();
+  }
+  // The fixed catalog was written for the test character: none of it belongs
+  // under anyone else, even with a token in it (the token goes back to the jar).
+  if (!ledger.data.catalogMoved) {
+    for (const g of ledger.data.goals) {
+      if (g.source !== 'catalog' || g.characterId === 'kori-test' || ['building', 'done'].includes(g.status)) continue;
+      const back = Math.max(0, (g.funded || 0) - (g.spent || 0));
+      ledger.data.balance += back;
+      g.funded = g.spent || 0;
+      g.waiting = false;
+      if (!g.spent) g.status = 'open';
+      g.characterId = 'kori-test';
+    }
+    ledger.data.catalogMoved = true;
     ledger.save();
   }
   // Goals and tricks used to be shared by every character. Once: the fixed
