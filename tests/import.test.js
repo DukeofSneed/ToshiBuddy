@@ -66,6 +66,15 @@ app.whenReady().then(() => {
     imp.saveCharacter(ROOT, id, { personality: 'Calm.', sheet: { scale: 1.5, animations: { idle: { frames: '0:0-3', fps: 4 }, walk: { frames: '1:0-3', flip: true }, bogus: { frames: '0:0' } } } });
     const cfg2 = JSON.parse(fs.readFileSync(path.join(dir, 'character.json'), 'utf8'));
     ok(cfg2.personality === 'Calm.' && cfg2.sheet.scale === 1.5 && cfg2.sheet.animations.walk.flip === true && !cfg2.sheet.animations.bogus, 'mapper save cleaned');
+    // Mirror modes: figure only, everything, none; never both at once.
+    const mir = imp.saveCharacter(ROOT, id, { sheet: { animations: { idle: { frames: '0:0' }, think: { frames: '0:1', flipBody: true }, wave: { frames: '0:2', flip: true }, surprised: { frames: '0:3', flip: true, flipBody: true } } } }).sheet.animations;
+    ok(mir.think.flipBody === true && !mir.think.flip, 'figure-only mirror saved');
+    ok(mir.wave.flip === true && !mir.wave.flipBody, 'full mirror saved');
+    ok(mir.surprised.flipBody === true && !mir.surprised.flip, 'both mirrors collapse to one');
+    ok(!mir.idle.flip && !mir.idle.flipBody, 'no mirror saved as none');
+    const un = imp.saveCharacter(ROOT, id, { sheet: { animations: { idle: { frames: '0:0' }, think: { frames: '0:1' } } } }).sheet.animations;
+    ok(!un.think.flip && !un.think.flipBody, 'mirror can be turned off');
+    imp.saveCharacter(ROOT, id, { sheet: { animations: { idle: { frames: '0:0-3', fps: 4 }, walk: { frames: '1:0-3', flip: true } } } });
     throws(() => imp.saveCharacter(ROOT, id, { sheet: { animations: { idle: { frames: '0:0; rm -rf' } } } }), /frames/, 'bad frames');
     throws(() => imp.saveCharacter(ROOT, '..\\evil', {}), /Unknown/, 'path traversal id');
 
@@ -96,5 +105,5 @@ app.whenReady().then(() => {
   console.log(`${pass} passed, ${fail} failed`);
   fs.rmSync(work, { recursive: true, force: true });
   process.exitCode = fail ? 1 : 0;
-  app.quit();
+  app.exit(fail ? 1 : 0); // app.quit() would report success even after a failure
 });

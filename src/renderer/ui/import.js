@@ -155,6 +155,7 @@
     }
     if (d.error) { note('ed-msg', d.error, true); return; }
     current = d;
+    edited = {};
     note('ed-msg', d.builtin ? 'The built-in test character is drawn in code, so it has no sheet to map.' : '');
     $('ed-body').classList.toggle('hidden', !!d.builtin);
     $('ed-personality').value = d.personality || '';
@@ -179,11 +180,14 @@
         <td>${k}<small>${esc(HELP[k] || '')}</small></td>
         <td><input type="text" class="f" value="${esc(frames)}" placeholder="${k === 'idle' ? '0:0-3' : ''}" /></td>
         <td><input type="number" class="fps" min="0.2" max="30" step="0.5" value="${a.fps != null ? a.fps : ''}" placeholder="6" /></td>
-        <td><input type="checkbox" class="flip" ${a.flip ? 'checked' : ''} /></td>
+        <td><select class="flip">${[['', 'No'], ['body', 'Figure'], ['all', 'Everything']].map(([v, l]) => `<option value="${v}" ${v === mirrorOf(a) ? 'selected' : ''}>${l}</option>`).join('')}</select></td>
         <td><input type="checkbox" class="loop" ${a.loop === false ? '' : 'checked'} /></td>
       </tr>`;
     }).join('');
   }
+
+  // One mirror mode per animation: the figure only (marks stay readable) or everything.
+  const mirrorOf = (a) => (a.flipBody ? 'body' : a.flip ? 'all' : '');
 
   function collect() {
     const existing = current[kind].animations || {};
@@ -196,7 +200,9 @@
       delete a.row;
       const fps = Number(tr.querySelector('.fps').value);
       if (fps > 0) a.fps = fps; else delete a.fps;
-      if (tr.querySelector('.flip').checked) a.flip = true; else delete a.flip;
+      const mirror = tr.querySelector('.flip').value;
+      delete a.flip; delete a.flipBody;
+      if (mirror === 'body') a.flipBody = true; else if (mirror === 'all') a.flip = true;
       if (!tr.querySelector('.loop').checked) a.loop = false; else delete a.loop;
       anims[k] = a;
     });
@@ -211,7 +217,10 @@
   }
 
   $('ed-char').addEventListener('change', (e) => loadDetails(e.target.value));
-  $('ed-kind').addEventListener('change', (e) => { kind = e.target.value; renderSheet(); });
+  // Switching sheets keeps what was typed on the other one until Save.
+  let edited = {};
+  const stash = () => { if (current && current[kind]) { current[kind].animations = collect(); current[kind].scale = Number($('ed-scale').value) || 1; edited[kind] = true; } };
+  $('ed-kind').addEventListener('change', (e) => { stash(); kind = e.target.value; renderSheet(); });
   $('ed-use').addEventListener('click', async () => {
     const r = await chars.switchTo($('ed-char').value);
     if (r.error) { note('ed-msg', r.error, true); return; }
@@ -226,7 +235,9 @@
   $('ed-save').addEventListener('click', async () => {
     if (!current) return;
     const patch = { personality: $('ed-personality').value };
-    patch[kind] = { animations: collect(), scale: Number($('ed-scale').value) || 1 };
+    stash();
+    for (const k of Object.keys(edited)) patch[k] = { animations: current[k].animations, scale: current[k].scale };
+    edited = {};
     const r = await chars.save(current.id, patch);
     if (r.error) { note('ed-msg', r.error, true); return; }
     note('ed-msg', 'Saved. The pet reloads with the new animations.');

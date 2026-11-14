@@ -129,8 +129,9 @@ function cleanAnimations(anims) {
     if (frames) a.frames = frames;
     if (Number.isFinite(Number(d.row))) a.row = Math.max(0, Math.min(99, Math.floor(Number(d.row))));
     if (Number.isFinite(Number(d.fps)) && Number(d.fps) > 0) a.fps = Math.max(0.2, Math.min(30, Number(d.fps)));
-    if (d.flip) a.flip = true;
+    // One mirror mode only: both together would cancel out on the figure.
     if (d.flipBody) a.flipBody = true;
+    else if (d.flip) a.flip = true;
     if (d.loop === false) a.loop = false;
     if (Number.isFinite(Number(d.loopFrom)) && Number(d.loopFrom) > 0) a.loopFrom = Math.floor(Number(d.loopFrom));
     if (Number.isFinite(Number(d.speed)) && Number(d.speed) > 0) a.speed = Math.min(400, Number(d.speed));

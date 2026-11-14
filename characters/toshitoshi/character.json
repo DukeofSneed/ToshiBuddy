@@ -59,7 +59,6 @@
       },
       "surprised": {
         "frames": "3:3",
-        "flip": true,
         "flipBody": true,
         "loop": false
       },
