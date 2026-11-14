@@ -6,6 +6,7 @@ const { createOverlay, createJarWindow, createCustomizeWindow, createImportWindo
 const characterImport = require('./character-import');
 const characterCheck = require('./character-check');
 const characterProfile = require('./jar/profile');
+const abilities = require('./abilities');
 const { QuipStore } = require('./quip-store');
 const { Settings } = require('./settings');
 const { Ledger } = require('./jar/ledger');
@@ -307,7 +308,15 @@ function start() {
     const who = { id: activeCharacterId(), name: charName(), isSkin: !isBuiltinActive(), personality };
     // Notes from the search-only profile run (src/main/jar/profile.js), if they
     // were made for this name and personality.
-    return { ...who, profile: who.isSkin ? characterProfile.profileText(userData, who.id, who) : '' };
+    // What he already does (app behaviors, names of his mapped poses, built
+    // tricks, listed ideas), so upgrades add to it instead of repeating it.
+    const mine = (x) => !x.characterId || x.characterId === who.id;
+    const has = abilities.describe({
+      config: c ? c.config : null, builtin: !who.isSkin,
+      built: ledger.data.upgrades.filter((u) => !u.reverted && mine(u)).map((u) => u.title),
+      planned: ledger.data.goals.filter((g) => mine(g) && g.status !== 'done').map((g) => g.title),
+    });
+    return { ...who, abilities: has, profile: who.isSkin ? characterProfile.profileText(userData, who.id, who) : '' };
   };
   const publicSettings = () => ({ ...settings.all(), characterName: charName() });
   const ownQuipsOnly = () => { const c = activeCharacter(); return !!(c && c.config && c.config.ownQuipsOnly); };
@@ -726,7 +735,7 @@ function start() {
     let r;
     try {
       r = await characterProfile.research({
-        userData, id, name: info.name, personality: info.personality, log,
+        userData, id, name: info.name, personality: info.personality, abilities: info.abilities, log,
         onRateLimit: (rl) => guard.observe(rl),
       });
     } catch (e) { r = { ok: false, error: e.message }; } finally { ideasBusy = false; }

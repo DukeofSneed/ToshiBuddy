@@ -4,6 +4,7 @@
 const fs = require('fs');
 const path = require('path');
 const { runClaude } = require('./claude');
+const { RULE: ABILITY_RULE } = require('../abilities');
 
 const SIZE_RANGE = {
   S: [8000, 40000],
@@ -37,7 +38,7 @@ function listModSlugs(projectRoot) {
 }
 
 function buildPrompt(projectRoot, request, ledger, character = { name: 'Kori', isSkin: false }) {
-  const { name, isSkin, personality, profile } = character;
+  const { name, isSkin, personality, profile, abilities } = character;
   const api = fs.readFileSync(path.join(projectRoot, 'docs', 'MOD_API.md'), 'utf8');
   const mods = listModSlugs(projectRoot);
   const done = ledger.data.upgrades.filter((u) => !u.reverted).map((u) => `- ${u.title} (${u.tokens} tokens)`).join('\n') || '- none yet';
@@ -57,6 +58,7 @@ function buildPrompt(projectRoot, request, ledger, character = { name: 'Kori', i
     '## Upgrades already built',
     done,
     '',
+    abilities ? `## What ${name} already does\n${abilities}\n${ABILITY_RULE} If the suggestion is mostly something on this list, set feasible to false and say in risk_note which existing behavior it repeats, or narrow the title and summary to the part that is new.\n` : '',
     '## The suggestion',
     request,
   ].join('\n');

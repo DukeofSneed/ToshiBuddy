@@ -32,6 +32,9 @@ upgrade runs that write mods. Kori (`characters/kori-test`, drawn in
   upgrade-run prompts; only the name, the `personality` text from character.json, and
   the stored profile notes go to estimates and upgrade runs (see `characterInfo()` in
   `src/main/main.js`).
+- Prompts also get a list of what the character already does (`src/main/abilities.js`:
+  app behaviors, the names of its mapped animations, built tricks, listed ideas) with a
+  rule not to repeat or imitate them. Animation names only; never what a pose looks like.
 - Profile notes and upgrade ideas come from one search-only run per character
   (`src/main/jar/profile.js`): its only tool is WebSearch, it runs in an empty temp
   folder, it is told to search for the name only, and its answer is cleaned and capped

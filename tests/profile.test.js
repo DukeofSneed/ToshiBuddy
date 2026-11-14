@@ -88,3 +88,21 @@ check('upgrade prompts get the name, personality and notes, and nothing from the
   console.log(`${passed} passed, ${process.exitCode ? 'some' : 0} failed`);
   fs.rmSync(dir, { recursive: true, force: true });
 })();
+
+// Upgrades must not overlap with what the character already does.
+{
+  const abilities = require(path.join(root, 'abilities.js'));
+  const cfg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'characters', 'toshitoshi', 'character.json'), 'utf8'));
+  const has = abilities.describe({ config: cfg, built: ['Tea break'], planned: ['Nap cushion'] });
+  assert.match(has, /falls asleep after a while/);
+  assert.match(has, /sleeping \(with its own drawn sleep marks\)/);
+  assert.match(has, /Tricks already built: Tea break/);
+  assert.match(has, /Ideas already on the list: Nap cushion/);
+  assert.ok(!/leaning on the screen edge/.test(has), 'poses that are not mapped are not claimed');
+  assert.ok(!/3:6|sheet\.png|frames/.test(has), 'no frame numbers or file names');
+  const who2 = { id: 'x', name: 'X', isSkin: true, personality: 'Calm.', abilities: has };
+  const up = new Upgrader({ projectRoot: dir, ledger: new Ledger(fs.mkdtempSync(path.join(os.tmpdir(), 'toshi-ab-'))), guard: {}, settings: { get: () => undefined }, git: {}, character: () => who2 });
+  const prompts = [profile.buildPrompt(who2), up.buildPrompt({ title: 'T', summary: 'S', goalTokens: 1 }, {})];
+  for (const p of prompts) { assert.ok(p.includes('falls asleep after a while')); assert.match(p, /never fake a pose the character already has drawn/); }
+  console.log('overlap checks passed');
+}
