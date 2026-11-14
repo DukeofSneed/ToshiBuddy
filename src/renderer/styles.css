@@ -352,3 +352,10 @@ html, body {
   animation: spark var(--dur) ease-out forwards;
 }
 @keyframes spark { from { transform: translate(0, 0); opacity: 1; } to { transform: translate(var(--dx), calc(var(--dy) + 30px)); opacity: 0; } }
+
+/* Marks ("?", "!", swirls) are drawn on their own layer so they are never
+   mirrored; each layer follows its figure's visibility and desk offset. */
+#skin-ultimate-marks { display: none; }
+#pet.ultimate.has-ultimate #skin-img-marks { display: none; }
+#pet.ultimate.has-ultimate #skin-ultimate-marks { display: inline; }
+#pet.skin.desk #skin-img-marks, #pet.skin.desk #skin-ultimate-marks { transform: translateY(-14px); transition: transform 400ms ease; }

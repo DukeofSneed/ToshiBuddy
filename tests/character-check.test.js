@@ -33,14 +33,13 @@ const toshi = pack('toshitoshi');
 const templates = [{ id: 'toshitoshi', name: 'ToshiToshi', rows: toshi.sheet.rows, animations: toshi.sheet.animations }];
 
 check('problems are reported', () => {
-  const cfg = { personality: 'x', sheet: { animations: { walk: { frames: '9:0-3' }, talk: { frames: '0:0-20' }, wave: { frames: '0:0', flip: true, flipBody: true }, sleep: { frames: '0:0', fps: 99 } } } };
+  const cfg = { personality: 'x', sheet: { animations: { walk: { frames: '9:0-3' }, talk: { frames: '0:0-20' }, sleep: { frames: '0:0', fps: 99 } } } };
   const r = checkCharacter(cfg, { rows: { sheet: [4, 4] }, quipCount: 0 });
   const text = r.items.map((i) => `${i.level} ${i.text}`).join('\n');
   assert.strictEqual(r.ok, false);
   assert.match(text, /error idle is not mapped/);
   assert.match(text, /error walk: none of its frames exist/);
   assert.match(text, /warn talk: 17 of 21 frames don't exist/);
-  assert.match(text, /warn wave: both mirror modes/);
   assert.match(text, /warn sleep: fps 99/);
   assert.match(text, /warn no lines/);
 });

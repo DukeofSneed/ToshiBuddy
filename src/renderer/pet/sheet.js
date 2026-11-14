@@ -123,6 +123,70 @@
 
   const median = (arr) => { const a = arr.slice().sort((x, y) => x - y); return a.length ? a[a.length >> 1] : 0; };
 
+  // Which detached pieces of a pose are marks ("?", "!", a swirl, "z z z") and
+  // not part of the figure: small, up by the head, and beside or above the figure
+  // (or, inside its outline box, clear of the body by a few pixels). They are
+  // never mirrored. Anything else detached (a sword arc, dust, a hair fragment)
+  // stays with the figure and mirrors with it. Pieces the user moved from another
+  // pose (moveMarks) always count.
+  //   fr: { main, bits }, label: per-pixel component ids, w: image width,
+  //   medH: typical figure height, moved: Set of component ids.
+  function findMarks(fr, label, w, medH, moved) {
+    const m = fr.main;
+    const midY = (m.miny + m.maxy) / 2;
+    const GAP = 3;
+    const clearOfBody = (c) => {
+      for (let y = c.miny; y <= c.maxy; y++) {
+        for (let x = c.minx; x <= c.maxx; x++) {
+          if (label[y * w + x] !== c.id) continue;
+          for (let dy = -GAP; dy <= GAP; dy++) {
+            for (let dx = -GAP; dx <= GAP; dx++) {
+              const xx = x + dx, q = (y + dy) * w + xx;
+              if (xx < 0 || xx >= w || q < 0 || q >= label.length) continue;
+              if (label[q] === m.id) return false;
+            }
+          }
+        }
+      }
+      return true;
+    };
+    return (fr.bits || []).filter((c) => {
+      if (moved && moved.has(c.id)) return true;
+      const big = Math.max(c.maxx - c.minx + 1, c.maxy - c.miny + 1);
+      if (big > medH * 0.25 || c.area < 30) return false;
+      const cx = (c.minx + c.maxx) / 2, cy = (c.miny + c.maxy) / 2;
+      if (cy > midY) return false;
+      // Beside or above the figure: a mark. Inside the figure's outline box
+      // (between hair spikes, say) it must also be clear of the body, or it is
+      // just a loose fragment of the drawing.
+      if (cx < m.minx || cx > m.maxx || cy < m.miny) return true;
+      // Inside the box: a piece of real size (a swirl tucked beside the hair) is
+      // a mark; a tiny one only if it stands clear of the body.
+      return c.area >= 80 || clearOfBody(c);
+    });
+  }
+
+  // Pieces that belong together (the hook and dot of "?", the strokes of a
+  // swirl) form one mark, so it moves as one piece and keeps its shape.
+  function groupMarks(pieces, gap) {
+    const groups = pieces.map((c) => ({ ids: [c.id], minx: c.minx, miny: c.miny, maxx: c.maxx, maxy: c.maxy }));
+    const apart = (a, b) => Math.max(a.minx - b.maxx, b.minx - a.maxx, a.miny - b.maxy, b.miny - a.maxy, 0);
+    for (let merged = true; merged;) {
+      merged = false;
+      for (let i = 0; i < groups.length && !merged; i++) {
+        for (let j = i + 1; j < groups.length; j++) {
+          if (apart(groups[i], groups[j]) > gap) continue;
+          const a = groups[i], b = groups[j];
+          groups[i] = { ids: [...a.ids, ...b.ids], minx: Math.min(a.minx, b.minx), miny: Math.min(a.miny, b.miny), maxx: Math.max(a.maxx, b.maxx), maxy: Math.max(a.maxy, b.maxy) };
+          groups.splice(j, 1);
+          merged = true;
+          break;
+        }
+      }
+    }
+    return groups;
+  }
+
   // moveMarks: [["3:4", "3:3"], ...] moves the small detached bits ("?", "!")
   // that sit beside pose 3:4 over to pose 3:3, for sheets where a mark was
   // drawn closer to the neighboring pose than to its own.
@@ -180,6 +244,7 @@
       f.maxx = Math.max(f.maxx, c.maxx); f.maxy = Math.max(f.maxy, c.maxy);
     }
     // Row baseline: where the feet are (median bottom of the main figures).
+    const moved = new Set(); // pieces the user moved to another pose: always marks
     const at = (rc) => { const [r, c] = String(rc).split(':').map(Number); return frames.findIndex((fr) => fr.row === r && fr.col === c); };
     const refit = (fr) => {
       const all = [fr.main, ...(fr.bits || [])];
@@ -195,10 +260,21 @@
       if (!moving.length) continue;
       src.bits = src.bits.filter((c) => !moving.includes(c));
       dst.bits = [...(dst.bits || []), ...moving];
-      for (const c of moving) frameOf[c.id] = to;
+      for (const c of moving) { frameOf[c.id] = to; moved.add(c.id); }
       refit(src); refit(dst);
     }
     const baselines = rows.map((r) => median(r.items.map((c) => c.maxy)));
+    // Marks ("?", "!", a swirl) are cut out of the pose: each pose keeps a body
+    // box (figure only) and a list of mark clusters drawn on their own layer.
+    for (const fr of frames) {
+      fr.marks = groupMarks(findMarks(fr, label, w, medH, moved), medH * 0.08);
+      const ids = new Set(fr.marks.flatMap((k) => k.ids));
+      const body = [fr.main, ...(fr.bits || []).filter((c) => !ids.has(c.id))];
+      fr.body = {
+        minx: Math.min(...body.map((c) => c.minx)), miny: Math.min(...body.map((c) => c.miny)),
+        maxx: Math.max(...body.map((c) => c.maxx)), maxy: Math.max(...body.map((c) => c.maxy)),
+      };
+    }
     // A pair the user already sorted out with moveMarks needs no hint.
     const settled = (n) => (Array.isArray(moveMarks) ? moveMarks : []).some((p) => (String(p[0]) === n.from && String(p[1]) === n.near) || (String(p[0]) === n.near && String(p[1]) === n.from));
     const seen = new Set();
@@ -206,46 +282,29 @@
     return { label, frameOf, frames, rows: rows.map((r) => r.items.length), baselines, near };
   }
 
+  // One image of the figure per pose, and one small image per mark beside it.
   function cutFrames(px, w, det) {
-    return det.frames.map((f, i) => {
-      const fw = f.maxx - f.minx + 1, fh = f.maxy - f.miny + 1;
+    const cut = (box, keep) => {
+      const bw = box.maxx - box.minx + 1, bh = box.maxy - box.miny + 1;
       const c = document.createElement('canvas');
-      c.width = fw; c.height = fh;
+      c.width = bw; c.height = bh;
       const g = c.getContext('2d');
-      const out = g.createImageData(fw, fh);
-      for (let y = 0; y < fh; y++) {
-        for (let x = 0; x < fw; x++) {
-          const p = (f.miny + y) * w + (f.minx + x);
+      const out = g.createImageData(bw, bh);
+      for (let y = 0; y < bh; y++) {
+        for (let x = 0; x < bw; x++) {
+          const p = (box.miny + y) * w + (box.minx + x);
           const l = det.label[p];
-          if (l < 0 || det.frameOf[l] !== i) continue;
-          const o = (y * fw + x) * 4;
+          if (l < 0 || !keep(l)) continue;
+          const o = (y * bw + x) * 4;
           out.data[o] = px[p * 4]; out.data[o + 1] = px[p * 4 + 1]; out.data[o + 2] = px[p * 4 + 2]; out.data[o + 3] = px[p * 4 + 3];
         }
       }
       g.putImageData(out, 0, 0);
-      // For flipBody: which pixels belong to the figure itself (mirrored) and
-      // which to marks beside it ("?", "!", swirls), which keep reading the right way.
-      const bits = (f.bits || []).map((c) => ({ minx: c.minx - f.minx, maxx: c.maxx - f.minx, id: c.id }));
-      const mirrored = () => {
-        const mc = document.createElement('canvas');
-        mc.width = fw; mc.height = fh;
-        const mg = mc.getContext('2d');
-        const o2 = mg.createImageData(fw, fh);
-        for (let y = 0; y < fh; y++) {
-          for (let x = 0; x < fw; x++) {
-            const p = (f.miny + y) * w + (f.minx + x);
-            const l = det.label[p];
-            if (l < 0 || det.frameOf[l] !== i) continue;
-            const bit = bits.find((b) => b.id === l);
-            // Body pixels mirror; a mark moves to the mirrored spot but isn't flipped.
-            const nx = bit ? x + (fw - 1 - bit.maxx) - bit.minx : fw - 1 - x;
-            const o = (y * fw + nx) * 4, s = (y * fw + x) * 4;
-            o2.data[o] = out.data[s]; o2.data[o + 1] = out.data[s + 1]; o2.data[o + 2] = out.data[s + 2]; o2.data[o + 3] = out.data[s + 3];
-          }
-        }
-        mg.putImageData(o2, 0, 0);
-        return mc.toDataURL('image/png');
-      };
+      return { url: c.toDataURL('image/png'), w: bw, h: bh };
+    };
+    return det.frames.map((f, i) => {
+      const markIds = new Set(f.marks.flatMap((k) => k.ids));
+      const body = cut(f.body, (l) => det.frameOf[l] === i && !markIds.has(l));
       const base = det.baselines[f.row];
       // Horizontal anchor: the center of the head (top 30% of the figure), not the
       // bounding box. A swinging leg or an outstretched sword widens the box and
@@ -259,16 +318,16 @@
         }
       }
       const cx = Number.isFinite(hmin) ? (hmin + hmax) / 2 : (m.minx + m.maxx) / 2;
-      let flipUrl = null;
-      // Marks beside the figure ("?", "!", a swirl): these must read the right
-      // way whichever way the pet faces.
-      const marks = (f.bits || []).some((b) => { const bx = (b.minx + b.maxx) / 2; return bx < f.main.minx || bx > f.main.maxx; });
       return {
-        get flipUrl() { return flipUrl || (flipUrl = mirrored()); },
-        marks,
-        row: f.row, col: f.col, url: c.toDataURL('image/png'), w: fw, h: fh,
-        ox: cx - f.minx,   // head center, from the frame's left edge
-        top: base - f.miny, // baseline to the frame's top
+        row: f.row, col: f.col, url: body.url, w: body.w, h: body.h,
+        ox: cx - f.body.minx,   // head center, from the body image's left edge
+        top: base - f.body.miny, // baseline to the body image's top
+        // Each mark: its own image, placed by its center relative to the head
+        // center (dx) and its top above the baseline. Never mirrored when drawn.
+        marks: f.marks.map((k) => {
+          const im = cut(k, (l) => k.ids.includes(l));
+          return { url: im.url, w: im.w, h: im.h, dx: (k.minx + k.maxx + 1) / 2 - cx, top: base - k.miny };
+        }),
       };
     });
   }
@@ -292,6 +351,11 @@
       const t = `${frames[i].row}:${frames[i].col}`;
       g.fillStyle = '#ff3b7a'; g.fillRect(f.minx * s, f.miny * s, g.measureText(t).width + 8, 19);
       g.fillStyle = '#fff'; g.fillText(t, f.minx * s + 4, f.miny * s + 15);
+      // Marks (drawn on their own layer, never mirrored) get a teal outline.
+      for (const k of f.marks || []) {
+        g.strokeStyle = '#12b5a6'; g.lineWidth = 1.5;
+        g.strokeRect((k.minx - 2) * s, (k.miny - 2) * s, (k.maxx - k.minx + 5) * s, (k.maxy - k.miny + 5) * s);
+      }
     });
     det.baselines.forEach((b) => { g.strokeStyle = 'rgba(40,120,255,0.5)'; g.setLineDash([6, 4]); g.beginPath(); g.moveTo(0, b * s); g.lineTo(c.width, b * s); g.stroke(); });
     return c.toDataURL('image/png');
@@ -388,54 +452,31 @@
       anims[key] = {
         frames: list,
         fps: Math.max(0.2, Math.min(30, Number(d.fps) || 6)),
-        flip: !!d.flip,
-        flipBody: !!d.flipBody, // mirror the figure but not the marks beside it
-        marksTurn: !!d.marksTurn, // marks turn with the body when facing left (default: they stay readable)
+        // Mirror the pose (the figure faces the other way). Older packs wrote this
+        // as "flip" or "flipBody"; both mean the same now. Marks are never mirrored.
+        mirror: !!(d.flip || d.flipBody),
         loop: d.loop !== false,
         loopFrom: Math.max(0, Math.min(list.length - 1, Number(d.loopFrom) || 0)),
         speed: Number(d.speed) > 0 ? Math.min(400, Number(d.speed)) : null, // walk: pixels per second
       };
     }
-    if (!anims.idle) anims.idle = { frames: [0], fps: 1, flip: false, loop: true, loopFrom: 0 };
+    if (!anims.idle) anims.idle = { frames: [0], fps: 1, mirror: false, loop: true, loopFrom: 0 };
     return anims;
   }
 
   async function prepare(url, cfg, opts = {}) {
     cfg = cfg || {};
     const key = url.split('?')[0];
-    const sig = JSON.stringify(['marks-v2', url, cfg.keyMode, cfg.keyTolerance, cfg.keyMax, cfg.moveMarks]);
-    // Frames that need the figure-only mirror: flipBody poses, and any pose with
-    // marks (used when the pet faces left, so the marks still read correctly).
-    const flipBodyFrames = (sheet) => [...new Set([
-      ...Object.values(sheet.anims).filter((a) => a.flipBody).flatMap((a) => a.frames),
-      ...sheet.frames.map((fr, i) => (fr.marks ? i : -1)).filter((i) => i >= 0),
-    ])];
+    const sig = JSON.stringify(['layers-v1', url, cfg.keyMode, cfg.keyTolerance, cfg.keyMax, cfg.moveMarks]);
 
     let sliced = null;
     let fromCache = false;
     const hit = await cacheGet(key);
     if (hit && hit.sig === sig) { sliced = hit.data; fromCache = true; }
-    if (!sliced) sliced = await slice(url, cfg);
+    if (!sliced) { sliced = await slice(url, cfg); cachePut(key, { sig, data: sliced }); }
 
     const sheet = { frames: sliced.frames, rows: sliced.rows, cfg };
     sheet.anims = buildAnims(cfg, sliced.rows, sheet);
-    // A cached copy lacks body-only mirrors for frames newly set to flipBody: slice again.
-    if (fromCache && flipBodyFrames(sheet).some((i) => !sheet.frames[i].flipUrl)) {
-      sliced = await slice(url, cfg);
-      fromCache = false;
-      sheet.frames = sliced.frames;
-      sheet.anims = buildAnims(cfg, sliced.rows, sheet);
-    }
-    if (!fromCache) {
-      // Store plain data: body-only mirrors only for the frames that need them.
-      const need = new Set(flipBodyFrames(sheet));
-      const frames = sliced.frames.map((fr, i) => {
-        const o = { row: fr.row, col: fr.col, url: fr.url, w: fr.w, h: fr.h, ox: fr.ox, top: fr.top, marks: !!fr.marks };
-        if (need.has(i)) o.flipUrl = fr.flipUrl;
-        return o;
-      });
-      cachePut(key, { sig, data: { ...sliced, frames } });
-    }
 
     // Size: the first idle frame is `scale` x 188 pet units tall.
     const f0 = sheet.frames[sheet.anims.idle.frames[0]];
@@ -484,21 +525,42 @@
     const wrap = document.getElementById(`${imageId}-wrap`);
     if (!img || !wrap) return null;
     let key = null, i = 0, timer = null;
+    // Marks live in their own group right after the figure's wrapper.
+    const NS = 'http://www.w3.org/2000/svg';
+    let marksG = document.getElementById(`${imageId}-marks`);
+    if (!marksG) {
+      marksG = document.createElementNS(NS, 'g');
+      marksG.setAttribute('id', `${imageId}-marks`);
+      wrap.parentNode.insertBefore(marksG, wrap.nextSibling);
+    }
     function draw() {
       const a = sheet.anims[key];
       const f = sheet.frames[a.frames[i]];
-      // Facing left mirrors the whole pet (CSS on #flip), which would turn a
-      // "?" or swirl backwards. For a frame with marks, mirror once more here
-      // and swap to the other figure-only mirror: the body still faces left and
-      // the marks read the right way.
-      const fix = !!(f.marks && f.flipUrl && !a.marksTurn && pet.classList.contains('face-left'));
-      const fb = !!a.flipBody !== fix;
-      const mirror = !!a.flip !== fix;
-      const b = frameBox(sheet, fb ? { ...f, ox: f.w - f.ox } : f);
-      img.setAttribute('href', fb && f.flipUrl ? f.flipUrl : f.url);
+      const u = sheet.u;
+      const b = frameBox(sheet, f);
+      img.setAttribute('href', f.url);
       img.setAttribute('x', b.x.toFixed(1)); img.setAttribute('y', b.y.toFixed(1));
       img.setAttribute('width', b.w.toFixed(1)); img.setAttribute('height', b.h.toFixed(1));
-      wrap.setAttribute('transform', mirror ? 'translate(160 0) scale(-1 1)' : '');
+      // The figure: mirrored around the pet's middle when the animation says so.
+      wrap.setAttribute('transform', a.mirror ? 'translate(160 0) scale(-1 1)' : '');
+      // The marks: they go to the other side with a mirrored figure, but the
+      // mark itself is never mirrored. Facing left mirrors the whole pet (CSS on
+      // #flip), so each mark is mirrored once more here to cancel that out.
+      const left = pet.classList.contains('face-left');
+      while (marksG.firstChild) marksG.removeChild(marksG.firstChild);
+      for (const mk of f.marks || []) {
+        const head = 80 + sheet.offX;
+        const cx = a.mirror ? 160 - (head + mk.dx * u) : head + mk.dx * u;
+        const mw = mk.w * u, mh = mk.h * u;
+        const el = document.createElementNS(NS, 'image');
+        el.setAttribute('href', mk.url);
+        el.setAttribute('x', (cx - mw / 2).toFixed(1));
+        el.setAttribute('y', (188 + sheet.offY - mk.top * u).toFixed(1));
+        el.setAttribute('width', mw.toFixed(1)); el.setAttribute('height', mh.toFixed(1));
+        if (left) el.setAttribute('transform', `translate(${(2 * cx).toFixed(1)} 0) scale(-1 1)`);
+        el.dataset.mark = '1';
+        marksG.appendChild(el);
+      }
     }
     function step() {
       const a = sheet.anims[key];
@@ -534,5 +596,5 @@
     return out;
   }
 
-  window.BuddySheet = { prepare, asImage, start, parseFrames };
+  window.BuddySheet = { prepare, asImage, start, parseFrames, findMarks, groupMarks };
 })();

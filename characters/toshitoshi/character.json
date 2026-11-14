@@ -54,13 +54,13 @@
       },
       "think": {
         "frames": "3:2",
-        "flipBody": true,
-        "loop": false
+        "loop": false,
+        "flipBody": true
       },
       "surprised": {
         "frames": "3:3",
-        "flipBody": true,
-        "loop": false
+        "loop": false,
+        "flipBody": true
       },
       "huff": {
         "frames": "3:1",
@@ -72,8 +72,8 @@
       },
       "wave": {
         "frames": "4:8",
-        "flip": true,
-        "loop": false
+        "loop": false,
+        "flipBody": true
       },
       "frost": {
         "frames": "2:8,2:9,2:10",

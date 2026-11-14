@@ -55,6 +55,42 @@ function runSelftest(ctx, selftestDir) {
           const shot = await capture(overlay, { x: Math.max(0, Math.round(pos.x) - 40), y: Math.max(0, Math.round(pos.y) - 20), width: 240, height: 220 });
           fs.writeFileSync(path.join(selftestDir, `state-${k}-left.png`), shot.toPNG());
         }
+        // Invariant: on screen, a mark is never mirrored. For every animation on
+        // both sheets, facing right and left, read the real transforms: the pet
+        // is mirrored by CSS when facing left, so each mark must carry exactly
+        // one more mirror then, and none when facing right.
+        const marksCheck = await overlay.webContents.executeJavaScript(`(async () => {
+          const p = document.getElementById('pet');
+          const keep = ['skin','has-ultimate','sheet','ultimate-sheet'].filter((c) => p.classList.contains(c));
+          const keys = ['idle','blink','walk','talk','sleep','drag','fall','land','working','think','surprised','huff','shrug','wave','frost','release','stamp'];
+          const out = { checked: 0, withMarks: [], bad: [] };
+          for (const k of keys) {
+            const seen = {};
+            for (const dir of ['right', 'left']) {
+              p.className = [k, 'face-' + dir, ...keep].join(' ');
+              await new Promise((r) => setTimeout(r, 30));
+              const cssMirror = getComputedStyle(document.getElementById('flip')).transform.startsWith('matrix(-1');
+              if (cssMirror !== (dir === 'left')) out.bad.push(k + ' ' + dir + ': the pet is not mirrored as expected');
+              for (const gid of ['skin-img-marks', 'skin-ultimate-marks']) {
+                const g = document.getElementById(gid);
+                if (!g) continue;
+                const marks = [...g.querySelectorAll('image')];
+                marks.forEach((m, n) => {
+                  out.checked++;
+                  const own = (m.getAttribute('transform') || '').includes('scale(-1');
+                  if (cssMirror !== own) out.bad.push(gid + ' ' + k + ' ' + dir + ': mark ' + n + ' would be drawn mirrored');
+                  const cx = Number(m.getAttribute('x')) + Number(m.getAttribute('width')) / 2;
+                  const id = gid + '#' + n;
+                  if (dir === 'right') seen[id] = cx; else if (Math.abs(seen[id] - cx) > 0.2) out.bad.push(gid + ' ' + k + ': mark ' + n + ' jumps when the pet turns');
+                });
+                if (marks.length && dir === 'right') out.withMarks.push(gid.replace('-marks', '') + ':' + k);
+              }
+            }
+          }
+          p.className = ['idle', 'face-right', ...keep].join(' ');
+          return JSON.stringify(out, null, 1);
+        })()`);
+        fs.writeFileSync(path.join(selftestDir, 'marks.json'), marksCheck);
         await overlay.webContents.executeJavaScript(`BuddyBrain.onIdleSeconds(0); (() => { const p=document.getElementById('pet'); const keep=['skin','has-ultimate','sheet','ultimate-sheet'].filter(c=>p.classList.contains(c)); p.className=['idle','face-right',...keep].join(' '); return 1; })()`);
       }
       // Then a bubble and the ice-crystal trick, cropped wider.

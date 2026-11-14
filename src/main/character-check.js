@@ -50,7 +50,6 @@ function checkSheet(sheetCfg, rows, label, near = [], kind = 'sheet') {
     const d = anims[k] || {};
     const cells = cellsOfAnim(d, rows);
     if (!cells.length) { add('error', `${k}: "${d.frames}" has no frames`); continue; }
-    if (d.flip && d.flipBody) add('warn', `${k}: both mirror modes are set, which cancel out on the figure`);
     if (d.fps != null && !(Number(d.fps) >= 0.2 && Number(d.fps) <= 30)) add('warn', `${k}: fps ${d.fps} is outside 0.2 to 30`);
     if (Number(d.loopFrom) >= cells.length) add('warn', `${k}: "loop from" ${d.loopFrom} is past its last frame`);
     if (rows && rows.length) {

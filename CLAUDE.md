@@ -56,6 +56,10 @@ upgrade runs that write mods. Kori (`characters/kori-test`, drawn in
   `modsFor()` in `src/main/mods.js` loads a trick only for the character it was built for.
 - A funded goal the guard refuses is marked `waiting` and retried after the plan resets
   (`src/main/jar/waiting.js`); it must only ever start through `guard.canStart()`.
+- Marks beside a pose ("?", "!", swirls) are cut out as their own images (`findMarks`,
+  `groupMarks` in `src/renderer/pet/sheet.js`) and drawn on a separate layer that is
+  never mirrored; a mirrored or left-facing figure only moves them to the other side.
+  Keep it a rule with no setting: do not add an option that can mirror a mark.
 - New sheets are mapped automatically from row counts (`src/main/character-check.js`:
   `autoMap`, `checkCharacter`); it never looks at the image.
 - Character import (`src/main/character-import.js`) validates everything: allowed file

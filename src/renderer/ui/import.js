@@ -6,7 +6,7 @@
   const IMG = /\.(png|webp|gif|jpe?g)$/i;
 
   const HELP = {
-    idle: 'standing around', blink: 'a quick blink while idle', walk: 'walking (frames should face right, or tick Flip)',
+    idle: 'standing around', blink: 'a quick blink while idle', walk: 'walking (frames should face right, or tick Mirror)',
     talk: 'while a speech bubble is up', sleep: 'napping (use Loop from the last frame to stay asleep)', drag: 'picked up by the mouse',
     fall: 'falling after being dropped', land: 'landing', lean: 'leaning on a screen edge', desk: 'at the desk',
     working: 'while an upgrade runs', scribbling: 'writing at the desk', think: 'thinking ("?")', surprised: 'surprised ("!")',
@@ -183,15 +183,11 @@
         <td>${k}<small>${esc(HELP[k] || '')}</small></td>
         <td><input type="text" class="f" value="${esc(frames)}" placeholder="${k === 'idle' ? '0:0-3' : ''}" /></td>
         <td><input type="number" class="fps" min="0.2" max="30" step="0.5" value="${a.fps != null ? a.fps : ''}" placeholder="6" /></td>
-        <td><select class="flip">${[['', 'No'], ['body', 'Figure'], ['all', 'Everything']].map(([v, l]) => `<option value="${v}" ${v === mirrorOf(a) ? 'selected' : ''}>${l}</option>`).join('')}</select></td>
-        <td><select class="marks"><option value="">Readable</option><option value="turn" ${a.marksTurn ? 'selected' : ''}>Turn</option></select></td>
+        <td><input type="checkbox" class="flip" ${a.flipBody || a.flip ? 'checked' : ''} /></td>
         <td><input type="checkbox" class="loop" ${a.loop === false ? '' : 'checked'} /></td>
       </tr>`;
     }).join('');
   }
-
-  // One mirror mode per animation: the figure only (marks stay readable) or everything.
-  const mirrorOf = (a) => (a.flipBody ? 'body' : a.flip ? 'all' : '');
 
   function renderCheck(r) {
     const mark = { ok: '\u2713', info: '\u00b7', warn: '!', error: '\u2715' };
@@ -217,10 +213,9 @@
       delete a.row;
       const fps = Number(tr.querySelector('.fps').value);
       if (fps > 0) a.fps = fps; else delete a.fps;
-      const mirror = tr.querySelector('.flip').value;
-      delete a.flip; delete a.flipBody;
-      if (mirror === 'body') a.flipBody = true; else if (mirror === 'all') a.flip = true;
-      if (tr.querySelector('.marks').value === 'turn') a.marksTurn = true; else delete a.marksTurn;
+      // Mirror the pose (the figure). Marks beside it are never mirrored.
+      delete a.flip; delete a.flipBody; delete a.marksTurn;
+      if (tr.querySelector('.flip').checked) a.flipBody = true;
       if (!tr.querySelector('.loop').checked) a.loop = false; else delete a.loop;
       anims[k] = a;
     });
