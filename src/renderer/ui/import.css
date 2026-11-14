@@ -52,3 +52,13 @@ table.anims input[type=number] { width: 64px; }
 .attach { font-size: 11.5px; border: 1px solid var(--line, #2a3550); border-radius: 10px; padding: 2px 4px 2px 8px; }
 button.x { background: none; border: none; color: var(--muted, #8a93a6); cursor: pointer; font-size: 11px; padding: 0 4px; }
 button.x.add { border: 1px dashed var(--line, #2a3550); border-radius: 10px; padding: 1px 8px; margin-left: 4px; }
+
+/* Boxes drawn on the numbered picture: a sign (never mirrored) or not a sign */
+.preview-stage { position: relative; }
+.preview-stage img { user-select: none; }
+#ed-boxes { position: absolute; inset: 0; pointer-events: none; }
+#ed-boxes .box { position: absolute; border: 2px solid #12b5a6; background: rgba(18, 181, 166, 0.18); box-sizing: border-box; pointer-events: auto; }
+#ed-boxes .box.plainBoxes { border: 2px dashed #8a93a6; background: rgba(138, 147, 166, 0.2); }
+#ed-boxes .box.drawing { pointer-events: none; }
+#ed-boxes .box .x { position: absolute; top: -9px; right: -9px; width: 16px; height: 16px; line-height: 14px; padding: 0; border-radius: 50%; background: #1b2540; color: #fff; font-size: 10px; }
+.box-tools { margin: 4px 0 8px; font-size: 12px; align-items: center; }

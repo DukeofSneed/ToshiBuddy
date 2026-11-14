@@ -80,6 +80,13 @@ app.whenReady().then(() => {
     ok(JSON.stringify(mk.moveMarks) === '[["0:2","0:1"]]', 'mark moves saved, duplicates and bad entries dropped: ' + JSON.stringify(mk.moveMarks));
     ok(!('moveMarks' in imp.saveCharacter(ROOT, id, { sheet: { moveMarks: [] } }).sheet), 'mark moves can be removed');
     imp.saveCharacter(ROOT, id, { sheet: { animations: { idle: { frames: '0:0-3', fps: 4 }, walk: { frames: '1:0-3', flip: true } } } });
+    // Boxes drawn in the editor: a sign, or not a sign. Bad entries are dropped.
+    const bx = imp.saveCharacter(ROOT, id, { sheet: { markBoxes: [[10.4, 20, 40, 60.6], [5, 5, 6, 6], ['a', 1, 2, 3], [1, 2, 3], [-50, 0, 30, 30]], plainBoxes: [[100, 100, 140, 150]] } }).sheet;
+    ok(JSON.stringify(bx.markBoxes) === '[[10,20,40,61],[0,0,30,30]]', 'sign boxes saved as whole pixels, bad ones dropped: ' + JSON.stringify(bx.markBoxes));
+    ok(JSON.stringify(bx.plainBoxes) === '[[100,100,140,150]]', 'not-a-sign boxes saved');
+    const nb = imp.saveCharacter(ROOT, id, { sheet: { markBoxes: [], plainBoxes: [] } }).sheet;
+    ok(!('markBoxes' in nb) && !('plainBoxes' in nb), 'boxes can be removed');
+    ok(imp.cleanBoxes(Array.from({ length: 60 }, (_, i) => [i, 0, i + 10, 10])).length === 40, 'at most 40 boxes');
     throws(() => imp.saveCharacter(ROOT, id, { sheet: { animations: { idle: { frames: '0:0; rm -rf' } } } }), /frames/, 'bad frames');
     throws(() => imp.saveCharacter(ROOT, '..\\evil', {}), /Unknown/, 'path traversal id');
 

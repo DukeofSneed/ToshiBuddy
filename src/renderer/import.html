@@ -89,7 +89,16 @@
             <select id="ed-kind"><option value="sheet">Main sheet</option><option value="ultimateSheet">Ultimate sheet</option></select>
           </div>
           <div id="ed-rows" class="muted small-note"></div>
-          <div class="preview-wrap"><img id="ed-preview" alt="Numbered frames" /></div>
+          <div class="preview-wrap"><div class="preview-stage" id="ed-stage"><img id="ed-preview" alt="Numbered frames" draggable="false" /><div id="ed-boxes"></div></div></div>
+          <div class="row box-tools">
+            <span class="muted">Signs like ? ! or a swirl are outlined in teal. Missed one, or it touches the character?</span>
+            <span class="grow"></span>
+            <select id="box-mode" title="Then drag a box on the picture above">
+              <option value="">Draw a box: off</option>
+              <option value="markBoxes">Box a sign (never mirrored): draw it tight</option>
+              <option value="plainBoxes">Box something that is NOT a sign</option>
+            </select>
+          </div>
           <div class="muted small-note">Frames: <code>1:0-5</code> = row 1, frames 0 to 5. Lists work too: <code>0:0-4,0:3-1</code>. Leave empty to fall back to idle. Marks like <b>?</b> and <b>!</b> (outlined in teal above) always read the right way, whichever way the character faces.</div>
           <table class="anims">
             <thead><tr><th>When</th><th>Frames</th><th>FPS</th><th title="Tick if this pose faces the wrong way. Marks like ? and ! are never mirrored: they always read the right way and move to the other side by themselves.">Mirror</th><th title="Off: hold the last frame">Loop</th></tr></thead>

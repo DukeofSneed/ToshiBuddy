@@ -146,6 +146,7 @@ function cleanSheet(s) {
   if (Array.isArray(s.moveMarks) && !cleanMoveMarks(s.moveMarks).length) { /* nothing valid: leave it out */ } else if (Array.isArray(s.moveMarks)) {
     out.moveMarks = s.moveMarks.filter((p) => Array.isArray(p) && p.length === 2 && p.every((x) => /^\d{1,2}:\d{1,2}$/.test(String(x)))).slice(0, 50).map((p) => p.map(String));
   }
+  for (const k of ['markBoxes', 'plainBoxes']) if (cleanBoxes(s[k]).length) out[k] = cleanBoxes(s[k]); // signs boxed by hand
   if (cleanMoveMarks(s.marksOk).length) out.marksOk = cleanMoveMarks(s.marksOk); // mark placements the user checked
   if (out.scale !== undefined) out.scale = Math.max(0.2, Math.min(4, out.scale));
   if (s.keyMode === 'none') out.keyMode = 'none';
@@ -164,6 +165,19 @@ function cleanMoveMarks(list) {
     if (out.some((q) => q[0] === String(p[0]) && q[1] === String(p[1]))) continue;
     out.push(p.map(String));
     if (out.length >= 50) break;
+  }
+  return out;
+}
+
+// Boxes drawn in the editor, in sheet pixels: [x1, y1, x2, y2].
+function cleanBoxes(list) {
+  const out = [];
+  for (const b of Array.isArray(list) ? list : []) {
+    if (!Array.isArray(b) || b.length !== 4 || !b.every((n) => Number.isFinite(Number(n)))) continue;
+    const [x1, y1, x2, y2] = b.map((n) => Math.max(0, Math.min(20000, Math.round(Number(n)))));
+    if (x2 - x1 < 2 || y2 - y1 < 2) continue;
+    out.push([x1, y1, x2, y2]);
+    if (out.length >= 40) break;
   }
   return out;
 }
@@ -334,6 +348,11 @@ function saveCharacter(projectRoot, id, patch) {
       const fine = cleanMoveMarks(p.marksOk);
       if (fine.length) cfg[kind].marksOk = fine; else delete cfg[kind].marksOk;
     }
+    for (const k of ['markBoxes', 'plainBoxes']) {
+      if (!Array.isArray(p[k])) continue;
+      const boxes = cleanBoxes(p[k]);
+      if (boxes.length) cfg[kind][k] = boxes; else delete cfg[kind][k];
+    }
     if (Array.isArray(p.moveMarks)) {
       const moves = cleanMoveMarks(p.moveMarks);
       if (moves.length) cfg[kind].moveMarks = moves; else delete cfg[kind].moveMarks;
@@ -344,4 +363,4 @@ function saveCharacter(projectRoot, id, patch) {
   return cfg;
 }
 
-module.exports = { cleanMoveMarks, importFiles, importPack, exportPack, saveCharacter, cleanConfig, cleanAnimations, readQuipsFile, slug, ANIM_KEYS, PACK_FILE_RE };
+module.exports = { cleanBoxes, cleanMoveMarks, importFiles, importPack, exportPack, saveCharacter, cleanConfig, cleanAnimations, readQuipsFile, slug, ANIM_KEYS, PACK_FILE_RE };

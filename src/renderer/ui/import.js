@@ -175,6 +175,7 @@
     if (s.preview) img.src = s.preview; else img.removeAttribute('src');
     $('ed-scale').value = s.scale || 1;
     renderMoves();
+    renderBoxes();
     $('ed-template').innerHTML = '<option value="">Best match</option>' + (s.templates || []).map((t) => `<option value="${esc(t.id)}">Like ${esc(t.name)}</option>`).join('');
     $('ed-anims').innerHTML = current.animKeys.map((k) => {
       const a = s.animations[k] || {};
@@ -195,6 +196,70 @@
     $('ed-check-list').innerHTML = !r ? '' : [`<li class="${r.ok ? (r.warnings ? 'warn' : 'ok') : 'error'}"><b>${head}</b></li>`]
       .concat(r.items.map((i) => `<li class="${i.level}"><span>${mark[i.level] || ''}</span> ${esc(i.text)}${i.pair ? ` <button class="x add" data-fine="${esc(i.pair.kind)}|${esc(i.pair.from)}|${esc(i.pair.near)}" title="I looked: the mark is on the right pose">It's fine</button>` : ''}</li>`)).join('');
   }
+
+  // ---- boxes drawn on the numbered picture ----
+  // The picture may be shown smaller than the sheet: convert between the two.
+  const BOX_KINDS = ['markBoxes', 'plainBoxes'];
+  function sheetScale() {
+    const img = $('ed-preview');
+    if (!img.naturalWidth || !img.clientWidth) return null;
+    const sheetW = (current && current[kind] && current[kind].size && current[kind].size[0]) || img.naturalWidth;
+    return sheetW / img.clientWidth; // sheet pixels per screen pixel
+  }
+  function renderBoxes() {
+    const k = sheetScale();
+    const s = current && current[kind];
+    const html = [];
+    if (k && s) {
+      for (const bk of BOX_KINDS) {
+        (s[bk] || []).forEach((b, i) => {
+          html.push(`<div class="box ${bk}" style="left:${b[0] / k}px;top:${b[1] / k}px;width:${(b[2] - b[0]) / k}px;height:${(b[3] - b[1]) / k}px" title="${bk === 'markBoxes' ? 'A sign: never mirrored' : 'Not a sign'}"><button class="x" data-unbox="${bk}|${i}" title="Remove this box">✕</button></div>`);
+        });
+      }
+    }
+    $('ed-boxes').innerHTML = html.join('');
+  }
+  $('ed-preview').addEventListener('load', renderBoxes);
+  window.addEventListener('resize', renderBoxes);
+  let drawing = null;
+  const stagePoint = (e) => { const r = $('ed-stage').getBoundingClientRect(); return [Math.max(0, Math.min(r.width, e.clientX - r.left)), Math.max(0, Math.min(r.height, e.clientY - r.top))]; };
+  $('ed-stage').addEventListener('mousedown', (e) => {
+    const mode = $('box-mode').value;
+    if (!mode || !current || e.button !== 0 || e.target.closest('[data-unbox]')) return;
+    e.preventDefault();
+    const [x, y] = stagePoint(e);
+    const el = document.createElement('div');
+    el.className = `box ${mode} drawing`;
+    $('ed-boxes').appendChild(el);
+    drawing = { mode, x, y, el };
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (!drawing) return;
+    const [x, y] = stagePoint(e);
+    Object.assign(drawing.el.style, { left: `${Math.min(x, drawing.x)}px`, top: `${Math.min(y, drawing.y)}px`, width: `${Math.abs(x - drawing.x)}px`, height: `${Math.abs(y - drawing.y)}px` });
+  });
+  window.addEventListener('mouseup', (e) => {
+    if (!drawing) return;
+    const d = drawing; drawing = null;
+    const [x, y] = stagePoint(e);
+    const k = sheetScale();
+    if (k && Math.abs(x - d.x) >= 4 && Math.abs(y - d.y) >= 4) {
+      stash();
+      const b = [Math.min(x, d.x) * k, Math.min(y, d.y) * k, Math.max(x, d.x) * k, Math.max(y, d.y) * k].map(Math.round);
+      current[kind][d.mode] = [...(current[kind][d.mode] || []), b].slice(0, 40);
+      note('ed-msg', d.mode === 'markBoxes' ? 'Boxed as a sign. Keep the box tight: any part of the character inside it moves with the sign. Press "Save and reload" to apply it.' : 'Boxed as not a sign. Press "Save and reload" to apply it.');
+    }
+    renderBoxes();
+  });
+  $('ed-boxes').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-unbox]');
+    if (!b || !current) return;
+    const [bk, i] = b.dataset.unbox.split('|');
+    stash();
+    current[kind][bk] = (current[kind][bk] || []).filter((_b, n) => n !== Number(i));
+    renderBoxes();
+    note('ed-msg', 'Box removed. Press "Save and reload" to apply it.');
+  });
 
   // Marks moved from one pose to the one they belong to.
   function renderMoves() {
@@ -308,7 +373,7 @@
     if (!current) return;
     const patch = { personality: $('ed-personality').value };
     stash();
-    for (const k of Object.keys(edited)) patch[k] = { animations: current[k].animations, scale: current[k].scale, moveMarks: current[k].moveMarks || [], marksOk: current[k].marksOk || [] };
+    for (const k of Object.keys(edited)) patch[k] = { animations: current[k].animations, scale: current[k].scale, moveMarks: current[k].moveMarks || [], marksOk: current[k].marksOk || [], markBoxes: current[k].markBoxes || [], plainBoxes: current[k].plainBoxes || [] };
     edited = {};
     const r = await chars.save(current.id, patch);
     if (r.error) { note('ed-msg', r.error, true); return; }

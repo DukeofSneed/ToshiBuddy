@@ -190,7 +190,24 @@
   // moveMarks: [["3:4", "3:3"], ...] moves the small detached bits ("?", "!")
   // that sit beside pose 3:4 over to pose 3:3, for sheets where a mark was
   // drawn closer to the neighboring pose than to its own.
-  function detectFrames(px, w, h, moveMarks) {
+  // A list of [x1, y1, x2, y2] boxes in sheet pixels, as drawn in the editor.
+  function cleanBoxes(list) {
+    const out = [];
+    for (const b of Array.isArray(list) ? list : []) {
+      if (!Array.isArray(b) || b.length !== 4 || !b.every((n) => Number.isFinite(Number(n)))) continue;
+      const [x1, y1, x2, y2] = b.map((n) => Math.round(Number(n)));
+      if (x2 - x1 < 2 || y2 - y1 < 2) continue;
+      out.push([x1, y1, x2, y2]);
+      if (out.length >= 40) break;
+    }
+    return out;
+  }
+  const inBox = (b, x, y) => x >= b[0] && x <= b[2] && y >= b[1] && y <= b[3];
+
+  // opts.markBoxes: everything of a pose inside such a box is a mark, even if it
+  // touches the figure. opts.plainBoxes: nothing inside is a mark.
+  function detectFrames(px, w, h, moveMarks, opts = {}) {
+    const markBoxes = cleanBoxes(opts.markBoxes), plainBoxes = cleanBoxes(opts.plainBoxes);
     const { label, comps } = components(px, w, h);
     const sizable = comps.filter((c) => c.area >= w * h * 0.0015);
     const medArea = median(sizable.map((c) => c.area));
@@ -266,8 +283,27 @@
     const baselines = rows.map((r) => median(r.items.map((c) => c.maxy)));
     // Marks ("?", "!", a swirl) are cut out of the pose: each pose keeps a body
     // box (figure only) and a list of mark clusters drawn on their own layer.
-    for (const fr of frames) {
-      fr.marks = groupMarks(findMarks(fr, label, w, medH, moved), medH * 0.08);
+    // Each drawn box belongs to the pose it sits on (or the nearest one).
+    const boxesOf = frames.map(() => []);
+    for (const b of markBoxes) {
+      const cx = (b[0] + b[2]) / 2, cy = (b[1] + b[3]) / 2;
+      let best = -1, bestD = Infinity;
+      frames.forEach((fr, i) => {
+        const d = Math.hypot(Math.max(fr.minx - cx, 0, cx - fr.maxx), Math.max(fr.miny - cy, 0, cy - fr.maxy));
+        if (d < bestD) { bestD = d; best = i; }
+      });
+      if (best >= 0) boxesOf[best].push(b);
+    }
+    for (const [fi, fr] of frames.entries()) {
+      const mine = boxesOf[fi];
+      const center = (c) => [(c.minx + c.maxx) / 2, (c.miny + c.maxy) / 2];
+      const found = findMarks(fr, label, w, medH, moved).filter((c) => {
+        const [cx, cy] = center(c);
+        return !plainBoxes.some((b) => inBox(b, cx, cy)) && !mine.some((b) => inBox(b, cx, cy));
+      });
+      fr.marks = groupMarks(found, medH * 0.08)
+        .concat(mine.map((b) => ({ ids: [], box: b, minx: b[0], miny: b[1], maxx: b[2], maxy: b[3] })));
+      fr.boxes = mine;
       const ids = new Set(fr.marks.flatMap((k) => k.ids));
       const body = [fr.main, ...(fr.bits || []).filter((c) => !ids.has(c.id))];
       fr.body = {
@@ -284,7 +320,7 @@
 
   // One image of the figure per pose, and one small image per mark beside it.
   function cutFrames(px, w, det) {
-    const cut = (box, keep) => {
+    const cut = (box, keep) => { // keep(label, x, y) in sheet pixels
       const bw = box.maxx - box.minx + 1, bh = box.maxy - box.miny + 1;
       const c = document.createElement('canvas');
       c.width = bw; c.height = bh;
@@ -294,7 +330,7 @@
         for (let x = 0; x < bw; x++) {
           const p = (box.miny + y) * w + (box.minx + x);
           const l = det.label[p];
-          if (l < 0 || !keep(l)) continue;
+          if (l < 0 || !keep(l, box.minx + x, box.miny + y)) continue;
           const o = (y * bw + x) * 4;
           out.data[o] = px[p * 4]; out.data[o + 1] = px[p * 4 + 1]; out.data[o + 2] = px[p * 4 + 2]; out.data[o + 3] = px[p * 4 + 3];
         }
@@ -304,7 +340,8 @@
     };
     return det.frames.map((f, i) => {
       const markIds = new Set(f.marks.flatMap((k) => k.ids));
-      const body = cut(f.body, (l) => det.frameOf[l] === i && !markIds.has(l));
+      const boxed = (x, y) => (f.boxes || []).some((b) => inBox(b, x, y));
+      const body = cut(f.body, (l, x, y) => det.frameOf[l] === i && !markIds.has(l) && !boxed(x, y));
       const base = det.baselines[f.row];
       // Horizontal anchor: the center of the head (top 30% of the figure), not the
       // bounding box. A swinging leg or an outstretched sword widens the box and
@@ -314,7 +351,7 @@
       let hmin = Infinity, hmax = -Infinity;
       for (let y = m.miny; y <= headBottom; y++) {
         for (let x = m.minx; x <= m.maxx; x++) {
-          if (det.label[y * w + x] === m.id) { if (x < hmin) hmin = x; if (x > hmax) hmax = x; }
+          if (det.label[y * w + x] === m.id && !boxed(x, y)) { if (x < hmin) hmin = x; if (x > hmax) hmax = x; }
         }
       }
       const cx = Number.isFinite(hmin) ? (hmin + hmax) / 2 : (m.minx + m.maxx) / 2;
@@ -325,7 +362,8 @@
         // Each mark: its own image, placed by its center relative to the head
         // center (dx) and its top above the baseline. Never mirrored when drawn.
         marks: f.marks.map((k) => {
-          const im = cut(k, (l) => k.ids.includes(l));
+          // A drawn box takes everything of this pose inside it; a found mark, its own pieces.
+          const im = k.box ? cut(k, (l) => det.frameOf[l] === i && !markIds.has(l)) : cut(k, (l) => k.ids.includes(l));
           return { url: im.url, w: im.w, h: im.h, dx: (k.minx + k.maxx + 1) / 2 - cx, top: base - k.miny };
         }),
       };
@@ -436,7 +474,7 @@
       removed = keyFlood(px, w, h, Math.max(1, Math.min(80, Number(cfg.keyTolerance) || 12)), Math.max(0, Math.min(255, Number(cfg.keyMax) || 0)));
       g.putImageData(data, 0, 0);
     }
-    const det = detectFrames(px, w, h, cfg.moveMarks);
+    const det = detectFrames(px, w, h, cfg.moveMarks, { markBoxes: cfg.markBoxes, plainBoxes: cfg.plainBoxes });
     if (!det.frames.length) throw new Error('no figures found on the sheet');
     const frames = cutFrames(px, w, det);
     return { w, h, removed, rows: det.rows, near: det.near, frames, index: indexImage(canvas, frames, det) };
@@ -467,7 +505,7 @@
   async function prepare(url, cfg, opts = {}) {
     cfg = cfg || {};
     const key = url.split('?')[0];
-    const sig = JSON.stringify(['layers-v1', url, cfg.keyMode, cfg.keyTolerance, cfg.keyMax, cfg.moveMarks]);
+    const sig = JSON.stringify(['layers-v2', url, cfg.keyMode, cfg.keyTolerance, cfg.keyMax, cfg.moveMarks, cfg.markBoxes, cfg.plainBoxes]);
 
     let sliced = null;
     let fromCache = false;
@@ -489,7 +527,7 @@
     const { w, h, removed, rows } = sliced;
     buddy.log(`sheet ${name}: ${w}x${h}, ${fromCache ? 'from cache' : removed == null ? 'already transparent' : `background ${Math.round(removed * 100)}% removed`}, ${rows.length} rows [${rows.join(', ')}] = ${sheet.frames.length} frames; animations: ${Object.keys(sheet.anims).join(', ')}`);
     if (opts.indexKind && opts.skinName) {
-      try { buddy.saveSheetIndex(opts.skinName, opts.indexKind, sliced.index, rows, sliced.near || []); } catch (_) { /* preview only */ }
+      try { buddy.saveSheetIndex(opts.skinName, opts.indexKind, sliced.index, rows, sliced.near || [], [w, h]); } catch (_) { /* preview only */ }
     }
     return sheet;
   }
@@ -596,5 +634,5 @@
     return out;
   }
 
-  window.BuddySheet = { prepare, asImage, start, parseFrames, findMarks, groupMarks };
+  window.BuddySheet = { prepare, asImage, start, parseFrames, findMarks, groupMarks, cleanBoxes };
 })();

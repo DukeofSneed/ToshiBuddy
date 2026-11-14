@@ -59,7 +59,9 @@ upgrade runs that write mods. Kori (`characters/kori-test`, drawn in
 - Marks beside a pose ("?", "!", swirls) are cut out as their own images (`findMarks`,
   `groupMarks` in `src/renderer/pet/sheet.js`) and drawn on a separate layer that is
   never mirrored; a mirrored or left-facing figure only moves them to the other side.
-  Keep it a rule with no setting: do not add an option that can mirror a mark.
+  Keep it a rule with no setting: do not add an option that can mirror a mark. A user can
+  box a sign by hand in the editor (`markBoxes`, for one that touches the figure) or box
+  something that is not a sign (`plainBoxes`); both only decide what counts as a mark.
 - New sheets are mapped automatically from row counts (`src/main/character-check.js`:
   `autoMap`, `checkCharacter`); it never looks at the image.
 - Character import (`src/main/character-import.js`) validates everything: allowed file

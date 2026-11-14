@@ -355,7 +355,7 @@ function start() {
   // The renderer slices sprite sheets and sends back a numbered preview
   // (sheet-index.png / ultimate-sheet-index.png) so the user can map frames.
   const sheetInfo = new Map(); // "<id>/<kind>" -> { rows, at }
-  ipcMain.on('overlay:sheet-index', (_e, { skin, kind, dataUrl, rows, near } = {}) => {
+  ipcMain.on('overlay:sheet-index', (_e, { skin, kind, dataUrl, rows, near, size } = {}) => {
     try {
       if (!['sheet', 'ultimate-sheet'].includes(kind)) return;
       if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image/png;base64,')) return;
@@ -365,7 +365,7 @@ function start() {
       if (Array.isArray(rows)) {
         const cell = /^\d{1,2}:\d{1,2}$/;
         const hints = (Array.isArray(near) ? near : []).filter((n) => n && cell.test(String(n.from)) && cell.test(String(n.near))).slice(0, 40).map((n) => ({ from: String(n.from), near: String(n.near) }));
-        sheetInfo.set(`${skin}/${kind}`, { rows: rows.slice(0, 50).map((n) => Math.max(0, Math.floor(Number(n) || 0))), near: hints, at: Date.now() });
+        sheetInfo.set(`${skin}/${kind}`, { rows: rows.slice(0, 50).map((n) => Math.max(0, Math.floor(Number(n) || 0))), near: hints, size: Array.isArray(size) && size.length === 2 ? size.map((n) => Math.max(1, Math.min(20000, Math.floor(Number(n) || 1)))) : null, at: Date.now() });
         autoMapIfNew(skin, kind === 'sheet' ? 'sheet' : 'ultimateSheet');
       }
     } catch (e) { log(`sheet index not saved: ${e.message}`); }
@@ -611,6 +611,9 @@ function start() {
       animations: (c.config[cfgKey] || {}).animations || {},
       rows: rowsOf(c, cfgKey),
       moveMarks: (c.config[cfgKey] || {}).moveMarks || [],
+      markBoxes: (c.config[cfgKey] || {}).markBoxes || [],
+      plainBoxes: (c.config[cfgKey] || {}).plainBoxes || [],
+      size: (sheetInfo.get(`${c.name}/${kind}`) || {}).size || null,
       marksOk: (c.config[cfgKey] || {}).marksOk || [],
       preview: preview(kind),
       templates: layoutTemplates(cfgKey, c.name).map((t) => ({ id: t.id, name: t.name })),
