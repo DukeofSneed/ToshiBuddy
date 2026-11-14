@@ -64,6 +64,11 @@ upgrade runs that write mods. Kori (`characters/kori-test`, drawn in
   something that is not a sign (`plainBoxes`); both only decide what counts as a mark.
 - New sheets are mapped automatically from row counts (`src/main/character-check.js`:
   `autoMap`, `checkCharacter`); it never looks at the image.
+- Updates for zip installs live in `src/main/updater.js`: `version.txt` is filled in by
+  git when a zip is made (a git checkout is a "dev copy" and is never updated this way);
+  the update is fetched from the repository named in package.json, only after the user
+  says yes; files the user changed under `characters/`, `mods/`, `content/` are kept
+  (`.install-manifest.json` records what was installed). Pushing to main is releasing.
 - Character import (`src/main/character-import.js`) validates everything: allowed file
   names, image magic bytes, size caps, whitelisted config keys. Keep it that way.
 - Never draw new art based on a user's character images.

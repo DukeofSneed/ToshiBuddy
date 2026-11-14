@@ -3,3 +3,4 @@
 *.png binary
 *.jpg binary
 *.ico binary
+version.txt export-subst

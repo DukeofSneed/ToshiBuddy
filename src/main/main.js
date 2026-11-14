@@ -7,6 +7,7 @@ const characterImport = require('./character-import');
 const characterCheck = require('./character-check');
 const characterProfile = require('./jar/profile');
 const abilities = require('./abilities');
+const updater = require('./updater');
 const attachments = require('./jar/attachments');
 const { QuipStore } = require('./quip-store');
 const { Settings } = require('./settings');
@@ -14,7 +15,7 @@ const { Ledger } = require('./jar/ledger');
 const { Guard } = require('./jar/guard');
 const { Upgrader } = require('./jar/upgrader');
 const { WaitingQueue } = require('./jar/waiting');
-const { Git } = require('./jar/git');
+const { Git, RUN_DIRS } = require('./jar/git');
 const { estimate } = require('./jar/estimator');
 const { listMods, modsFor, readQuipPacks, readCharacterDialogue, listCharacters, invalidateCharacters, charactersRoot } = require('./mods');
 const { trayIcon } = require('./tray-icon');
@@ -968,12 +969,59 @@ function start() {
       { label: 'Pause wandering', type: 'checkbox', checked: !!settings.get('paused'), click: (m) => toggleSetting('paused', m.checked) },
       { label: 'Start with Windows', type: 'checkbox', checked: !!settings.get('autostart'), click: (m) => toggleSetting('autostart', m.checked) },
       { type: 'separator' },
+      { label: 'Check for updates…', click: () => checkForUpdates({ manual: true }) },
+      { label: 'Look for updates at startup', type: 'checkbox', checked: settings.get('updateCheck') !== false, click: (m) => toggleSetting('updateCheck', m.checked) },
       { label: 'Reload mods and quips', click: () => reloadAndAwaitMods([], 1000) },
       { label: 'Open project folder', click: () => shell.openPath(PROJECT_ROOT) },
       { type: 'separator' },
       { label: 'Quit', click: () => { if (jarWin) jarWin.__reallyClose = true; app.quit(); } },
     ]);
   }
+  // ---- updates (zip installs only; a git checkout is updated with git) ----
+  try { if (updater.ensureManifest(PROJECT_ROOT)) log('update: noted the installed files'); } catch (e) { log(`update: ${e.message}`); }
+  let updating = false;
+  async function checkForUpdates({ manual = false } = {}) {
+    if (updating) return;
+    let c;
+    try { c = await updater.check(PROJECT_ROOT); } catch (e) {
+      log(`update check failed: ${e.message}`);
+      if (manual) notify(`Couldn't check for updates: ${e.message}.`, 7000);
+      return;
+    }
+    if (c.dev) { if (manual) notify('This is a development copy (a git folder). Update it with git pull.', 7000); return; }
+    if (!c.available) { if (manual) notify('You have the latest version.', 5000); return; }
+    if (!manual) { notify('A new version of ToshiBuddy is available. Right-click → Check for updates.', 9000); return; }
+    if (upgrader.isBusy()) { notify('An upgrade is being built. Update when it finishes.', 7000); return; }
+    const when = c.latest.date ? new Date(c.latest.date).toLocaleDateString() : '';
+    const answer = await dialog.showMessageBox({
+      type: 'question', buttons: ['Update now', 'Later'], defaultId: 0, cancelId: 1, noLink: true,
+      title: 'ToshiBuddy update',
+      message: 'A new version is available.',
+      detail: `Latest change${when ? ` (${when})` : ''}: ${c.latest.summary}\n\nYour characters, built tricks, jar and settings are kept. The app restarts when it is done.`,
+    });
+    if (answer.response !== 0) return;
+    updating = true;
+    notify('Downloading the update…', 6000);
+    try {
+      const r = await updater.update(PROJECT_ROOT, { log });
+      if (r.updated) {
+        // Tricks and quip packs are tracked in the local git history upgrades use: record the update there.
+        try { if (fs.existsSync(path.join(PROJECT_ROOT, '.git')) && !(await git.isClean(RUN_DIRS))) await git.commitAll('chore: app update', RUN_DIRS); } catch (e) { log(`update: ${e.message}`); }
+        if (r.needsSetup) {
+          await dialog.showMessageBox({ type: 'info', buttons: ['OK'], title: 'ToshiBuddy update', message: 'Updated. One more step.', detail: 'This version needs a newer engine. Close ToshiBuddy and run "Setup ToshiBuddy.cmd" once.' });
+          return;
+        }
+        if (jarWin) jarWin.__reallyClose = true;
+        app.relaunch();
+        app.exit(0);
+      } else notify('You have the latest version.', 5000);
+    } catch (e) {
+      log(`update failed: ${e.message}`);
+      notify(`The update didn't work: ${e.message}. Nothing was changed that stops the app; try again later.`, 9000);
+    } finally { updating = false; }
+  }
+  if (!process.env.TOSHI_SELFTEST && settings.get('updateCheck') !== false) setTimeout(() => checkForUpdates(), 20000);
+
   ipcMain.on('__check-usage', async () => {
     const s = await guard.refresh({ force: true });
     notify(s.utilization !== null ? usageLine(s, 0) : 'No usage reading came back. Check the jar.', 8000);

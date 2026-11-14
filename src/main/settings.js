@@ -18,6 +18,7 @@ const DEFAULTS = {
   showAnchors: false, // draw markers where props attach (for tuning a character's anchors)
   ultimateSeconds: 30, // how long the ultimate form lasts after a donation (a skin can override)
   autostart: false,
+  updateCheck: true,          // look for a newer version at startup (it only tells you; you choose to update)
   showJarProp: true,          // the jar sits in the bottom-right corner of the screen
   quickDonateTokens: 1000,     // what double-clicking the jar donates
   // Plan-limit guard

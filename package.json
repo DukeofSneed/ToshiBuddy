@@ -11,5 +11,6 @@
   },
   "devDependencies": {
     "electron": "^45.3.0"
-  }
+  },
+  "repository": "github:DukeofSneed/ToshiBuddy"
 }
