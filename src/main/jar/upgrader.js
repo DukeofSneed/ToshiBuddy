@@ -145,9 +145,13 @@ class Upgrader {
     const status = await this.guard.refresh();
     const gate = this.guard.canStart();
     if (!gate.ok) {
-      this.ledger.updateGoal(goalId, { note: `blocked: ${gate.reason}` });
-      this.emit({ phase: 'blocked', goalId, title: goal.title, reason: gate.reason });
-      return { ok: false, reason: gate.reason };
+      // Not a dead end: the goal waits and starts by itself once the plan has
+      // room again (src/main/jar/waiting.js), unless the user turned that off.
+      const willRetry = this.settings.get('autoRetry') !== false;
+      const first = !goal.waiting;
+      this.ledger.updateGoal(goalId, { waiting: true, note: `${willRetry ? 'Waiting for room in your plan' : 'On hold'}: ${gate.reason}.${willRetry ? ' It starts by itself when there is room.' : ''}` });
+      if (first || !willRetry) this.emit({ phase: 'blocked', goalId, title: goal.title, reason: gate.reason, willRetry });
+      return { ok: false, reason: `plan has no room: ${gate.reason}` };
     }
     const utilBefore = status.utilization;
 
@@ -182,7 +186,7 @@ class Upgrader {
     ];
     if (useResume) args.push('--resume', goal.sessionId);
 
-    this.ledger.updateGoal(goalId, { status: 'building', note: '', model });
+    this.ledger.updateGoal(goalId, { status: 'building', note: '', model, waiting: false });
     this.emit({ phase: 'start', goalId, title: goal.title, model, budgetTokens });
     this.log(`upgrade "${goal.title}": model=${model} budget=${budgetTokens} tokens cap=$${capUsd}`);
 

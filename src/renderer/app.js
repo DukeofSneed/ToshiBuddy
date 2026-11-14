@@ -236,7 +236,7 @@
         break;
       case 'blocked':
         BuddySfx.play('womp');
-        BuddyBubble.toast(`"${ev.title}" is on hold: ${ev.reason}`, 7000);
+        BuddyBubble.toast(ev.willRetry ? `"${ev.title}" is waiting for room in your plan (${ev.reason}). It starts by itself.` : `"${ev.title}" is on hold: ${ev.reason}`, 8000);
         break;
       default:
         break;

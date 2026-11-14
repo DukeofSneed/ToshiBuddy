@@ -10,6 +10,7 @@ const { Settings } = require('./settings');
 const { Ledger } = require('./jar/ledger');
 const { Guard } = require('./jar/guard');
 const { Upgrader } = require('./jar/upgrader');
+const { WaitingQueue } = require('./jar/waiting');
 const { Git } = require('./jar/git');
 const { estimate } = require('./jar/estimator');
 const { listMods, readQuipPacks, readCharacterDialogue, listCharacters, invalidateCharacters, charactersRoot } = require('./mods');
@@ -607,7 +608,7 @@ function start() {
   });
   ipcMain.handle('jar:remove-goal', (_e, { goalId }) => ({ ok: ledger.removeGoal(goalId), state: jarState() }));
   ipcMain.handle('jar:settings', (_e, patch) => {
-    const allowed = ['muted', 'sfx', 'sfxVolume', 'paused', 'autostart', 'deskMode', 'slackNudges', 'character', 'maxUtilization', 'calibrationRunTokens', 'autoBuild', 'allowUsageEndpointFallback', 'upgradeModel', 'upgradeEffort', 'maxTurns', 'showJarProp', 'quickDonateTokens'];
+    const allowed = ['muted', 'sfx', 'sfxVolume', 'paused', 'autostart', 'deskMode', 'slackNudges', 'character', 'maxUtilization', 'calibrationRunTokens', 'autoBuild', 'autoRetry', 'allowUsageEndpointFallback', 'upgradeModel', 'upgradeEffort', 'maxTurns', 'showJarProp', 'quickDonateTokens'];
     const clean = {};
     for (const k of allowed) if (k in patch) clean[k] = patch[k];
     if ('character' in clean && !listCharacters(PROJECT_ROOT).some((c) => c.name === clean.character)) delete clean.character;
@@ -667,10 +668,19 @@ function start() {
     return { ...r, state: jarState() };
   });
 
-  // Auto-build funded goals if the user opted in.
+  // Goals the plan had no room for start by themselves after it resets.
+  const waiting = new WaitingQueue({
+    ledger, guard, upgrader, settings, log,
+    onStart: (goal) => notify(`Your plan has room again. Starting "${goal.title}".`, 7000),
+  });
+  ledger.onChange(() => waiting.schedule());
+  waiting.schedule();
+
+  // Auto-build funded goals if the user opted in. Goals already waiting for
+  // room in the plan are left to the waiting queue.
   ledger.onChange(() => {
     if (!settings.get('autoBuild') || upgrader.isBusy()) return;
-    const next = ledger.data.goals.find((g) => g.status === 'funded' && !g.touchesCore);
+    const next = ledger.data.goals.find((g) => g.status === 'funded' && !g.touchesCore && !g.waiting);
     if (next) setTimeout(() => { if (!upgrader.isBusy()) upgrader.build(next.id); }, 1500);
   });
 
@@ -806,7 +816,7 @@ function start() {
   const testCtx = {
     app, screen, settings, ledger, guard, logLines, log, charName, buildMenu, openCustomize, openImport, activeCharacterId, reloadAndAwaitMods,
     listCharacters: () => listCharacters(PROJECT_ROOT),
-    overAt, get hitAreas() { return hitAreas; },
+    overAt, get hitAreas() { return hitAreas; }, waiting,
     checkActive: () => { const c = activeCharacter(); return c && !c.builtin ? checkOf(c) : null; },
     get overlay() { return overlay; }, get jarWin() { return jarWin; },
     get customizeWin() { return customizeWin; }, get importWin() { return importWin; },

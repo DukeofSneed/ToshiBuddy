@@ -24,6 +24,7 @@ const DEFAULTS = {
   maxUtilization: 80,          // percent of the binding plan window the jar may use
   calibrationRunTokens: 20000, // max run/donation before the guard has learned tokens-per-percent
   autoBuild: false,            // start a run automatically once a goal is funded
+  autoRetry: true,             // a funded goal the plan had no room for starts by itself after the reset
   allowUsageEndpointFallback: false, // opt-in: read /usage numbers from the undocumented oauth endpoint
   upgradeModel: 'haiku',
   upgradeEffort: 'medium',

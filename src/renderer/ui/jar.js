@@ -61,6 +61,7 @@
     document.title = `${charName}'s Jar`;
     document.querySelectorAll('.char-name').forEach((el) => { el.textContent = charName; });
     $('auto-build').checked = !!state.settings.autoBuild;
+    $('auto-retry').checked = state.settings.autoRetry !== false;
 
     // Upgrades
     const ups = L.upgrades || [];
@@ -117,7 +118,7 @@
       actions += `<button class="small ghost" data-remove="${g.id}" title="Remove; unspent tokens go back to the jar">✕</button>`;
     }
     return `<div class="goal ${g.status}">
-      <div class="head"><div class="title">${esc(g.title)}</div><span class="badge ${g.status}">${g.status}${g.size ? ' · ' + g.size : ''}</span></div>
+      <div class="head"><div class="title">${esc(g.title)}</div><span class="badge ${g.status}">${g.waiting && g.status !== 'building' ? 'waiting' : g.status}${g.size ? ' · ' + g.size : ''}</span></div>
       <div class="summary">${esc(g.summary)}</div>
       <div class="bar"><div style="width:${pct}%"></div></div>
       <div class="meta"><span>${fmt(shown)} / ${fmt(target)} tokens${['paused', 'failed'].includes(g.status) ? ' to continue' : ''}</span><span>${g.spent ? `spent ${fmt(g.spent)}` : g.source === 'catalog' ? 'catalog idea' : 'your idea'}</span></div>
@@ -161,6 +162,7 @@
     } finally { $('suggest-btn').disabled = false; }
   };
   $('suggest-text').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('suggest-btn').click(); });
+  $('auto-retry').onchange = (e) => act(jar.updateSettings({ autoRetry: e.target.checked }).then((s) => ({ state: s })));
   $('auto-build').onchange = (e) => act(jar.updateSettings({ autoBuild: e.target.checked }).then((s) => ({ state: s })));
   $('maxutil').oninput = (e) => { $('maxutil-val').textContent = e.target.value; };
   $('maxutil').onchange = (e) => jar.updateSettings({ maxUtilization: Number(e.target.value) }).then(render);
