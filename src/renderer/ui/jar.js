@@ -63,6 +63,7 @@
     if (I.available) {
       $('ideas-btn').disabled = !!I.busy || !!state.busy;
       $('ideas-btn').textContent = I.busy ? 'Looking…' : I.has ? 'Refresh ideas' : `Get ideas for ${charName}`;
+      $('ideas-btn').title = 'Looks up the character\'s name on the web and suggests upgrades that fit. Uses a little of your plan. Refreshing replaces the ideas you have not pinned (★), funded, or added a picture to, with new ones that do not repeat any of them.';
       $('ideas-text').textContent = I.busy ? `Looking up ${charName}…`
         : !I.has ? `No ideas made for ${charName} yet.`
         : I.stale ? 'The name or personality changed since these ideas were made.'
@@ -130,7 +131,7 @@
       actions += `<button class="small ghost" data-remove="${g.id}" title="Remove; unspent tokens go back to the jar">✕</button>`;
     }
     return `<div class="goal ${g.status}">
-      <div class="head"><div class="title">${esc(g.title)}</div><span class="badge ${g.status}">${g.waiting && g.status !== 'building' ? 'waiting' : g.status}${g.size ? ' · ' + g.size : ''}</span></div>
+      <div class="head"><div class="title">${g.status === 'done' ? '' : `<button class="pin ${g.pinned ? 'on' : ''}" data-pin="${g.id}" data-on="${g.pinned ? 1 : 0}" title="${g.pinned ? 'Pinned: stays when you refresh ideas. Click to unpin.' : 'Pin: keep this one when you refresh ideas'}">${g.pinned ? '★' : '☆'}</button>`}${esc(g.title)}</div><span class="badge ${g.status}">${g.waiting && g.status !== 'building' ? 'waiting' : g.status}${g.size ? ' · ' + g.size : ''}</span></div>
       <div class="summary">${esc(g.summary)}</div>
       <div class="bar"><div style="width:${pct}%"></div></div>
       <div class="meta"><span>${fmt(shown)} / ${fmt(target)} tokens${['paused', 'failed'].includes(g.status) ? ' to continue' : ''}</span><span>${g.spent ? `spent ${fmt(g.spent)}` : g.source === 'catalog' ? 'catalog idea' : g.source === 'ideas' ? 'made for this character' : 'your idea'}</span></div>
@@ -228,7 +229,8 @@
       b.disabled = true;
       const g = S.ledger.goals.find((x) => x.id === b.dataset.build);
       act(g && g.sessionId ? jar.resume(b.dataset.build) : jar.build(b.dataset.build));
-    } else if (b.dataset.attach) {
+    } else if (b.dataset.pin) await act(jar.pin(b.dataset.pin, b.dataset.on !== '1'));
+    else if (b.dataset.attach) {
       const r = await act(jar.attach({ goalId: b.dataset.attach, use: b.dataset.use }));
       if (r && !r.ok && r.error) $('suggest-msg').textContent = r.error;
     } else if (b.dataset.unattach) await act(jar.attach({ goalId: b.dataset.unattach, remove: b.dataset.file }));

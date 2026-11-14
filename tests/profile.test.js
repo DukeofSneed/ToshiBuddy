@@ -131,3 +131,22 @@ check('upgrade prompts get the name, personality and notes, and nothing from the
   fs.rmSync(d, { recursive: true, force: true });
   console.log('ownership checks passed');
 }
+
+// Refreshing ideas: nothing that repeats what the user already has.
+{
+  const { similar, withoutRepeats } = profile;
+  assert.ok(similar('Watermelon snack prop', 'A watermelon snack'));
+  assert.ok(similar('Nap mode on inactivity', 'Inactivity nap'));
+  assert.ok(similar('Frost breath when idle', 'Frosty breath while idling'));
+  assert.ok(!similar('Watermelon snack prop', 'Frost breath when idle'));
+  assert.ok(!similar('Tiny desk paperwork stack', 'Desk photo frame'));
+  assert.ok(!similar('Rare earned praise', 'Protective check-in'));
+  const have = ['Watermelon snack prop', 'Frost breath when idle'];
+  const out = withoutRepeats([{ title: 'Watermelon snack' }, { title: 'Tea ceremony break' }, { title: 'A tea ceremony break' }, { title: 'Snowflake collection' }], have);
+  assert.deepStrictEqual(out.map((i) => i.title), ['Tea ceremony break', 'Snowflake collection']);
+  const p = profile.buildPrompt({ name: 'X', personality: 'Calm.', avoid: '- Watermelon snack prop: a slice on the desk' });
+  assert.match(p, /already been shown[\s\S]*Watermelon snack prop/);
+  assert.match(p, /not a variation, rewording, or second version/);
+  assert.ok(!/already been shown/.test(profile.buildPrompt({ name: 'X', personality: 'Calm.' })));
+  console.log('refresh checks passed');
+}

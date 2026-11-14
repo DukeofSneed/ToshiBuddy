@@ -38,7 +38,7 @@ function describe({ config = null, builtin = false, built = [], planned = [] } =
   if (mapped.length) lines.push(`Hand-drawn poses the character already has: ${mapped.map((k) => POSES[k]).join(', ')}.`);
   const b = built.map((t) => clean(t, 80)).filter(Boolean).slice(0, 30);
   if (b.length) lines.push(`Tricks already built: ${b.join('; ')}.`);
-  const p = planned.map((t) => clean(t, 80)).filter(Boolean).slice(0, 30);
+  const p = planned.map((t) => clean(t, 80)).filter(Boolean).slice(0, 40);
   if (p.length) lines.push(`Ideas already on the list: ${p.join('; ')}.`);
   return lines.join('\n');
 }

@@ -803,24 +803,36 @@ function start() {
     pushJar();
     notify(`Looking up ideas for ${info.name}…`, 5000);
     let r;
+    // Everything on this character's list now, kept or about to be replaced:
+    // the new set must not repeat any of it.
+    const mineNow = ledger.data.goals.filter((g) => g.characterId === id);
+    const line = (g) => `- ${g.title}: ${String(g.summary || '').replace(/\s+/g, ' ').slice(0, 140)}`;
     try {
       r = await characterProfile.research({
         userData, id, name: info.name, personality: info.personality, abilities: info.abilities, log,
+        avoid: mineNow.slice(0, 40).map(line).join('\n'),
         onRateLimit: (rl) => guard.observe(rl),
       });
     } catch (e) { r = { ok: false, error: e.message }; } finally { ideasBusy = false; }
     if (r.tokens) ledger.chargeFee(r.tokens, 'ideas');
     if (r.rateLimit) guard.observe(r.rateLimit);
     if (!r.ok) { notify(`Couldn't get ideas: ${r.error}`, 7000); pushJar(); return { ok: false, error: r.error }; }
-    // Replace this character's untouched earlier ideas; keep anything with tokens in it.
-    ledger.data.goals = ledger.data.goals.filter((g) => !(g.characterId === id && g.source === 'ideas' && !g.funded && !g.spent && g.status === 'open'));
-    const have = new Set(ledger.data.goals.filter((g) => g.characterId === id).map((g) => g.title.toLowerCase()));
+    // Replace this character's untouched earlier ideas. Kept: anything pinned,
+    // anything with tokens or a picture in it, and the user's own suggestions.
+    const replaceable = (g) => g.characterId === id && g.source === 'ideas' && !g.pinned && !g.funded && !g.spent && g.status === 'open' && !(g.attachments || []).length;
+    const shownBefore = ledger.data.goals.filter((g) => g.characterId === id).map((g) => g.title);
+    const keptCount = ledger.data.goals.filter((g) => g.characterId === id && g.source === 'ideas' && !replaceable(g)).length;
+    ledger.data.goals = ledger.data.goals.filter((g) => !replaceable(g));
+    // New ideas only: nothing that repeats what was on the list before the refresh.
+    const fresh = characterProfile.withoutRepeats(r.profile.ideas, shownBefore);
     let added = 0;
-    for (const idea of r.profile.ideas.slice().reverse()) {
-      if (have.has(idea.title.toLowerCase())) continue;
+    for (const idea of fresh.slice().reverse()) {
       ledger.addGoal({ ...idea, source: 'ideas', characterId: id });
       added++;
     }
+    const dropped = r.profile.ideas.length - fresh.length;
+    if (dropped) log(`ideas for ${id}: ${dropped} left out for repeating something already shown`);
+    if (keptCount) log(`ideas for ${id}: ${keptCount} earlier ideas kept (pinned, funded, or with a picture)`);
     ledger.save();
     log(`ideas for ${id}: ${added} goals, ${r.profile.found ? 'character found by name' : 'from the personality text only'}`);
     notify(`${added} new idea${added === 1 ? '' : 's'} for ${info.name}. Open the jar to see them.`, 7000);
@@ -828,6 +840,12 @@ function start() {
     return { ok: true, added, found: r.profile.found };
   }
   ipcMain.handle('jar:ideas', async () => ({ ...(await getIdeas()), state: jarState() }));
+  // A pinned goal survives "Refresh ideas".
+  ipcMain.handle('jar:pin', (_e, { goalId, pinned } = {}) => {
+    const g = ledger.goal(String(goalId || ''));
+    if (g) ledger.updateGoal(g.id, { pinned: !!pinned });
+    return { ok: !!g, state: jarState() };
+  });
 
   // Goals the plan had no room for start by themselves after it resets.
   const waiting = new WaitingQueue({
