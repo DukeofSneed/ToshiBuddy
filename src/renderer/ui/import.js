@@ -156,6 +156,7 @@
     if (d.error) { note('ed-msg', d.error, true); return; }
     current = d;
     edited = {};
+    renderCheck(null);
     note('ed-msg', d.builtin ? 'The built-in test character is drawn in code, so it has no sheet to map.' : '');
     $('ed-body').classList.toggle('hidden', !!d.builtin);
     $('ed-personality').value = d.personality || '';
@@ -173,6 +174,7 @@
     const img = $('ed-preview');
     if (s.preview) img.src = s.preview; else img.removeAttribute('src');
     $('ed-scale').value = s.scale || 1;
+    $('ed-template').innerHTML = '<option value="">Best match</option>' + (s.templates || []).map((t) => `<option value="${esc(t.id)}">Like ${esc(t.name)}</option>`).join('');
     $('ed-anims').innerHTML = current.animKeys.map((k) => {
       const a = s.animations[k] || {};
       const frames = a.frames != null ? a.frames : (a.row != null ? `${a.row}:0-99` : '');
@@ -188,6 +190,13 @@
 
   // One mirror mode per animation: the figure only (marks stay readable) or everything.
   const mirrorOf = (a) => (a.flipBody ? 'body' : a.flip ? 'all' : '');
+
+  function renderCheck(r) {
+    const mark = { ok: '\u2713', info: '\u00b7', warn: '!', error: '\u2715' };
+    const head = !r ? '' : r.ok ? (r.warnings ? `Works, with ${r.warnings} thing${r.warnings === 1 ? '' : 's'} to look at` : 'Everything checks out') : `${r.errors} problem${r.errors === 1 ? '' : 's'} to fix`;
+    $('ed-check-list').innerHTML = !r ? '' : [`<li class="${r.ok ? (r.warnings ? 'warn' : 'ok') : 'error'}"><b>${head}</b></li>`]
+      .concat(r.items.map((i) => `<li class="${i.level}"><span>${mark[i.level] || ''}</span> ${esc(i.text)}</li>`)).join('');
+  }
 
   function collect() {
     const existing = current[kind].animations || {};
@@ -226,6 +235,32 @@
     if (r.error) { note('ed-msg', r.error, true); return; }
     note('ed-msg', 'Switched.');
     loadDetails($('ed-char').value, { waitForPreview: true });
+  });
+  $('ed-automap').addEventListener('click', async () => {
+    if (!current) return;
+    const r = await chars.autoMap(current.id, kind, $('ed-template').value || null);
+    if (r.error) { note('ed-msg', r.error, true); return; }
+    if (!Object.keys(r.animations).length) { note('ed-msg', 'Nothing could be mapped on this sheet.', true); return; }
+    const mods = Object.fromEntries(Object.entries(current[kind].animations || {}).filter(([k]) => k.startsWith('anim-')));
+    current[kind].animations = { ...r.animations, ...mods };
+    edited[kind] = true;
+    renderSheet();
+    note('ed-msg', r.guessed ? 'Guessed idle, walk and talk. Adjust the frames, then Save.' : `Filled in from ${r.sourceName}'s layout. Check the frames, then Save.`);
+  });
+  $('ed-check').addEventListener('click', async () => {
+    if (!current) return;
+    stash();
+    const draft = {};
+    for (const k of Object.keys(edited)) draft[k] = { animations: current[k].animations };
+    const r = await chars.check(current.id, draft);
+    if (r.error) { note('ed-msg', r.error, true); return; }
+    renderCheck(r);
+  });
+  $('ed-preview-all').addEventListener('click', async () => {
+    if (!current) return;
+    note('ed-msg', 'Playing each saved animation on the pet…');
+    const r = await chars.preview(current.id);
+    note('ed-msg', r.error ? r.error : `Played ${r.played.length} animations.`, !!r.error);
   });
   $('ed-export').addEventListener('click', async () => {
     const r = await chars.exportPack($('ed-char').value);

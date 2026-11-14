@@ -148,8 +148,16 @@ function cleanSheet(s) {
   }
   if (out.scale !== undefined) out.scale = Math.max(0.2, Math.min(4, out.scale));
   if (s.keyMode === 'none') out.keyMode = 'none';
+  const rows = cleanRows(s.rows);
+  if (rows) out.rows = rows;
   if (s.animations) out.animations = cleanAnimations(s.animations);
   return out;
+}
+
+// How many poses each row of the sheet has (found when the sheet is sliced).
+function cleanRows(rows) {
+  if (!Array.isArray(rows) || !rows.length) return null;
+  return rows.slice(0, 50).map((n) => Math.max(0, Math.min(99, Math.floor(Number(n) || 0))));
 }
 
 function writeJson(file, data) {
@@ -307,6 +315,7 @@ function saveCharacter(projectRoot, id, patch) {
     if (!p) continue;
     cfg[kind] = cfg[kind] || {};
     if (p.animations) cfg[kind].animations = cleanAnimations(p.animations);
+    if (cleanRows(p.rows)) cfg[kind].rows = cleanRows(p.rows);
     if (Number.isFinite(Number(p.scale)) && Number(p.scale) > 0) cfg[kind].scale = Math.max(0.2, Math.min(4, Number(p.scale)));
   }
   writeJson(file, cfg);

@@ -14,5 +14,8 @@ contextBridge.exposeInMainWorld('chars', {
   switchTo: (id) => ipcRenderer.invoke('import:switch', { id }),
   choose: (id) => ipcRenderer.invoke('import:choose', { id }),
   exportPack: (id) => ipcRenderer.invoke('import:export', { id }),
+  autoMap: (id, kind, from) => ipcRenderer.invoke('import:automap', { id, kind, from }),
+  check: (id, draft) => ipcRenderer.invoke('import:check', { id, draft }),
+  preview: (id) => ipcRenderer.invoke('import:preview', { id }),
   onGoto: (fn) => ipcRenderer.on('import:goto', (_e, hash) => fn(hash)),
 });

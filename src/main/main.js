@@ -4,6 +4,7 @@ const path = require('path');
 const fs = require('fs');
 const { createOverlay, createJarWindow, createCustomizeWindow, createImportWindow } = require('./overlay');
 const characterImport = require('./character-import');
+const characterCheck = require('./character-check');
 const { QuipStore } = require('./quip-store');
 const { Settings } = require('./settings');
 const { Ledger } = require('./jar/ledger');
@@ -313,8 +314,82 @@ function start() {
       if (!listCharacters(PROJECT_ROOT).some((c) => c.name === skin && !c.builtin)) return;
       const file = path.join(charactersRoot(PROJECT_ROOT), skin, `${kind}-index.png`);
       fs.writeFileSync(file, Buffer.from(dataUrl.slice(22), 'base64'));
-      if (Array.isArray(rows)) sheetInfo.set(`${skin}/${kind}`, { rows: rows.slice(0, 50).map((n) => Math.max(0, Math.floor(Number(n) || 0))), at: Date.now() });
+      if (Array.isArray(rows)) {
+        sheetInfo.set(`${skin}/${kind}`, { rows: rows.slice(0, 50).map((n) => Math.max(0, Math.floor(Number(n) || 0))), at: Date.now() });
+        autoMapIfNew(skin, kind === 'sheet' ? 'sheet' : 'ultimateSheet');
+      }
     } catch (e) { log(`sheet index not saved: ${e.message}`); }
+  });
+  // IPC handlers that answer { error } instead of throwing.
+  const guarded = (fn) => (_e, args) => {
+    try { return fn(args || {}); } catch (e) { return { error: e.message }; }
+  };
+  // ---- animation maps: row counts, auto-mapping, checking ----
+  const quipCountOf = (id) => ((readCharacterDialogue(PROJECT_ROOT, id) || {}).quips || []).length;
+  const KIND_FILE = { sheet: 'sheet', ultimateSheet: 'ultimate-sheet' };
+  const rowsOf = (c, cfgKey) => (sheetInfo.get(`${c.name}/${KIND_FILE[cfgKey]}`) || {}).rows || (c.config[cfgKey] || {}).rows || null;
+  // Characters whose map can be copied onto another sheet of the same kind.
+  const layoutTemplates = (cfgKey, exceptId) => listCharacters(PROJECT_ROOT)
+    .filter((c) => !c.builtin && c.name !== exceptId && rowsOf(c, cfgKey) && Object.keys((c.config[cfgKey] || {}).animations || {}).length)
+    .map((c) => ({ id: c.name, name: displayNameOf(c), rows: rowsOf(c, cfgKey), animations: c.config[cfgKey].animations }));
+  // A freshly imported sheet has no map: fill one in as soon as its poses are counted.
+  function autoMapIfNew(id, cfgKey) {
+    const c = listCharacters(PROJECT_ROOT).find((x) => x.name === id && !x.builtin);
+    if (!c || Object.keys((c.config[cfgKey] || {}).animations || {}).length) return;
+    const rows = rowsOf(c, cfgKey);
+    const r = characterCheck.autoMap(rows, layoutTemplates(cfgKey, id));
+    if (!Object.keys(r.animations).length) return;
+    characterImport.saveCharacter(PROJECT_ROOT, id, { [cfgKey]: { animations: r.animations, rows } });
+    invalidateCharacters();
+    log(`animations mapped automatically for ${id} (${cfgKey}): ${r.guessed ? 'guessed' : `layout of ${r.source}`}, ${Object.keys(r.animations).length} animations`);
+    notify(r.guessed ? 'I guessed the idle, walk and talk poses. Check them in Edit animations.' : `Animations set up automatically (same layout as ${r.sourceName}).`, 8000);
+    if (id === activeCharacterId()) reloadAndAwaitMods([], 1500);
+  }
+  function checkOf(c, draft) {
+    const config = { ...c.config };
+    for (const k of ['sheet', 'ultimateSheet']) {
+      if (draft && draft[k] && draft[k].animations) config[k] = { ...(config[k] || {}), animations: characterImport.cleanAnimations(draft[k].animations) };
+    }
+    let quipCount = null;
+    try { quipCount = quipCountOf(c.name); } catch (_) { /* unknown */ }
+    return characterCheck.checkCharacter(config, {
+      rows: { sheet: rowsOf(c, 'sheet'), ultimateSheet: rowsOf(c, 'ultimateSheet') },
+      quipCount, hasSheet: !!c.sheet, hasUltimateSheet: !!c.ultimateSheet,
+    });
+  }
+  ipcMain.handle('import:automap', guarded(({ id, kind, from } = {}) => {
+    const c = listCharacters(PROJECT_ROOT).find((x) => x.name === id && !x.builtin);
+    if (!c || !KIND_FILE[kind]) throw new Error('Unknown character.');
+    const rows = rowsOf(c, kind);
+    if (!rows) throw new Error('The poses have not been counted yet. Press "Use this character" first.');
+    return characterCheck.autoMap(rows, layoutTemplates(kind, id), { from: from ? String(from) : null });
+  }));
+  ipcMain.handle('import:check', guarded(({ id, draft } = {}) => {
+    const c = listCharacters(PROJECT_ROOT).find((x) => x.name === id && !x.builtin);
+    if (!c) throw new Error('Unknown character.');
+    return checkOf(c, draft);
+  }));
+  // Play each mapped animation on the pet for two seconds, with its name shown.
+  let previewing = false;
+  ipcMain.handle('import:preview', async (_e, { id } = {}) => {
+    if (id !== activeCharacterId()) return { error: 'Press "Use this character" first, then preview.' };
+    if (previewing) return { error: 'A preview is already playing.' };
+    const c = activeCharacter();
+    const keys = Object.keys(((c && c.config.sheet) || {}).animations || {}).filter((k) => characterCheck.ANIM_KEYS.includes(k));
+    if (!keys.length) return { error: 'No animations are mapped yet.' };
+    previewing = true;
+    try {
+      await overlay.webContents.executeJavaScript(`(async () => {
+        const p = document.getElementById('pet'); const all = ${JSON.stringify(characterCheck.ANIM_KEYS)};
+        const clear = () => { for (const k of all) p.classList.remove(k); };
+        BuddyBrain.setPaused(true); BuddyBubble.hide();
+        try {
+          for (const k of ${JSON.stringify(keys)}) { clear(); p.classList.add(k); BuddyBubble.toast(k, 1900); await new Promise((r) => setTimeout(r, 2000)); }
+        } finally { clear(); p.classList.add('idle'); BuddyBrain.setPaused(false); }
+        return 1;
+      })()`);
+    } catch (e) { return { error: e.message }; } finally { previewing = false; }
+    return { played: keys };
   });
   ipcMain.handle('overlay:bootstrap', () => ({
     workArea: screen.getPrimaryDisplay().workArea,
@@ -358,9 +433,6 @@ function start() {
     if (customizeWin && !customizeWin.isDestroyed()) customizeWin.webContents.send('custom:changed', s);
     return { state: s };
   }
-  const guarded = (fn) => (_e, args) => {
-    try { return fn(args || {}); } catch (e) { return { error: e.message }; }
-  };
   ipcMain.handle('custom:state', () => customizeState());
   ipcMain.handle('custom:set-name', guarded(({ name }) => {
     const clean = String(name || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40);
@@ -466,8 +538,9 @@ function start() {
     const sheetOf = (cfgKey, kind) => ({
       scale: (c.config[cfgKey] || {}).scale || 1,
       animations: (c.config[cfgKey] || {}).animations || {},
-      rows: (sheetInfo.get(`${c.name}/${kind}`) || {}).rows || null,
+      rows: rowsOf(c, cfgKey),
       preview: preview(kind),
+      templates: layoutTemplates(cfgKey, c.name).map((t) => ({ id: t.id, name: t.name })),
     });
     return {
       id: c.name, name: displayNameOf(c), builtin: c.builtin, test: c.test,
@@ -734,6 +807,7 @@ function start() {
     app, screen, settings, ledger, guard, logLines, log, charName, buildMenu, openCustomize, openImport, activeCharacterId, reloadAndAwaitMods,
     listCharacters: () => listCharacters(PROJECT_ROOT),
     overAt, get hitAreas() { return hitAreas; },
+    checkActive: () => { const c = activeCharacter(); return c && !c.builtin ? checkOf(c) : null; },
     get overlay() { return overlay; }, get jarWin() { return jarWin; },
     get customizeWin() { return customizeWin; }, get importWin() { return importWin; },
   };

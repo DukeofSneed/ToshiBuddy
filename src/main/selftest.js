@@ -168,6 +168,7 @@ function runSelftest(ctx, selftestDir) {
       wake.emptySpotClickThrough = !ctx.overAt({ x: cb.x + 5, y: cb.y + 5 });
       fs.writeFileSync(path.join(selftestDir, 'wake.json'), JSON.stringify(wake, null, 1));
       const labels = (m) => m.items.flatMap((i) => [i.label, ...(i.submenu ? labels(i.submenu) : [])]).filter(Boolean);
+      if (ctx.checkActive) fs.writeFileSync(path.join(selftestDir, 'character-check.json'), JSON.stringify(ctx.checkActive(), null, 1));
       fs.writeFileSync(path.join(selftestDir, 'menu.json'), JSON.stringify({ name: charName(), tooltipName: `${charName()} Buddy`, menu: labels(buildMenu()) }, null, 1));
       fs.writeFileSync(path.join(selftestDir, 'log.txt'), logLines.join('\n'));
     } catch (e) {

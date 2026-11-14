@@ -98,7 +98,15 @@
           <div class="row">
             <label class="inline">Size <input type="number" id="ed-scale" min="0.2" max="4" step="0.05" /></label>
             <span class="grow"></span>
+            <select id="ed-template" title="Whose layout to copy"></select>
+            <button class="ghost small" id="ed-automap" title="Fill in the frames from a matching layout, or guess idle, walk and talk">Auto-map</button>
           </div>
+          <div class="row">
+            <button class="ghost small" id="ed-check" title="Check that every frame exists and nothing is missing">Check</button>
+            <button class="ghost small" id="ed-preview-all" title="Play each saved animation on the pet for two seconds">Preview all</button>
+            <span class="grow"></span>
+          </div>
+          <ul id="ed-check-list" class="check-list"></ul>
         </div>
         <div class="row end">
           <button id="ed-save">Save and reload</button>
