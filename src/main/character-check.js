@@ -71,7 +71,7 @@ function checkCharacter(config, { rows = {}, quipCount = null, hasSheet = true, 
   const items = [];
   if (!config.personality) items.push({ level: 'warn', text: 'no personality text: upgrades and replies use a generic voice' });
   if (quipCount === 0) items.push({ level: 'warn', text: 'no lines: the character will not say anything' });
-  else if (quipCount) items.push({ level: 'ok', text: `${quipCount} lines` });
+  else if (quipCount) items.push({ level: 'ok', text: `${quipCount} line${quipCount === 1 ? '' : 's'}` });
   if (hasSheet) items.push(...checkSheet(config.sheet, rows.sheet, hasUltimateSheet ? 'Main sheet' : ''));
   else items.push({ level: 'info', text: 'no sprite sheet: shown as a still image' });
   if (hasUltimateSheet) items.push(...checkSheet(config.ultimateSheet, rows.ultimateSheet, 'Ultimate sheet'));
