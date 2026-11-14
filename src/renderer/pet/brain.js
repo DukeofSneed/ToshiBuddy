@@ -266,11 +266,21 @@
     el.dataset.papers = String(st.papers);
     el.classList.add('desk-in');
     setTimeout(() => el.classList.remove('desk-in'), 600);
-    BuddySfx.play('stamp');
+    deskSound('stamp');
     if (!fire('desk', { kind })) quip([`desk-enter-${kind}`, 'desk-enter']);
     st.nextQuip = now() + rand(150000, 300000);
     scheduleDeskWork();
   }
+  // Scribbling and stamping repeat for as long as the user works, so they have
+  // their own level: 'off', 'quiet' (softer, and not every time) or 'normal'.
+  function deskSound(name) {
+    const level = st.deskSounds || 'quiet';
+    if (level === 'off') return;
+    if (level === 'normal') { BuddySfx.play(name); return; }
+    if (name === 'scribble' && Math.random() < 0.6) return;
+    BuddySfx.play(name, 0.3);
+  }
+  function setDeskSounds(level) { st.deskSounds = ['off', 'quiet', 'normal'].includes(level) ? level : 'quiet'; }
   function scheduleDeskWork() {
     clearDeskTimers();
     const loop = (fn, min, max) => {
@@ -285,7 +295,7 @@
     loop(() => {
       const el = pet();
       el.classList.add('scribbling');
-      BuddySfx.play('scribble');
+      deskSound('scribble');
       setTimeout(() => el.classList.remove('scribbling'), rand(1800, 3600));
     }, 3500, 7000);
     loop(() => stamp(), 11000, 24000);
@@ -300,7 +310,7 @@
     el.classList.remove('stamp');
     void el.offsetWidth;
     el.classList.add('stamp');
-    setTimeout(() => { BuddySfx.play('stamp'); el.classList.add('stamped'); }, 470);
+    setTimeout(() => { deskSound('stamp'); el.classList.add('stamped'); }, 470);
     setTimeout(() => el.classList.remove('stamp'), 900);
     setTimeout(() => el.classList.remove('stamped'), 2600);
     return true;
@@ -671,7 +681,7 @@
   }
 
   window.BuddyBrain = {
-    start, resize, say, quip, playAnimation, fire, setPaused, setWorking, setDeskEnabled,
+    start, resize, say, quip, playAnimation, fire, setPaused, setWorking, setDeskEnabled, setDeskSounds,
     onIdleSeconds, onActivity, enterDesk, exitDesk, enterUltimate, exitUltimate, armIntervals, resetPointer, state: st,
   };
 })();

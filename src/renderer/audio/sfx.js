@@ -7,6 +7,7 @@
   let noiseBuf = null;
   let enabled = true;
   let volume = 0.5;
+  let scale = 1; // loudness of the sound being started (see play)
   const lastPlayed = {};
 
   function ensure() {
@@ -31,7 +32,7 @@
     if (to !== freq) osc.frequency.exponentialRampToValueAtTime(Math.max(20, to), t + dur);
     const env = ctx.createGain();
     env.gain.setValueAtTime(0.0001, t);
-    env.gain.exponentialRampToValueAtTime(gain, t + attack);
+    env.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain * scale), t + attack);
     env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     let node = osc;
     if (filter) {
@@ -59,7 +60,7 @@
     if (to !== freq) f.frequency.exponentialRampToValueAtTime(Math.max(20, to), t + dur);
     const env = ctx.createGain();
     env.gain.setValueAtTime(0.0001, t);
-    env.gain.exponentialRampToValueAtTime(gain, t + attack);
+    env.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain * scale), t + attack);
     env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     src.connect(f);
     f.connect(env);
@@ -181,15 +182,17 @@
     },
   };
 
-  function play(name) {
-    if (!enabled || !SOUNDS[name]) return false;
+  // loudness: 0-1, a fraction of the sound's normal level (default 1).
+  function play(name, loudness = 1) {
+    if (!enabled || !SOUNDS[name] || !(loudness > 0)) return false;
     if (!ensure()) return false;
     // Don't stack the same sound on itself (rapid clicks).
     const now = performance.now();
     if (lastPlayed[name] && now - lastPlayed[name] < 60) return false;
     lastPlayed[name] = now;
     if (ctx.state === 'suspended') ctx.resume();
-    try { SOUNDS[name](ctx.currentTime + 0.01); return true; } catch (_) { return false; }
+    scale = Math.min(1, loudness);
+    try { SOUNDS[name](ctx.currentTime + 0.01); return true; } catch (_) { return false; } finally { scale = 1; }
   }
 
   window.BuddySfx = {

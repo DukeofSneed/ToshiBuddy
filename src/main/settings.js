@@ -8,6 +8,7 @@ const DEFAULTS = {
   sfx: true,        // sound effects
   sfxVolume: 0.5,   // 0-1
   paused: false,
+  deskSounds: 'quiet', // the desk's scribbling and stamping: 'off', 'quiet' or 'normal'
   deskMode: true,   // sit at the desk while the user writes or does labs
   slackNudges: true, // a rare comment after a long stretch of games or videos
   deskApps: null,   // override { writing: [...process names], lab: [...] }

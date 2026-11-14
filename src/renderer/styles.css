@@ -168,6 +168,10 @@ html, body {
 #pet.desk[data-papers="8"] .sheet { display: block; }
 #stamp-mark { transition: opacity 200ms; }
 #pet.desk.stamped #stamp-mark { opacity: 0.9; }
+/* The snowflake in the stamp is the built-in test character's emblem: other
+   characters stamp a plain ring. */
+#pet.skin #stamp-flake { display: none; }
+#pet.skin #stamp-mark circle { stroke: #5b6478; }
 #pet.desk-in #desk { animation: deskIn 500ms cubic-bezier(.2,1.4,.5,1); transform-origin: 80px 189px; }
 @keyframes deskIn { from { transform: scaleY(0.2) translateY(30px); opacity: 0; } to { transform: none; opacity: 1; } }
 

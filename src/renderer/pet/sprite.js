@@ -117,7 +117,7 @@
     <path d="M68,131 L91.5,131 M67.2,133.4 L92.8,133.4" stroke="#9fb7d6" stroke-width="0.8"/>
     <g id="stamp-mark" opacity="0">
       <circle cx="88" cy="132" r="2.8" fill="none" stroke="#3f7fd0" stroke-width="1.2"/>
-      ${snowflake(88, 132, 1.8, 'stroke="#3f7fd0" stroke-width="0.7" fill="none"')}
+      <g id="stamp-flake">${snowflake(88, 132, 1.8, 'stroke="#3f7fd0" stroke-width="0.7" fill="none"')}</g>
     </g>
     <g id="ink">
       <rect x="114" y="118" width="13" height="10" rx="2.5" fill="#22345f" stroke="${LINE}" stroke-width="1.1"/>

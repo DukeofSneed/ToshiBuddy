@@ -181,6 +181,7 @@
   }, 80);
   BuddyBrain.setPaused(!!boot.settings.paused);
   BuddyBrain.setDeskEnabled(boot.settings.deskMode !== false);
+  BuddyBrain.setDeskSounds(boot.settings.deskSounds);
 
   buddy.on('work-area', (wa) => BuddyBrain.resize(wa));
   buddy.on('idle-seconds', (sec) => BuddyBrain.onIdleSeconds(sec));
@@ -191,6 +192,7 @@
     BuddyVoice.setMuted(!!s.muted);
     BuddyBrain.setPaused(!!s.paused);
     BuddyBrain.setDeskEnabled(s.deskMode !== false);
+    BuddyBrain.setDeskSounds(s.deskSounds);
     document.getElementById('pet').classList.toggle('show-anchors', !!s.showAnchors);
     BuddySfx.setEnabled(s.sfx !== false);
     BuddySfx.setVolume(s.sfxVolume ?? 0.5);
