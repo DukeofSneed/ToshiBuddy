@@ -132,6 +132,7 @@ function cleanAnimations(anims) {
     // One mirror mode only: both together would cancel out on the figure.
     if (d.flipBody) a.flipBody = true;
     else if (d.flip) a.flip = true;
+    if (d.marksTurn) a.marksTurn = true;
     if (d.loop === false) a.loop = false;
     if (Number.isFinite(Number(d.loopFrom)) && Number(d.loopFrom) > 0) a.loopFrom = Math.floor(Number(d.loopFrom));
     if (Number.isFinite(Number(d.speed)) && Number(d.speed) > 0) a.speed = Math.min(400, Number(d.speed));
@@ -143,14 +144,28 @@ function cleanAnimations(anims) {
 function cleanSheet(s) {
   const out = {};
   for (const k of ['scale', 'offsetX', 'offsetY', 'keyTolerance', 'keyMax']) if (Number.isFinite(Number(s[k]))) out[k] = Number(s[k]);
-  if (Array.isArray(s.moveMarks)) {
+  if (Array.isArray(s.moveMarks) && !cleanMoveMarks(s.moveMarks).length) { /* nothing valid: leave it out */ } else if (Array.isArray(s.moveMarks)) {
     out.moveMarks = s.moveMarks.filter((p) => Array.isArray(p) && p.length === 2 && p.every((x) => /^\d{1,2}:\d{1,2}$/.test(String(x)))).slice(0, 50).map((p) => p.map(String));
   }
+  if (cleanMoveMarks(s.marksOk).length) out.marksOk = cleanMoveMarks(s.marksOk); // mark placements the user checked
   if (out.scale !== undefined) out.scale = Math.max(0.2, Math.min(4, out.scale));
   if (s.keyMode === 'none') out.keyMode = 'none';
   const rows = cleanRows(s.rows);
   if (rows) out.rows = rows;
   if (s.animations) out.animations = cleanAnimations(s.animations);
+  return out;
+}
+
+// [["3:4", "3:3"], ...]: marks beside the first pose belong to the second.
+function cleanMoveMarks(list) {
+  if (!Array.isArray(list)) return [];
+  const out = [];
+  for (const p of list) {
+    if (!Array.isArray(p) || p.length !== 2 || !p.every((x) => /^\d{1,2}:\d{1,2}$/.test(String(x))) || String(p[0]) === String(p[1])) continue;
+    if (out.some((q) => q[0] === String(p[0]) && q[1] === String(p[1]))) continue;
+    out.push(p.map(String));
+    if (out.length >= 50) break;
+  }
   return out;
 }
 
@@ -316,10 +331,18 @@ function saveCharacter(projectRoot, id, patch) {
     cfg[kind] = cfg[kind] || {};
     if (p.animations) cfg[kind].animations = cleanAnimations(p.animations);
     if (cleanRows(p.rows)) cfg[kind].rows = cleanRows(p.rows);
+    if (Array.isArray(p.marksOk)) {
+      const fine = cleanMoveMarks(p.marksOk);
+      if (fine.length) cfg[kind].marksOk = fine; else delete cfg[kind].marksOk;
+    }
+    if (Array.isArray(p.moveMarks)) {
+      const moves = cleanMoveMarks(p.moveMarks);
+      if (moves.length) cfg[kind].moveMarks = moves; else delete cfg[kind].moveMarks;
+    }
     if (Number.isFinite(Number(p.scale)) && Number(p.scale) > 0) cfg[kind].scale = Math.max(0.2, Math.min(4, Number(p.scale)));
   }
   writeJson(file, cfg);
   return cfg;
 }
 
-module.exports = { importFiles, importPack, exportPack, saveCharacter, cleanConfig, cleanAnimations, readQuipsFile, slug, ANIM_KEYS, PACK_FILE_RE };
+module.exports = { cleanMoveMarks, importFiles, importPack, exportPack, saveCharacter, cleanConfig, cleanAnimations, readQuipsFile, slug, ANIM_KEYS, PACK_FILE_RE };

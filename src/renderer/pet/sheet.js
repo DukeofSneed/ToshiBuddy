@@ -152,18 +152,27 @@
       frames.push({ row: ri, col: ci, main: c, minx: c.minx, miny: c.miny, maxx: c.maxx, maxy: c.maxy });
     }));
     const maxGap = medH * 0.35;
+    // Marks that sit about as close to the pose next door as to their own: the
+    // character check points these out, since they may belong to the other pose.
+    let near = [];
     for (const c of comps) {
       if (frameOf[c.id] !== -1 || c.area < 25) continue;
       const cx = (c.minx + c.maxx) / 2, cy = (c.miny + c.maxy) / 2;
-      let best = -1, bestD = Infinity;
+      let best = -1, bestD = Infinity, second = -1, secondD = Infinity;
       frames.forEach((f, i) => {
         const m = f.main;
         const dx = Math.max(m.minx - cx, 0, cx - m.maxx);
         const dy = Math.max(m.miny - cy, 0, cy - m.maxy);
         const d = Math.hypot(dx, dy);
-        if (d < bestD) { bestD = d; best = i; }
+        if (d < bestD) { second = best; secondD = bestD; bestD = d; best = i; }
+        else if (d < secondD) { secondD = d; second = i; }
       });
       if (best < 0 || bestD > maxGap) continue;
+      const own = frames[best].main;
+      const beside = cx < own.minx || cx > own.maxx;
+      if (beside && second >= 0 && frames[second].row === frames[best].row && secondD <= maxGap * 1.5 && secondD <= Math.max(bestD * 2, bestD + medH * 0.1) && c.area >= 60) {
+        near.push({ from: `${frames[best].row}:${frames[best].col}`, near: `${frames[second].row}:${frames[second].col}` });
+      }
       frameOf[c.id] = best;
       (frames[best].bits = frames[best].bits || []).push(c);
       const f = frames[best];
@@ -190,7 +199,11 @@
       refit(src); refit(dst);
     }
     const baselines = rows.map((r) => median(r.items.map((c) => c.maxy)));
-    return { label, frameOf, frames, rows: rows.map((r) => r.items.length), baselines };
+    // A pair the user already sorted out with moveMarks needs no hint.
+    const settled = (n) => (Array.isArray(moveMarks) ? moveMarks : []).some((p) => (String(p[0]) === n.from && String(p[1]) === n.near) || (String(p[0]) === n.near && String(p[1]) === n.from));
+    const seen = new Set();
+    near = near.filter((n) => !settled(n) && !seen.has(`${n.from}>${n.near}`) && seen.add(`${n.from}>${n.near}`)).slice(0, 40);
+    return { label, frameOf, frames, rows: rows.map((r) => r.items.length), baselines, near };
   }
 
   function cutFrames(px, w, det) {
@@ -362,7 +375,7 @@
     const det = detectFrames(px, w, h, cfg.moveMarks);
     if (!det.frames.length) throw new Error('no figures found on the sheet');
     const frames = cutFrames(px, w, det);
-    return { w, h, removed, rows: det.rows, frames, index: indexImage(canvas, frames, det) };
+    return { w, h, removed, rows: det.rows, near: det.near, frames, index: indexImage(canvas, frames, det) };
   }
 
   function buildAnims(cfg, rows, sheet) {
@@ -377,6 +390,7 @@
         fps: Math.max(0.2, Math.min(30, Number(d.fps) || 6)),
         flip: !!d.flip,
         flipBody: !!d.flipBody, // mirror the figure but not the marks beside it
+        marksTurn: !!d.marksTurn, // marks turn with the body when facing left (default: they stay readable)
         loop: d.loop !== false,
         loopFrom: Math.max(0, Math.min(list.length - 1, Number(d.loopFrom) || 0)),
         speed: Number(d.speed) > 0 ? Math.min(400, Number(d.speed)) : null, // walk: pixels per second
@@ -389,7 +403,7 @@
   async function prepare(url, cfg, opts = {}) {
     cfg = cfg || {};
     const key = url.split('?')[0];
-    const sig = JSON.stringify(['marks-v1', url, cfg.keyMode, cfg.keyTolerance, cfg.keyMax, cfg.moveMarks]);
+    const sig = JSON.stringify(['marks-v2', url, cfg.keyMode, cfg.keyTolerance, cfg.keyMax, cfg.moveMarks]);
     // Frames that need the figure-only mirror: flipBody poses, and any pose with
     // marks (used when the pet faces left, so the marks still read correctly).
     const flipBodyFrames = (sheet) => [...new Set([
@@ -434,7 +448,7 @@
     const { w, h, removed, rows } = sliced;
     buddy.log(`sheet ${name}: ${w}x${h}, ${fromCache ? 'from cache' : removed == null ? 'already transparent' : `background ${Math.round(removed * 100)}% removed`}, ${rows.length} rows [${rows.join(', ')}] = ${sheet.frames.length} frames; animations: ${Object.keys(sheet.anims).join(', ')}`);
     if (opts.indexKind && opts.skinName) {
-      try { buddy.saveSheetIndex(opts.skinName, opts.indexKind, sliced.index, rows); } catch (_) { /* preview only */ }
+      try { buddy.saveSheetIndex(opts.skinName, opts.indexKind, sliced.index, rows, sliced.near || []); } catch (_) { /* preview only */ }
     }
     return sheet;
   }
@@ -477,7 +491,7 @@
       // "?" or swirl backwards. For a frame with marks, mirror once more here
       // and swap to the other figure-only mirror: the body still faces left and
       // the marks read the right way.
-      const fix = !!(f.marks && f.flipUrl && pet.classList.contains('face-left'));
+      const fix = !!(f.marks && f.flipUrl && !a.marksTurn && pet.classList.contains('face-left'));
       const fb = !!a.flipBody !== fix;
       const mirror = !!a.flip !== fix;
       const b = frameBox(sheet, fb ? { ...f, ox: f.w - f.ox } : f);

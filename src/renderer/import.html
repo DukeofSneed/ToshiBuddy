@@ -92,7 +92,7 @@
           <div class="preview-wrap"><img id="ed-preview" alt="Numbered frames" /></div>
           <div class="muted small-note">Frames: <code>1:0-5</code> = row 1, frames 0 to 5. Lists work too: <code>0:0-4,0:3-1</code>. Leave empty to fall back to idle.</div>
           <table class="anims">
-            <thead><tr><th>When</th><th>Frames</th><th>FPS</th><th title="Figure: mirror the character but keep marks like ? and ! readable. Everything: mirror the whole pose.">Mirror</th><th title="Off: hold the last frame">Loop</th></tr></thead>
+            <thead><tr><th>When</th><th>Frames</th><th>FPS</th><th title="Figure: mirror the character but keep marks like ? and ! readable. Everything: mirror the whole pose.">Mirror</th><th title="For poses with a ?, ! or swirl beside the character. Readable: the mark always reads the right way. Turn: the mark turns around with the character when it faces left.">Marks</th><th title="Off: hold the last frame">Loop</th></tr></thead>
             <tbody id="ed-anims"></tbody>
           </table>
           <div class="row">
@@ -103,10 +103,21 @@
           </div>
           <div class="row">
             <button class="ghost small" id="ed-check" title="Check that every frame exists and nothing is missing">Check</button>
-            <button class="ghost small" id="ed-preview-all" title="Play each saved animation on the pet for two seconds">Preview all</button>
+            <button class="ghost small" id="ed-preview-all" title="Play each saved animation on the pet, facing right and then facing left">Preview all</button>
             <span class="grow"></span>
           </div>
           <ul id="ed-check-list" class="check-list"></ul>
+          <details class="marks-box">
+            <summary>Marks on the wrong pose</summary>
+            <div class="muted small-note">If a ?, ! or swirl shows up on the pose next to the one it belongs to, move it. Use the pose numbers from the picture above, for example from <code>3:4</code> to <code>3:3</code>.</div>
+            <div class="row">
+              <label class="inline">From pose <input type="text" id="mm-from" placeholder="3:4" size="5" /></label>
+              <label class="inline">to pose <input type="text" id="mm-to" placeholder="3:3" size="5" /></label>
+              <button class="ghost small" id="mm-add">Add</button>
+              <span class="grow"></span>
+            </div>
+            <div id="mm-list" class="attach-list"></div>
+          </details>
         </div>
         <div class="row end">
           <button id="ed-save">Save and reload</button>

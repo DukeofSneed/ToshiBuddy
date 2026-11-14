@@ -355,7 +355,7 @@ function start() {
   // The renderer slices sprite sheets and sends back a numbered preview
   // (sheet-index.png / ultimate-sheet-index.png) so the user can map frames.
   const sheetInfo = new Map(); // "<id>/<kind>" -> { rows, at }
-  ipcMain.on('overlay:sheet-index', (_e, { skin, kind, dataUrl, rows } = {}) => {
+  ipcMain.on('overlay:sheet-index', (_e, { skin, kind, dataUrl, rows, near } = {}) => {
     try {
       if (!['sheet', 'ultimate-sheet'].includes(kind)) return;
       if (typeof dataUrl !== 'string' || !dataUrl.startsWith('data:image/png;base64,')) return;
@@ -363,7 +363,9 @@ function start() {
       const file = path.join(charactersRoot(PROJECT_ROOT), skin, `${kind}-index.png`);
       fs.writeFileSync(file, Buffer.from(dataUrl.slice(22), 'base64'));
       if (Array.isArray(rows)) {
-        sheetInfo.set(`${skin}/${kind}`, { rows: rows.slice(0, 50).map((n) => Math.max(0, Math.floor(Number(n) || 0))), at: Date.now() });
+        const cell = /^\d{1,2}:\d{1,2}$/;
+        const hints = (Array.isArray(near) ? near : []).filter((n) => n && cell.test(String(n.from)) && cell.test(String(n.near))).slice(0, 40).map((n) => ({ from: String(n.from), near: String(n.near) }));
+        sheetInfo.set(`${skin}/${kind}`, { rows: rows.slice(0, 50).map((n) => Math.max(0, Math.floor(Number(n) || 0))), near: hints, at: Date.now() });
         autoMapIfNew(skin, kind === 'sheet' ? 'sheet' : 'ultimateSheet');
       }
     } catch (e) { log(`sheet index not saved: ${e.message}`); }
@@ -380,6 +382,7 @@ function start() {
   // ---- animation maps: row counts, auto-mapping, checking ----
   const quipCountOf = (id) => ((readCharacterDialogue(PROJECT_ROOT, id) || {}).quips || []).length;
   const KIND_FILE = { sheet: 'sheet', ultimateSheet: 'ultimate-sheet' };
+  const nearOf = (c, cfgKey) => (sheetInfo.get(`${c.name}/${KIND_FILE[cfgKey]}`) || {}).near || [];
   const rowsOf = (c, cfgKey) => (sheetInfo.get(`${c.name}/${KIND_FILE[cfgKey]}`) || {}).rows || (c.config[cfgKey] || {}).rows || null;
   // Characters whose map can be copied onto another sheet of the same kind.
   const layoutTemplates = (cfgKey, exceptId) => listCharacters(PROJECT_ROOT)
@@ -402,11 +405,14 @@ function start() {
     const config = { ...c.config };
     for (const k of ['sheet', 'ultimateSheet']) {
       if (draft && draft[k] && draft[k].animations) config[k] = { ...(config[k] || {}), animations: characterImport.cleanAnimations(draft[k].animations) };
+      if (draft && draft[k] && Array.isArray(draft[k].marksOk)) config[k] = { ...(config[k] || {}), marksOk: characterImport.cleanMoveMarks(draft[k].marksOk) };
+      if (draft && draft[k] && Array.isArray(draft[k].moveMarks)) config[k] = { ...(config[k] || {}), moveMarks: characterImport.cleanMoveMarks(draft[k].moveMarks) };
     }
     let quipCount = null;
     try { quipCount = quipCountOf(c.name); } catch (_) { /* unknown */ }
     return characterCheck.checkCharacter(config, {
       rows: { sheet: rowsOf(c, 'sheet'), ultimateSheet: rowsOf(c, 'ultimateSheet') },
+      near: { sheet: nearOf(c, 'sheet'), ultimateSheet: nearOf(c, 'ultimateSheet') },
       quipCount, hasSheet: !!c.sheet, hasUltimateSheet: !!c.ultimateSheet,
     });
   }
@@ -435,10 +441,22 @@ function start() {
       await overlay.webContents.executeJavaScript(`(async () => {
         const p = document.getElementById('pet'); const all = ${JSON.stringify(characterCheck.ANIM_KEYS)};
         const clear = () => { for (const k of all) p.classList.remove(k); };
+        const wasLeft = p.classList.contains('face-left');
         BuddyBrain.setPaused(true); BuddyBubble.hide();
         try {
-          for (const k of ${JSON.stringify(keys)}) { clear(); p.classList.add(k); BuddyBubble.toast(k, 1900); await new Promise((r) => setTimeout(r, 2000)); }
-        } finally { clear(); p.classList.add('idle'); BuddyBrain.setPaused(false); }
+          for (const k of ${JSON.stringify(keys)}) {
+            for (const dir of ['right', 'left']) {
+              clear(); p.classList.add(k);
+              p.classList.toggle('face-left', dir === 'left'); p.classList.toggle('face-right', dir === 'right');
+              BuddyBubble.toast(k + ' (facing ' + dir + ')', dir === 'right' ? 1900 : 1400);
+              await new Promise((r) => setTimeout(r, dir === 'right' ? 2000 : 1500));
+            }
+          }
+        } finally {
+          clear(); p.classList.add('idle');
+          p.classList.toggle('face-left', wasLeft); p.classList.toggle('face-right', !wasLeft);
+          BuddyBrain.setPaused(false);
+        }
         return 1;
       })()`);
     } catch (e) { return { error: e.message }; } finally { previewing = false; }
@@ -592,6 +610,8 @@ function start() {
       scale: (c.config[cfgKey] || {}).scale || 1,
       animations: (c.config[cfgKey] || {}).animations || {},
       rows: rowsOf(c, cfgKey),
+      moveMarks: (c.config[cfgKey] || {}).moveMarks || [],
+      marksOk: (c.config[cfgKey] || {}).marksOk || [],
       preview: preview(kind),
       templates: layoutTemplates(cfgKey, c.name).map((t) => ({ id: t.id, name: t.name })),
     });

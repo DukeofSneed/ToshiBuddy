@@ -36,9 +36,9 @@ function cellsOfAnim(d, rows) {
 
 const exists = (rows, c) => Number.isInteger(c.row) && Number.isInteger(c.col) && c.row >= 0 && c.col >= 0 && c.row < rows.length && c.col < rows[c.row];
 
-function checkSheet(sheetCfg, rows, label) {
+function checkSheet(sheetCfg, rows, label, near = [], kind = 'sheet') {
   const items = [];
-  const add = (level, text) => items.push({ level, text: label ? `${label}: ${text}` : text });
+  const add = (level, text, extra) => items.push({ level, text: label ? `${label}: ${text}` : text, ...(extra || {}) });
   const anims = (sheetCfg && sheetCfg.animations) || {};
   const keys = Object.keys(anims);
   if (!keys.length) { add('error', 'no animations are mapped yet (use Auto-map)'); return items; }
@@ -61,20 +61,30 @@ function checkSheet(sheetCfg, rows, label) {
     good++;
   }
   if (good) add('ok', `${good} animation${good === 1 ? '' : 's'} mapped`);
+  // A mark ("?", "!", a swirl) drawn about as close to the pose next door: it
+  // may be showing on the wrong pose. Only for poses that are actually used.
+  const used = new Set(keys.flatMap((k) => cellsOfAnim(anims[k] || {}, rows).map((c) => `${c.row}:${c.col}`)));
+  // Pairs the user looked at and marked as fine (marksOk), or already moved, are not repeated.
+  const same = (p, n) => Array.isArray(p) && ((String(p[0]) === n.from && String(p[1]) === n.near) || (String(p[0]) === n.near && String(p[1]) === n.from));
+  const settled = (n) => [...((sheetCfg && sheetCfg.marksOk) || []), ...((sheetCfg && sheetCfg.moveMarks) || [])].some((p) => same(p, n));
+  for (const n of Array.isArray(near) ? near : []) {
+    if (!n || settled(n) || !(used.has(n.from) || used.has(n.near))) continue;
+    add('warn', `a mark beside pose ${n.from} sits about as close to pose ${n.near}. Look at both in Preview all; if it shows on the wrong one, add a move from ${n.from} to ${n.near} under "Marks on the wrong pose"`, { pair: { kind, from: n.from, near: n.near } });
+  }
   const unmapped = ANIM_KEYS.filter((k) => !anims[k] && !['idle', 'walk', 'talk'].includes(k));
   if (unmapped.length) add('info', `shown as idle: ${unmapped.join(', ')}`);
   return items;
 }
 
 // config: character.json. rows: { sheet: [..], ultimateSheet: [..] }.
-function checkCharacter(config, { rows = {}, quipCount = null, hasSheet = true, hasUltimateSheet = false } = {}) {
+function checkCharacter(config, { rows = {}, near = {}, quipCount = null, hasSheet = true, hasUltimateSheet = false } = {}) {
   const items = [];
   if (!config.personality) items.push({ level: 'warn', text: 'no personality text: upgrades and replies use a generic voice' });
   if (quipCount === 0) items.push({ level: 'warn', text: 'no lines: the character will not say anything' });
   else if (quipCount) items.push({ level: 'ok', text: `${quipCount} line${quipCount === 1 ? '' : 's'}` });
-  if (hasSheet) items.push(...checkSheet(config.sheet, rows.sheet, hasUltimateSheet ? 'Main sheet' : ''));
+  if (hasSheet) items.push(...checkSheet(config.sheet, rows.sheet, hasUltimateSheet ? 'Main sheet' : '', near.sheet, 'sheet'));
   else items.push({ level: 'info', text: 'no sprite sheet: shown as a still image' });
-  if (hasUltimateSheet) items.push(...checkSheet(config.ultimateSheet, rows.ultimateSheet, 'Ultimate sheet'));
+  if (hasUltimateSheet) items.push(...checkSheet(config.ultimateSheet, rows.ultimateSheet, 'Ultimate sheet', near.ultimateSheet, 'ultimateSheet'));
   const errors = items.filter((i) => i.level === 'error').length;
   const warnings = items.filter((i) => i.level === 'warn').length;
   return { ok: errors === 0, errors, warnings, items };

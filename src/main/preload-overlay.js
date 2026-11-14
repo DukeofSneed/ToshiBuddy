@@ -12,7 +12,7 @@ contextBridge.exposeInMainWorld('buddy', {
   ready: () => ipcRenderer.send('overlay:ready'),
   getContent: () => ipcRenderer.invoke('overlay:content'),
   reportMod: (status) => ipcRenderer.send('overlay:mod-status', status),
-  saveSheetIndex: (skin, kind, dataUrl, rows) => ipcRenderer.send('overlay:sheet-index', { skin, kind, dataUrl, rows }),
+  saveSheetIndex: (skin, kind, dataUrl, rows, near) => ipcRenderer.send('overlay:sheet-index', { skin, kind, dataUrl, rows, near }),
   log: (...args) => ipcRenderer.send('overlay:log', args.map(String).join(' ')),
   on: (channel, handler) => {
     const allowed = new Set(['work-area', 'idle-seconds', 'say', 'animate', 'settings', 'reload-content', 'upgrade-event', 'sfx', 'activity', 'quips', 'quip', 'jar-state', 'toast', 'pointer-reset']);

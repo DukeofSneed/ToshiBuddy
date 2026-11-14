@@ -174,6 +174,7 @@
     const img = $('ed-preview');
     if (s.preview) img.src = s.preview; else img.removeAttribute('src');
     $('ed-scale').value = s.scale || 1;
+    renderMoves();
     $('ed-template').innerHTML = '<option value="">Best match</option>' + (s.templates || []).map((t) => `<option value="${esc(t.id)}">Like ${esc(t.name)}</option>`).join('');
     $('ed-anims').innerHTML = current.animKeys.map((k) => {
       const a = s.animations[k] || {};
@@ -183,6 +184,7 @@
         <td><input type="text" class="f" value="${esc(frames)}" placeholder="${k === 'idle' ? '0:0-3' : ''}" /></td>
         <td><input type="number" class="fps" min="0.2" max="30" step="0.5" value="${a.fps != null ? a.fps : ''}" placeholder="6" /></td>
         <td><select class="flip">${[['', 'No'], ['body', 'Figure'], ['all', 'Everything']].map(([v, l]) => `<option value="${v}" ${v === mirrorOf(a) ? 'selected' : ''}>${l}</option>`).join('')}</select></td>
+        <td><select class="marks"><option value="">Readable</option><option value="turn" ${a.marksTurn ? 'selected' : ''}>Turn</option></select></td>
         <td><input type="checkbox" class="loop" ${a.loop === false ? '' : 'checked'} /></td>
       </tr>`;
     }).join('');
@@ -195,7 +197,13 @@
     const mark = { ok: '\u2713', info: '\u00b7', warn: '!', error: '\u2715' };
     const head = !r ? '' : r.ok ? (r.warnings ? `Works, with ${r.warnings} thing${r.warnings === 1 ? '' : 's'} to look at` : 'Everything checks out') : `${r.errors} problem${r.errors === 1 ? '' : 's'} to fix`;
     $('ed-check-list').innerHTML = !r ? '' : [`<li class="${r.ok ? (r.warnings ? 'warn' : 'ok') : 'error'}"><b>${head}</b></li>`]
-      .concat(r.items.map((i) => `<li class="${i.level}"><span>${mark[i.level] || ''}</span> ${esc(i.text)}</li>`)).join('');
+      .concat(r.items.map((i) => `<li class="${i.level}"><span>${mark[i.level] || ''}</span> ${esc(i.text)}${i.pair ? ` <button class="x add" data-fine="${esc(i.pair.kind)}|${esc(i.pair.from)}|${esc(i.pair.near)}" title="I looked: the mark is on the right pose">It's fine</button>` : ''}</li>`)).join('');
+  }
+
+  // Marks moved from one pose to the one they belong to.
+  function renderMoves() {
+    const list = (current && current[kind] && current[kind].moveMarks) || [];
+    $('mm-list').innerHTML = list.map((p, i) => `<span class="attach">${esc(p[0])} → ${esc(p[1])}<button class="x" data-unmove="${i}" title="Remove">✕</button></span>`).join('') || '<span class="muted small-note">None.</span>';
   }
 
   function collect() {
@@ -212,6 +220,7 @@
       const mirror = tr.querySelector('.flip').value;
       delete a.flip; delete a.flipBody;
       if (mirror === 'body') a.flipBody = true; else if (mirror === 'all') a.flip = true;
+      if (tr.querySelector('.marks').value === 'turn') a.marksTurn = true; else delete a.marksTurn;
       if (!tr.querySelector('.loop').checked) a.loop = false; else delete a.loop;
       anims[k] = a;
     });
@@ -236,6 +245,26 @@
     note('ed-msg', 'Switched.');
     loadDetails($('ed-char').value, { waitForPreview: true });
   });
+  $('mm-add').addEventListener('click', () => {
+    if (!current) return;
+    const cell = /^\d{1,2}:\d{1,2}$/;
+    const from = $('mm-from').value.trim(), to = $('mm-to').value.trim();
+    if (!cell.test(from) || !cell.test(to) || from === to) { note('ed-msg', 'Use pose numbers like 3:4 and 3:3 (row:pose), and two different poses.', true); return; }
+    stash();
+    const list = current[kind].moveMarks || [];
+    if (!list.some((p) => p[0] === from && p[1] === to)) current[kind].moveMarks = [...list, [from, to]];
+    $('mm-from').value = ''; $('mm-to').value = '';
+    renderMoves();
+    note('ed-msg', 'Added. Press "Save and reload" to apply it.');
+  });
+  $('mm-list').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-unmove]');
+    if (!b || !current) return;
+    stash();
+    current[kind].moveMarks = (current[kind].moveMarks || []).filter((_p, i) => i !== Number(b.dataset.unmove));
+    renderMoves();
+    note('ed-msg', 'Removed. Press "Save and reload" to apply it.');
+  });
   $('ed-automap').addEventListener('click', async () => {
     if (!current) return;
     const r = await chars.autoMap(current.id, kind, $('ed-template').value || null);
@@ -247,20 +276,33 @@
     renderSheet();
     note('ed-msg', r.guessed ? 'Guessed idle, walk and talk. Adjust the frames, then Save.' : `Filled in from ${r.sourceName}'s layout. Check the frames, then Save.`);
   });
-  $('ed-check').addEventListener('click', async () => {
+  async function runCheck() {
     if (!current) return;
     stash();
     const draft = {};
-    for (const k of Object.keys(edited)) draft[k] = { animations: current[k].animations };
+    for (const k of Object.keys(edited)) draft[k] = { animations: current[k].animations, marksOk: current[k].marksOk || [], moveMarks: current[k].moveMarks || [] };
     const r = await chars.check(current.id, draft);
     if (r.error) { note('ed-msg', r.error, true); return; }
     renderCheck(r);
+  }
+  $('ed-check').addEventListener('click', runCheck);
+  // "It's fine": this mark is on the right pose; don't mention it again.
+  $('ed-check-list').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-fine]');
+    if (!b || !current) return;
+    const [k, from, near] = b.dataset.fine.split('|');
+    if (!current[k]) return;
+    stash();
+    current[k].marksOk = [...(current[k].marksOk || []), [from, near]];
+    edited[k] = true;
+    note('ed-msg', 'Noted. Press "Save and reload" to keep it.');
+    runCheck();
   });
   $('ed-preview-all').addEventListener('click', async () => {
     if (!current) return;
     note('ed-msg', 'Playing each saved animation on the pet…');
     const r = await chars.preview(current.id);
-    note('ed-msg', r.error ? r.error : `Played ${r.played.length} animations.`, !!r.error);
+    note('ed-msg', r.error ? r.error : `Played ${r.played.length} animations, each facing right and then left.`, !!r.error);
   });
   $('ed-export').addEventListener('click', async () => {
     const r = await chars.exportPack($('ed-char').value);
@@ -271,7 +313,7 @@
     if (!current) return;
     const patch = { personality: $('ed-personality').value };
     stash();
-    for (const k of Object.keys(edited)) patch[k] = { animations: current[k].animations, scale: current[k].scale };
+    for (const k of Object.keys(edited)) patch[k] = { animations: current[k].animations, scale: current[k].scale, moveMarks: current[k].moveMarks || [], marksOk: current[k].marksOk || [] };
     edited = {};
     const r = await chars.save(current.id, patch);
     if (r.error) { note('ed-msg', r.error, true); return; }

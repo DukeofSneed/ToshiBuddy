@@ -74,6 +74,11 @@ app.whenReady().then(() => {
     ok(!mir.idle.flip && !mir.idle.flipBody, 'no mirror saved as none');
     const un = imp.saveCharacter(ROOT, id, { sheet: { animations: { idle: { frames: '0:0' }, think: { frames: '0:1' } } } }).sheet.animations;
     ok(!un.think.flip && !un.think.flipBody, 'mirror can be turned off');
+    // Marks: turn with the body per animation, and moving a mark to another pose.
+    const mk = imp.saveCharacter(ROOT, id, { sheet: { animations: { idle: { frames: '0:0' }, drag: { frames: '0:1', marksTurn: true }, think: { frames: '0:2' } }, moveMarks: [['0:2', '0:1'], ['0:2', '0:1'], ['0:1', '0:1'], ['x', '0:1'], ['../a', '0:0']] } }).sheet;
+    ok(mk.animations.drag.marksTurn === true && !mk.animations.think.marksTurn, 'marks choice saved per animation');
+    ok(JSON.stringify(mk.moveMarks) === '[["0:2","0:1"]]', 'mark moves saved, duplicates and bad entries dropped: ' + JSON.stringify(mk.moveMarks));
+    ok(!('moveMarks' in imp.saveCharacter(ROOT, id, { sheet: { moveMarks: [] } }).sheet), 'mark moves can be removed');
     imp.saveCharacter(ROOT, id, { sheet: { animations: { idle: { frames: '0:0-3', fps: 4 }, walk: { frames: '1:0-3', flip: true } } } });
     throws(() => imp.saveCharacter(ROOT, id, { sheet: { animations: { idle: { frames: '0:0; rm -rf' } } } }), /frames/, 'bad frames');
     throws(() => imp.saveCharacter(ROOT, '..\\evil', {}), /Unknown/, 'path traversal id');

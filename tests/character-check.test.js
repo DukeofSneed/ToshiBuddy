@@ -83,6 +83,15 @@ check('a one-row sheet still gets idle and walk', () => {
   assert.strictEqual(g.walk.frames, '0:4-9');
   assert.deepStrictEqual(guess([]), {});
 });
+check('a mark close to the pose next door is pointed out, for poses in use', () => {
+  const cfg = { personality: 'x', sheet: { animations: { idle: { frames: '0:0' }, walk: { frames: '0:1' }, talk: { frames: '0:2' }, think: { frames: '1:2' } } } };
+  const near = { sheet: [{ from: '1:3', near: '1:2' }, { from: '2:0', near: '2:1' }] };
+  const r = checkCharacter(cfg, { rows: { sheet: [4, 4, 4] }, near });
+  const warns = r.items.filter((i) => i.level === 'warn').map((i) => i.text);
+  assert.strictEqual(warns.length, 1, 'only the pair that touches a used pose');
+  assert.match(warns[0], /mark beside pose 1:3 sits about as close to pose 1:2.*move from 1:3 to 1:2/);
+  assert.ok(r.ok, 'a hint, not an error');
+});
 check('a named layout can be forced', () => {
   const r = autoMap([6, 8, 4], templates, { from: 'toshitoshi' });
   assert.strictEqual(r.source, 'toshitoshi');
@@ -90,3 +99,14 @@ check('a named layout can be forced', () => {
 });
 
 console.log(`${passed} passed, ${process.exitCode ? 'some' : 0} failed`);
+
+// A mark hint the user marked as fine, or already moved, is not repeated.
+{
+  const cfg = { personality: 'x', sheet: { marksOk: [['1:2', '1:3']], moveMarks: [['2:0', '2:1']], animations: { idle: { frames: '0:0' }, walk: { frames: '0:1' }, talk: { frames: '0:2' }, think: { frames: '1:2' }, wave: { frames: '2:1' }, shrug: { frames: '1:0' } } } };
+  const near = { sheet: [{ from: '1:3', near: '1:2' }, { from: '2:0', near: '2:1' }, { from: '1:0', near: '1:1' }] };
+  const r = checkCharacter(cfg, { rows: { sheet: [4, 4, 4] }, near });
+  const hints = r.items.filter((i) => i.pair);
+  assert.strictEqual(hints.length, 1);
+  assert.deepStrictEqual(hints[0].pair, { kind: 'sheet', from: '1:0', near: '1:1' });
+  console.log('mark hint checks passed');
+}
