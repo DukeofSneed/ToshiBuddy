@@ -4,7 +4,7 @@
 const fs = require('fs');
 const path = require('path');
 const { runClaude } = require('./claude');
-const { RULE: ABILITY_RULE } = require('../abilities');
+const { RULE: ABILITY_RULE, LIMITS } = require('../abilities');
 
 const SIZE_RANGE = {
   S: [8000, 40000],
@@ -49,6 +49,8 @@ function buildPrompt(projectRoot, request, ledger, character = { name: 'Kori', i
     'Requests to reproduce copyrighted characters, art, dialogue, or audio are not feasible; set feasible to false for those.',
     'A human has suggested an upgrade. Estimate what it would take for a separate headless Claude Code run (model: haiku) to implement it as a mod.',
     'Mods can only add quips, CSS animations, SVG props, and simple behaviors through the Mod API below; they cannot touch src/.',
+    'Hard limits (a suggestion that needs any of these broken is not feasible: set feasible to false and say why in risk_note; if only part of it breaks them, narrow the title and summary to the part that fits):',
+    LIMITS,
     'Be realistic about tokens: a run reads docs/MOD_API.md (~2k tokens), one or two existing mods, then writes one mod.js. Small cosmetic mods land in 10k-30k tokens; animation-heavy or behavior-heavy mods 40k-120k; anything needing new core support is not feasible (set touches_core true).',
     '',
     '## Mod API',

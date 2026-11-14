@@ -15,6 +15,7 @@ contextBridge.exposeInMainWorld('jar', {
   resume: (goalId) => ipcRenderer.invoke('jar:resume', { goalId }),
   cancelRun: () => ipcRenderer.invoke('jar:cancel-run'),
   undo: (upgradeId) => ipcRenderer.invoke('jar:undo', { upgradeId }),
+  toggleUpgrade: (upgradeId, enabled) => ipcRenderer.invoke('jar:toggle-upgrade', { upgradeId, enabled }),
   removeGoal: (goalId) => ipcRenderer.invoke('jar:remove-goal', { goalId }),
   checkUsage: () => ipcRenderer.invoke('jar:check-usage'),
   updateSettings: (patch) => ipcRenderer.invoke('jar:settings', patch),

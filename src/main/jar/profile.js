@@ -12,7 +12,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { runClaude } = require('./claude');
 const { SIZE_RANGE } = require('./estimator');
-const { RULE: ABILITY_RULE } = require('../abilities');
+const { RULE: ABILITY_RULE, LIMITS } = require('../abilities');
 
 const ID_RE = /^[a-z0-9][a-z0-9-]{0,39}$/;
 const MAX_PROFILE = 800;
@@ -35,8 +35,10 @@ const SCHEMA = {
           summary: { type: 'string', description: 'What would be built, concretely, in 1-2 sentences' },
           size: { type: 'string', enum: ['S', 'M'] },
           estimated_tokens: { type: 'integer' },
+          needs_new_art: { type: 'boolean', description: 'True if this idea would need any new or changed artwork of the character, or a body part moving on its own (a nod, a blink, a wave, a new pose or expression)' },
+          needs_memory: { type: 'boolean', description: 'True if this idea needs to remember or count anything between sessions, or to know about tasks, streaks, or what the owner is doing' },
         },
-        required: ['title', 'summary', 'size', 'estimated_tokens'],
+        required: ['title', 'summary', 'size', 'estimated_tokens', 'needs_new_art', 'needs_memory'],
       },
     },
   },
@@ -66,13 +68,21 @@ function profileText(userData, id, who) {
 
 // Whatever the run returned is data: strip control characters, cap every length,
 // keep only known fields, clamp token estimates to the usual size ranges.
+// Wording that can only be done with new artwork or separately moving parts.
+const ART_RE = /\b(nods?|nodding|blinks?|winks?|smiles?|smirks?|frowns?|grins?|pouts?|yawns?|facial expression|new (pose|sprite|outfit|costume|expression|frame)s?|redraw\w*|sprite ?sheet|(raises?|waves?|lifts?|moves?|crosses|folds?|points?|shakes?|tilts?|turns?) (his|her|their|its|the|an?) (head|hand|arm|eyebrow|finger|eyes?|hair)s?|eyes? (narrow|widen|close|glow|roll)\w*|changes? (clothes|outfit|expression)|counter|streak|milestones?|keeps? (count|track)|remembers?)\b/i;
+const needsArt = (s) => ART_RE.test(String(s || ''));
+
 function clean(out) {
+  let tossed = 0;
   const ideas = [];
   const seen = new Set();
   for (const i of Array.isArray(out && out.ideas) ? out.ideas : []) {
     const title = text(i && i.title, 80);
     const summary = text(i && i.summary, 300);
     if (!title || !summary || seen.has(title.toLowerCase())) continue;
+    // Tossed: anything the run itself says needs new art or memory, and anything
+    // whose wording still asks for a body part to move or a new pose.
+    if (i.needs_new_art === true || i.needs_memory === true || needsArt(`${title}. ${summary}`)) { tossed++; continue; }
     seen.add(title.toLowerCase());
     const size = i.size === 'M' ? 'M' : 'S';
     const [lo, hi] = SIZE_RANGE[size];
@@ -80,7 +90,7 @@ function clean(out) {
     ideas.push({ title, summary, size, goalTokens: Math.round(est / 1000) * 1000 });
     if (ideas.length >= MAX_IDEAS) break;
   }
-  return { found: !!(out && out.found), profile: text(out && out.profile, MAX_PROFILE), ideas };
+  return { found: !!(out && out.found), profile: text(out && out.profile, MAX_PROFILE), ideas, tossed };
 }
 
 // Are two ideas about the same thing? Compared on their meaningful words, so
@@ -118,7 +128,9 @@ function buildPrompt({ name, personality, abilities, avoid }) {
     '',
     `1. Use web search to look up the name "${name}" (try it alone, and with words like "character"). Search only for the name; do not put the owner's description into a search. One to three searches is enough.`,
     '2. If a known character with that name fits the description, write short factual notes about it in your own words: setting, role, themes, likes and dislikes, manner of speaking. If nothing fits (an original character), set found to false and base the notes on the owner\'s description alone.',
-    `3. Propose ${MAX_IDEAS} small upgrades that suit this character. An upgrade can only add: short spoken lines, CSS animations of the whole figure, small drawn props (simple SVG shapes) on the head, a hand, or the desk, and simple timed or click behaviors. No new artwork of the character, no sound files, no network features.`,
+    `3. Propose ${MAX_IDEAS} small upgrades that suit this character, within these limits:`,
+    LIMITS,
+    'Check each idea against the limits before you list it, and answer needs_new_art and needs_memory honestly for each: ideas marked true are discarded, so replace them with ideas that fit.',
     abilities ? `\nWhat the character already does in the app:\n${abilities}\n${ABILITY_RULE}` : '',
     avoid ? `\nIdeas the owner has already been shown. Every new idea must be clearly different from all of these: a different subject, not a variation, rewording, or second version of one:\n${avoid}` : '',
     '',
@@ -167,4 +179,4 @@ async function research({ userData, id, name, personality, abilities, avoid, log
   return { ok: true, profile, tokens: res.tokens, rateLimit: res.rateLimit };
 }
 
-module.exports = { similar, withoutRepeats, research, readProfile, profileText, clean, buildPrompt, signature, profileFile, SCHEMA };
+module.exports = { needsArt, similar, withoutRepeats, research, readProfile, profileText, clean, buildPrompt, signature, profileFile, SCHEMA };

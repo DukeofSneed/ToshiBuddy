@@ -91,3 +91,5 @@ button.x.add { border: 1px dashed var(--line); border-radius: 10px; padding: 2px
 /* Pin a goal so "Refresh ideas" keeps it */
 button.pin { background: none; border: none; cursor: pointer; padding: 0 5px 0 0; font-size: 14px; line-height: 1; color: var(--muted); }
 button.pin:hover, button.pin.on { color: var(--warn); }
+
+.upgrade.off .t { opacity: 0.5; text-decoration: line-through; }

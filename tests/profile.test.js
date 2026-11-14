@@ -42,7 +42,7 @@ check('the answer is cleaned: lengths capped, control characters gone, sizes cla
   assert.deepStrictEqual(c.ideas[0], { title: 'Nap cushion', summary: 'A cushion on the desk.', size: 'S', goalTokens: 8000 });
   assert.strictEqual(c.ideas[1].title, 'Huge thing');
   assert.ok(c.ideas[1].goalTokens <= 40000, 'unknown sizes fall back to small');
-  assert.deepStrictEqual(profile.clean(null), { found: false, profile: '', ideas: [] });
+  assert.deepStrictEqual(profile.clean(null), { found: false, profile: '', ideas: [], tossed: 0 });
 });
 
 check('stored notes are used only for the name and personality they were made for', () => {
@@ -149,4 +149,42 @@ check('upgrade prompts get the name, personality and notes, and nothing from the
   assert.match(p, /not a variation, rewording, or second version/);
   assert.ok(!/already been shown/.test(profile.buildPrompt({ name: 'X', personality: 'Calm.' })));
   console.log('refresh checks passed');
+}
+
+// Ideas that would need new artwork, a moving body part, or memory are tossed.
+{
+  const idea = (title, summary, extra = {}) => ({ title, summary, size: 'S', estimated_tokens: 20000, needs_new_art: false, needs_memory: false, ...extra });
+  const c = profile.clean({ found: true, profile: 'x', ideas: [
+    idea('Rare earned praise', 'Reaching a long streak plays a small nod animation with an approving line. The counter is stored locally.'),
+    idea('Cold stare', 'His eyes narrow when clicked three times.'),
+    idea('Winter coat', 'A new outfit for cold days.', { needs_new_art: true }),
+    idea('Daily tally', 'Shows a tidy number on the desk.', { needs_memory: true }),
+    idea('Arm wave hello', 'He waves his hand at the hour.'),
+    idea('Watermelon slice', 'A slice of watermelon drawn from simple shapes sits on the desk, with a line when clicked.'),
+    idea('Frost drift', 'Small snowflake shapes drift past while the whole figure sways gently on a timer.'),
+    idea('Tea cup', 'A steaming cup on the desk; a line when he sits down to work.'),
+  ] });
+  assert.deepStrictEqual(c.ideas.map((i) => i.title), ['Watermelon slice', 'Frost drift', 'Tea cup']);
+  assert.strictEqual(c.tossed, 5);
+  const limits = require(path.join(root, 'abilities.js')).LIMITS;
+  for (const p of [profile.buildPrompt({ name: 'X', personality: 'Calm.' }), new Upgrader({ projectRoot: dir, ledger: new Ledger(fs.mkdtempSync(path.join(os.tmpdir(), 'toshi-lim-'))), guard: {}, settings: { get: () => undefined }, git: {}, character: () => ({ id: 'x', name: 'X', isSkin: true }) }).buildPrompt({ title: 'T', summary: 'S', goalTokens: 1 }, {})]) {
+    assert.ok(p.includes("artwork cannot be edited, redrawn, or added to"));
+    assert.ok(p.includes('no counters, streaks, scores'));
+  }
+  assert.ok(limits.includes('must be thrown out'));
+
+  // A built trick can be switched off and on without undoing it.
+  const { modsFor, readQuipPacks } = require(path.join(root, 'mods.js'));
+  const d = fs.mkdtempSync(path.join(os.tmpdir(), 'toshi-off-'));
+  for (const s of ['tea', 'hat']) { fs.mkdirSync(path.join(d, 'mods', s), { recursive: true }); fs.writeFileSync(path.join(d, 'mods', s, 'mod.js'), '//'); }
+  fs.mkdirSync(path.join(d, 'content', 'quips'), { recursive: true });
+  fs.writeFileSync(path.join(d, 'content', 'quips', 'tea.json'), JSON.stringify(['Tea time.']));
+  const ups = [{ characterId: 'x', slugs: ['tea'], files: ['mods/tea/mod.js', 'content/quips/tea.json'], disabled: true }, { characterId: 'x', slugs: ['hat'], files: ['mods/hat/mod.js'] }];
+  const on = (list) => modsFor(d, [], list, 'x').filter((m) => m.enabled).map((m) => m.slug);
+  assert.deepStrictEqual(on(ups), ['hat']);
+  assert.deepStrictEqual(readQuipPacks(d, { upgrades: ups, characterId: 'x' }), []);
+  ups[0].disabled = false;
+  assert.deepStrictEqual(on(ups).sort(), ['hat', 'tea']);
+  assert.strictEqual(readQuipPacks(d, { upgrades: ups, characterId: 'x' }).length, 1);
+  console.log('limits and switch checks passed');
 }

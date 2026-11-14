@@ -46,4 +46,13 @@ function describe({ config = null, builtin = false, built = [], planned = [] } =
 // The rule that goes with the list in every prompt.
 const RULE = 'Do not repeat, replace, or imitate anything in this list. In particular, never fake a pose the character already has drawn (sleeping, thinking, waving and so on) with a moving idle pose or a drawn symbol. An upgrade must add something new: a new prop, a new occasion, new lines, or a new behavior. Adding lines or a small prop to an existing behavior is fine; a second version of it is not.';
 
-module.exports = { describe, RULE, POSES, ALWAYS };
+// The hard limits. The character's artwork is fixed: an upgrade can never add,
+// change, or redraw a pose, so an idea that needs one is not an upgrade.
+const LIMITS = [
+  'The character\'s artwork cannot be edited, redrawn, or added to. There are no new poses, expressions, outfits, or body-part movements: the head, arms, eyes and mouth cannot move on their own. The only motion available is moving the whole existing picture (slide, hop, tilt, sway, shrink, grow, fade).',
+  'An upgrade may add: spoken lines; whole-figure CSS motion as above; small props drawn from simple shapes (or a picture the owner attached) on the head, a hand, or the desk; and reactions to these events only: a click, a double-click, being dropped, the hour changing, waking up, falling asleep, leaning on the screen edge, sitting down at the desk, a donation, an upgrade finishing, the donation transformation starting, and a repeating timer.',
+  'An upgrade cannot: remember anything between sessions (no counters, streaks, scores, or saved settings), know what the owner is doing beyond those events, read files or the screen, use the network, or play new sounds.',
+  'If an idea would need new artwork of the character, a separately moving body part, or anything in the "cannot" list, it must be thrown out, not adapted with a workaround.',
+].join('\n');
+
+module.exports = { describe, RULE, LIMITS, POSES, ALWAYS };

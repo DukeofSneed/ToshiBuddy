@@ -79,7 +79,7 @@
     // Upgrades
     const ups = L.upgrades || [];
     $('upgrades').innerHTML = ups.length
-      ? ups.map((up) => `<div class="upgrade ${up.reverted ? 'reverted' : ''}"><div><div class="t">${esc(up.title)}</div><div class="muted" style="font-size:11px">${fmt(up.tokens)} tokens · ${esc(up.model)} · ${new Date(up.at).toLocaleDateString()}</div></div>${up.reverted ? '<span class="muted">undone</span>' : `<button class="small ghost" data-undo="${up.id}">Undo</button>`}</div>`).join('')
+      ? ups.map((up) => `<div class="upgrade ${up.reverted ? 'reverted' : ''} ${up.disabled && !up.reverted ? 'off' : ''}"><div><div class="t">${esc(up.title)}</div><div class="muted" style="font-size:11px">${fmt(up.tokens)} tokens · ${esc(up.model)} · ${new Date(up.at).toLocaleDateString()}</div></div>${up.reverted ? '<span class="muted">undone</span>' : `<span class="row"><label class="muted" title="Switch this trick off without removing it"><input type="checkbox" data-toggle-upgrade="${up.id}" ${up.disabled ? '' : 'checked'} /> on</label><button class="small ghost" data-undo="${up.id}" title="Remove this trick for good">Undo</button></span>`}</div>`).join('')
       : 'None yet.';
 
     // Settings
@@ -236,6 +236,10 @@
     } else if (b.dataset.unattach) await act(jar.attach({ goalId: b.dataset.unattach, remove: b.dataset.file }));
     else if (b.dataset.remove) await act(jar.removeGoal(b.dataset.remove));
     else if (b.dataset.cancel) render(await jar.cancelRun());
+  });
+  $('upgrades').addEventListener('change', async (e) => {
+    const c = e.target.closest('input[data-toggle-upgrade]');
+    if (c) { c.disabled = true; await act(jar.toggleUpgrade(c.dataset.toggleUpgrade, c.checked)); }
   });
   $('upgrades').addEventListener('click', async (e) => {
     const b = e.target.closest('button[data-undo]');

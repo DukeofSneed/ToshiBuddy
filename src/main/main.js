@@ -766,6 +766,19 @@ function start() {
     return { ...r, state: jarState() };
   });
   ipcMain.handle('jar:cancel-run', () => { upgrader.cancel(); return jarState(); });
+  // Switch one built trick off or on without undoing it.
+  ipcMain.handle('jar:toggle-upgrade', async (_e, { upgradeId, enabled } = {}) => {
+    const up = ledger.upgrade(String(upgradeId || ''));
+    if (!up || up.reverted) return { ok: false, state: jarState() };
+    if (upgrader.isBusy()) return { ok: false, error: 'An upgrade is running; try again when it finishes.', state: jarState() };
+    up.disabled = !enabled;
+    ledger.save();
+    log(`trick "${up.title}" switched ${enabled ? 'on' : 'off'}`);
+    await reloadAndAwaitMods([], 1500);
+    quipsChanged();
+    notify(`"${up.title}" is ${enabled ? 'on' : 'off'}.`, 4000);
+    return { ok: true, state: jarState() };
+  });
   ipcMain.handle('jar:undo', async (_e, { upgradeId }) => {
     const r = await upgrader.undo(upgradeId);
     if (r.ok) notify('Upgrade undone.', 4000);
@@ -832,6 +845,7 @@ function start() {
     }
     const dropped = r.profile.ideas.length - fresh.length;
     if (dropped) log(`ideas for ${id}: ${dropped} left out for repeating something already shown`);
+    if (r.profile.tossed) log(`ideas for ${id}: ${r.profile.tossed} tossed for needing new artwork or memory`);
     if (keptCount) log(`ideas for ${id}: ${keptCount} earlier ideas kept (pinned, funded, or with a picture)`);
     ledger.save();
     log(`ideas for ${id}: ${added} goals, ${r.profile.found ? 'character found by name' : 'from the personality text only'}`);

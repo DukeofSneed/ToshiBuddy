@@ -45,9 +45,11 @@ function modOwners(projectRoot, upgrades) {
   }
   return owner;
 }
+// Slugs of tricks the user switched off in the jar.
+const switchedOff = (upgrades) => (upgrades || []).filter((u) => u.disabled && !u.reverted).flatMap((u) => u.slugs || []);
 function modsFor(projectRoot, disabled, upgrades, characterId) {
   const owner = modOwners(projectRoot, upgrades);
-  return listMods(projectRoot, disabled).filter((m) => !owner.has(m.slug) || owner.get(m.slug) === characterId);
+  return listMods(projectRoot, [...(disabled || []), ...switchedOff(upgrades)]).filter((m) => !owner.has(m.slug) || owner.get(m.slug) === characterId);
 }
 // Quip packs an upgrade wrote under content/quips/ belong to that upgrade's character.
 function quipPackOwners(upgrades) {
@@ -56,7 +58,7 @@ function quipPackOwners(upgrades) {
     if (u.reverted || !u.characterId) continue;
     for (const f of u.files || []) {
       const m = /^content\/quips\/([^/]+\.json)$/.exec(String(f).replace(/\\/g, '/'));
-      if (m) owner.set(m[1], u.characterId);
+      if (m) owner.set(m[1], u.disabled ? '(switched off)' : u.characterId);
     }
   }
   return owner;
