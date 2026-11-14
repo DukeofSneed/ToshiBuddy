@@ -151,27 +151,44 @@ check('upgrade prompts get the name, personality and notes, and nothing from the
   console.log('refresh checks passed');
 }
 
-// Ideas that would need new artwork, a moving body part, or memory are tossed.
+// Ideas are kept only if they fit: poses he has drawn, small props, simple counts.
 {
+  const ab = require(path.join(root, 'abilities.js'));
+  const toshi = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'characters', 'toshitoshi', 'character.json'), 'utf8'));
+  const poses = ab.playablePoses({ config: toshi });
+  assert.deepStrictEqual(poses, ['wave', 'think', 'surprised', 'huff', 'shrug', 'frost', 'stamp']);
+  assert.deepStrictEqual(ab.playablePoses({ config: { sheet: { animations: { idle: {}, walk: {} } } } }), []);
   const idea = (title, summary, extra = {}) => ({ title, summary, size: 'S', estimated_tokens: 20000, needs_new_art: false, needs_memory: false, ...extra });
-  const c = profile.clean({ found: true, profile: 'x', ideas: [
-    idea('Rare earned praise', 'Reaching a long streak plays a small nod animation with an approving line. The counter is stored locally.'),
+  const list = [
+    idea('Rare earned praise', 'Every fifth finished typing session he bows with a short approving line. The count is saved.'),
+    idea('Hello wave', 'He waves his hand when the hour changes.'),
+    idea('Party hat', 'A small party hat sits on top of his head on the hour.'),
+    idea('Watermelon slice', 'A slice of watermelon drawn from simple shapes sits on the desk.'),
+    idea('Approving nod', 'He nods when a session ends.'),
     idea('Cold stare', 'His eyes narrow when clicked three times.'),
-    idea('Winter coat', 'A new outfit for cold days.', { needs_new_art: true }),
-    idea('Daily tally', 'Shows a tidy number on the desk.', { needs_memory: true }),
-    idea('Arm wave hello', 'He waves his hand at the hour.'),
-    idea('Watermelon slice', 'A slice of watermelon drawn from simple shapes sits on the desk, with a line when clicked.'),
-    idea('Frost drift', 'Small snowflake shapes drift past while the whole figure sways gently on a timer.'),
-    idea('Tea cup', 'A steaming cup on the desk; a line when he sits down to work.'),
-  ] });
-  assert.deepStrictEqual(c.ideas.map((i) => i.title), ['Watermelon slice', 'Frost drift', 'Tea cup']);
-  assert.strictEqual(c.tossed, 5);
-  const limits = require(path.join(root, 'abilities.js')).LIMITS;
-  for (const p of [profile.buildPrompt({ name: 'X', personality: 'Calm.' }), new Upgrader({ projectRoot: dir, ledger: new Ledger(fs.mkdtempSync(path.join(os.tmpdir(), 'toshi-lim-'))), guard: {}, settings: { get: () => undefined }, git: {}, character: () => ({ id: 'x', name: 'X', isSkin: true }) }).buildPrompt({ title: 'T', summary: 'S', goalTokens: 1 }, {})]) {
-    assert.ok(p.includes("artwork cannot be edited, redrawn, or added to"));
-    assert.ok(p.includes('no counters, streaks, scores'));
-  }
-  assert.ok(limits.includes('must be thrown out'));
+    idea('Winter coat', 'A thick coat for cold days.'),
+    idea('Hero cape', 'A flowing cape behind him.'),
+    idea('Salute', 'He salutes at the hour.', { needs_new_art: true }),
+    idea('Diary', 'Remembers what day you last worked.', { needs_memory: true }),
+  ];
+  const c = profile.clean({ found: true, profile: 'x', ideas: list }, { poses });
+  assert.deepStrictEqual(c.ideas.map((i) => i.title), ['Rare earned praise', 'Hello wave', 'Party hat', 'Watermelon slice']);
+  assert.strictEqual(c.tossed, 6);
+  // A character without a wave pose does not get the wave idea.
+  const none = profile.clean({ found: true, profile: 'x', ideas: list }, { poses: [] });
+  assert.ok(!none.ideas.some((i) => i.title === 'Hello wave'));
+  assert.ok(none.ideas.some((i) => i.title === 'Party hat'));
+
+  const lim = ab.limits(poses);
+  assert.match(lim, /ONLY poses that may be used are the ones already drawn.*wave \(wave or bow\)/);
+  assert.match(lim, /Never clothing, costumes, masks, capes/);
+  assert.match(lim, /a hat on top of the head/);
+  assert.match(lim, /keep a simple count/);
+  assert.match(lim, /finishing a typing session.*switching to another app/);
+  assert.match(ab.limits([]), /no extra drawn poses to play/);
+  const who3 = { id: 'x', name: 'X', isSkin: true, personality: 'Calm.', limits: lim };
+  const prompts = [profile.buildPrompt(who3), new Upgrader({ projectRoot: dir, ledger: new Ledger(fs.mkdtempSync(path.join(os.tmpdir(), 'toshi-lim-'))), guard: {}, settings: { get: () => undefined }, git: {}, character: () => who3 }).buildPrompt({ title: 'T', summary: 'S', goalTokens: 1 }, {})];
+  for (const p of prompts) { assert.ok(p.includes('ONLY poses that may be used')); assert.ok(p.includes('must be thrown out')); }
 
   // A built trick can be switched off and on without undoing it.
   const { modsFor, readQuipPacks } = require(path.join(root, 'mods.js'));

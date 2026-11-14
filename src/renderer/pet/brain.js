@@ -320,14 +320,24 @@
     const minutes = Math.round((now() - st.deskSince) / 60000);
     setMode('idle');
     st.nextDecision = now() + 3000;
-    if (!quiet) quip(minutes >= 20 ? ['desk-exit-long', 'desk-exit'] : ['desk-exit'], {});
+    if (!quiet) {
+      // Upgrades can react to a finished typing session (and count them).
+      const handled = fire('desk-done', { minutes });
+      const long = minutes >= 20 && fire('desk-long', { minutes });
+      if (!handled && !long) quip(minutes >= 20 ? ['desk-exit-long', 'desk-exit'] : ['desk-exit'], {});
+    }
   }
   // Called by the main process every 2 seconds.
   //   typing: 0-8, kind: coding | lab | writing | reading | leisure | null,
   //   leisure: a game or video app (only when slacking nudges are on).
-  function onActivity({ typing = 0, kind = null, leisure = false }) {
+  function onActivity({ typing = 0, kind = null, leisure = false, switched = false }) {
     const t = now();
     const calm = ['idle', 'walk', 'lean'].includes(st.mode) && !BuddyBubble.isVisible() && !st.working;
+    // The owner moved to another app: upgrades may react, at most every 20 seconds.
+    if (switched && !st.paused && t - (st.lastSwitchFire || 0) >= 20000) {
+      st.lastSwitchFire = t;
+      if (calm || st.mode === 'desk') fire('app-switch', {});
+    }
     // A long, uninterrupted stretch of games or videos earns a dry remark; if it
     // keeps going, a firmer one later. Being inactive never counts as slacking.
     if (leisure) {
@@ -390,12 +400,23 @@
   function fire(trigger, extra = {}) {
     let handled = false;
     for (const b of BuddyMods.behaviors(trigger)) {
-      const chance = b.chance === undefined ? 1 : b.chance;
-      if (Math.random() > chance) continue;
-      runAction(b, extra);
-      handled = true;
+      if (attempt(b, extra)) handled = true;
     }
     return handled;
+  }
+  // One behavior, one event: a counted behavior adds to its saved count every
+  // time and acts only on its Nth time or milestones; then the usual chance.
+  function attempt(b, extra) {
+    let more = extra;
+    if (b.count) {
+      const c = BuddyMods.bump(b.slug, b.count);
+      if (!c.hit) return false;
+      more = { ...extra, count: c.n };
+    }
+    const chance = b.chance === undefined ? 1 : b.chance;
+    if (Math.random() > chance) return false;
+    runAction(b, more);
+    return true;
   }
   function runAction(b, extra) {
     const a = b.action;
@@ -414,7 +435,7 @@
     for (const t of intervalTimers) clearInterval(t);
     intervalTimers.length = 0;
     for (const b of BuddyMods.behaviors('interval')) {
-      intervalTimers.push(setInterval(() => { if (st.mode !== 'sleep' && st.mode !== 'drag' && !st.paused) { const c = b.chance === undefined ? 1 : b.chance; if (Math.random() <= c) runAction(b, {}); } }, b.every));
+      intervalTimers.push(setInterval(() => { if (st.mode !== 'sleep' && st.mode !== 'drag' && !st.paused) attempt(b, {}); }, b.every));
     }
   }
 

@@ -104,7 +104,10 @@ BuddyMods.register({
   cannot add image files of its own, and must never redraw an attached picture.
 - `behaviors[]`: `trigger` is one of `idle`, `click`, `dblclick`, `drop`, `hour`,
   `wake`, `sleep`, `lean`, `desk` (Kori sits down at the desk), `ultimate` (the
-  ultimate form begins), `donate`, `upgrade`, `interval` (needs `every` >= 30000 ms). `chance` 0-1 (default 1). `action` may
+  ultimate form begins), `donate`, `upgrade`, `desk-done` (a typing session at the desk
+  ends; `{minutes}` in `say`), `desk-long` (the same, for sessions of 20 minutes or
+  more), `app-switch` (the user moved to another app; at most once per 20 seconds),
+  `interval` (needs `every` >= 30000 ms). `chance` 0-1 (default 1). `action` may
   combine:
   - `animate`: built-in `frost`, `huff`, `shrug`, `think`, `wave`, `surprised`,
     `stamp` (desk only), `release` (the full Frost Release, use sparingly), or one
@@ -116,6 +119,23 @@ BuddyMods.register({
     `chime`, `blizzard`, `stamp`, `scribble`, `huff`. Mods cannot add audio files.
   When a mod handles `idle`, `click`, `dblclick`, `drop`, `wake`, `hour`, or `desk`,
   the built-in reaction for that event is skipped that time.
+
+### Counting (the only memory a mod has)
+A behavior may carry `count: { name: 'sessions', every: 5 }` and/or
+`count: { name: 'sessions', at: [10, 50, 100] }`. Each time its trigger fires, the
+saved count `name` (per mod, kept on the user's computer across restarts and sleep)
+goes up by one, and the action runs only when the count is a multiple of `every` or
+equals a number in `at`. `{count}` in `say` is replaced with the number. Example:
+`{ trigger: 'desk-done', count: { name: 'sessions', every: 5 }, action: { animate: 'wave', say: 'Session {count}. Acceptable.' } }`
+There is no other storage: no dates, scores, or settings.
+
+### Poses and props
+- `action.animate` may name a built-in pose only if the prompt lists it as one the
+  character has drawn. Never ask for a pose that is not listed, and never imitate one
+  (a "nod", a "blink") with shapes or motion.
+- Props are small add-ons on top of or beside the character (a hat, something held,
+  something on the desk). Never clothing or anything that covers the body or face or
+  changes the outfit.
 
 ### What a mod cannot do
 - Touch anything under `src/`, `docs/`, `prompts/`, `characters/`, `package.json`, or

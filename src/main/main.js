@@ -332,7 +332,9 @@ function start() {
       built: ledger.data.upgrades.filter((u) => !u.reverted && mine(u)).map((u) => u.title),
       planned: ledger.data.goals.filter((g) => mine(g) && g.status !== 'done').map((g) => g.title),
     });
-    return { ...who, abilities: has, profile: who.isSkin ? characterProfile.profileText(userData, who.id, who) : '' };
+    // Poses already drawn in his own sheet that an upgrade may play; nothing else.
+    const poses = abilities.playablePoses({ config: c ? c.config : null, builtin: !who.isSkin });
+    return { ...who, abilities: has, poses, limits: abilities.limits(poses), profile: who.isSkin ? characterProfile.profileText(userData, who.id, who) : '' };
   };
   const publicSettings = () => ({ ...settings.all(), characterName: charName() });
   const ownQuipsOnly = () => { const c = activeCharacter(); return !!(c && c.config && c.config.ownQuipsOnly); };
@@ -824,6 +826,7 @@ function start() {
       r = await characterProfile.research({
         userData, id, name: info.name, personality: info.personality, abilities: info.abilities, log,
         avoid: mineNow.slice(0, 40).map(line).join('\n'),
+        limits: info.limits, poses: info.poses,
         onRateLimit: (rl) => guard.observe(rl),
       });
     } catch (e) { r = { ok: false, error: e.message }; } finally { ideasBusy = false; }
@@ -885,6 +888,7 @@ function start() {
 
   // ---- desk mode: is the user actively writing or doing a lab? ----
   // Samples are classified and dropped; window titles are never logged or stored.
+  let lastFront = '';
   const activity = new ActivityWatcher({
     log,
     onSample: (sample) => {
@@ -898,7 +902,12 @@ function start() {
       // typing: 0-8, how much of the last 2 seconds looked like typing. The desk
       // decides from a rolling window; typing in a game never counts.
       const typing = kind === 'leisure' ? 0 : Math.max(0, Math.min(8, Number(sample.k) || 0));
-      overlay.webContents.send('activity', { typing, kind, leisure, idle });
+      // Did the app in front change since the last sample? Only that yes/no
+      // leaves here; the name is compared in memory and never kept elsewhere.
+      const front = String(sample.p || '');
+      const switched = !!front && !!lastFront && front !== lastFront;
+      if (front) lastFront = front;
+      overlay.webContents.send('activity', { typing, kind, leisure, idle, switched });
     },
   });
   const watcherWanted = () => settings.get('deskMode') !== false || settings.get('slackNudges') !== false;

@@ -38,7 +38,7 @@ function listModSlugs(projectRoot) {
 }
 
 function buildPrompt(projectRoot, request, ledger, character = { name: 'Kori', isSkin: false }, extra = '') {
-  const { name, isSkin, personality, profile, abilities } = character;
+  const { name, isSkin, personality, profile, abilities, limits } = character;
   const api = fs.readFileSync(path.join(projectRoot, 'docs', 'MOD_API.md'), 'utf8');
   const mods = listModSlugs(projectRoot);
   const done = ledger.data.upgrades.filter((u) => !u.reverted).map((u) => `- ${u.title} (${u.tokens} tokens)`).join('\n') || '- none yet';
@@ -50,7 +50,7 @@ function buildPrompt(projectRoot, request, ledger, character = { name: 'Kori', i
     'A human has suggested an upgrade. Estimate what it would take for a separate headless Claude Code run (model: haiku) to implement it as a mod.',
     'Mods can only add quips, CSS animations, SVG props, and simple behaviors through the Mod API below; they cannot touch src/.',
     'Hard limits (a suggestion that needs any of these broken is not feasible: set feasible to false and say why in risk_note; if only part of it breaks them, narrow the title and summary to the part that fits):',
-    LIMITS,
+    limits || LIMITS,
     'Be realistic about tokens: a run reads docs/MOD_API.md (~2k tokens), one or two existing mods, then writes one mod.js. Small cosmetic mods land in 10k-30k tokens; animation-heavy or behavior-heavy mods 40k-120k; anything needing new core support is not feasible (set touches_core true).',
     '',
     '## Mod API',

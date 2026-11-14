@@ -8,7 +8,7 @@
   let currentBase = null; // URL of the folder the mod being loaded lives in
   const IMAGE_FILE = /^[a-z0-9][a-z0-9-]{0,39}\.(png|webp|gif|jpg)$/;
   const ANCHORS = new Set(['head', 'hand-r', 'hand-l', 'back', 'front', 'desk']);
-  const TRIGGERS = new Set(['idle', 'click', 'dblclick', 'drop', 'hour', 'wake', 'sleep', 'interval', 'donate', 'upgrade', 'lean', 'desk', 'ultimate']);
+  const TRIGGERS = new Set(['idle', 'click', 'dblclick', 'drop', 'hour', 'wake', 'sleep', 'interval', 'donate', 'upgrade', 'lean', 'desk', 'ultimate', 'desk-done', 'desk-long', 'app-switch']);
   const RESERVED_ANIMS = new Set(['idle', 'walk', 'lean', 'sleep', 'drag', 'fall', 'land', 'talk', 'blink', 'face-left', 'face-right',
     'desk', 'desk-in', 'release', 'stamp', 'stamped', 'scribbling', 'skin', 'working', 'frost', 'huff', 'shrug', 'think', 'wave', 'surprised',
     'ultimate', 'ultimate-in', 'ultimate-out', 'has-ultimate']);
@@ -61,6 +61,14 @@
         if (b.trigger === 'interval' && !(b.every >= 30000)) fail('interval behaviors need every >= 30000 ms');
         if (b.chance !== undefined && !(b.chance >= 0 && b.chance <= 1)) fail('behavior chance must be 0-1');
         if (!b.action || typeof b.action !== 'object') fail('behavior needs an action object');
+        if (b.count !== undefined) {
+          // A saved count of how often this event happened; the action runs every N times or at milestones.
+          const c = b.count;
+          if (!c || typeof c !== 'object' || !/^[a-z0-9-]{1,30}$/.test(String(c.name))) fail('behavior count.name must be 1-30 chars of a-z, 0-9, -');
+          const every = c.every === undefined || (Number.isInteger(c.every) && c.every >= 2 && c.every <= 100000);
+          const at = c.at === undefined || (Array.isArray(c.at) && c.at.length >= 1 && c.at.length <= 20 && c.at.every((n) => Number.isInteger(n) && n >= 1 && n <= 1000000));
+          if (!every || !at || (c.every === undefined && c.at === undefined)) fail('behavior count needs every (2-100000) and/or at (a list of up to 20 whole numbers)');
+        }
         const a = b.action;
         if (a.animate !== undefined && typeof a.animate !== 'string') fail('action.animate must be a string');
         if (a.say !== undefined && typeof a.say !== 'string' && !Array.isArray(a.say)) fail('action.say must be a string or array');
@@ -159,6 +167,21 @@
     return out;
   }
 
+  // Saved counts, kept in this window's storage (it survives restarts, sleep,
+  // and the window being replaced). { slug: { name: n } }
+  const COUNT_KEY = 'buddy.counts';
+  function readCounts() { try { return JSON.parse(localStorage.getItem(COUNT_KEY) || '{}') || {}; } catch (_) { return {}; } }
+  // Add one to a behavior's count. Returns { n, hit }: hit is true when the action should run.
+  function bump(slug, count) {
+    const all = readCounts();
+    const mine = all[slug] && typeof all[slug] === 'object' ? all[slug] : (all[slug] = {});
+    const n = Math.min(1e9, (Number(mine[count.name]) || 0) + 1);
+    mine[count.name] = n;
+    try { localStorage.setItem(COUNT_KEY, JSON.stringify(all)); } catch (_) { /* storage full or blocked: counts just don't persist */ }
+    const hit = (count.every ? n % count.every === 0 : false) || (Array.isArray(count.at) && count.at.includes(n));
+    return { n, hit };
+  }
+
   function setProp(slug, id, show) {
     const el = document.getElementById(`prop-${slug}-${id}`);
     if (!el) return;
@@ -199,5 +222,5 @@
     });
   }
 
-  window.BuddyMods = { register, loadAll, quips, animations, behaviors, setProp, list: () => registry.map((r) => r.slug), skipped: () => skipped.slice() };
+  window.BuddyMods = { register, loadAll, quips, animations, behaviors, setProp, bump, list: () => registry.map((r) => r.slug), skipped: () => skipped.slice() };
 })();

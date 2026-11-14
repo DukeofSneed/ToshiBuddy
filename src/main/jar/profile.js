@@ -35,8 +35,8 @@ const SCHEMA = {
           summary: { type: 'string', description: 'What would be built, concretely, in 1-2 sentences' },
           size: { type: 'string', enum: ['S', 'M'] },
           estimated_tokens: { type: 'integer' },
-          needs_new_art: { type: 'boolean', description: 'True if this idea would need any new or changed artwork of the character, or a body part moving on its own (a nod, a blink, a wave, a new pose or expression)' },
-          needs_memory: { type: 'boolean', description: 'True if this idea needs to remember or count anything between sessions, or to know about tasks, streaks, or what the owner is doing' },
+          needs_new_art: { type: 'boolean', description: 'True if this idea would need any new or changed artwork of the character, a pose that is not in the allowed list, a body part moving on its own, or anything worn that covers the body or changes the outfit' },
+          needs_memory: { type: 'boolean', description: 'True if this idea needs any memory other than a simple count of one of its allowed events, or needs to know what the owner is doing beyond the allowed events' },
         },
         required: ['title', 'summary', 'size', 'estimated_tokens', 'needs_new_art', 'needs_memory'],
       },
@@ -69,10 +69,22 @@ function profileText(userData, id, who) {
 // Whatever the run returned is data: strip control characters, cap every length,
 // keep only known fields, clamp token estimates to the usual size ranges.
 // Wording that can only be done with new artwork or separately moving parts.
-const ART_RE = /\b(nods?|nodding|blinks?|winks?|smiles?|smirks?|frowns?|grins?|pouts?|yawns?|facial expression|new (pose|sprite|outfit|costume|expression|frame)s?|redraw\w*|sprite ?sheet|(raises?|waves?|lifts?|moves?|crosses|folds?|points?|shakes?|tilts?|turns?) (his|her|their|its|the|an?) (head|hand|arm|eyebrow|finger|eyes?|hair)s?|eyes? (narrow|widen|close|glow|roll)\w*|changes? (clothes|outfit|expression)|counter|streak|milestones?|keeps? (count|track)|remembers?)\b/i;
-const needsArt = (s) => ART_RE.test(String(s || ''));
+const ART_RE = /\b(nods?|nodding|blinks?|winks?|smiles?|smirks?|frowns?|grins?|pouts?|yawns?|salutes?|facial expression|new (pose|sprite|expression|frame)s?|redraw\w*|sprite ?sheet|(raises?|waves?|lifts?|moves?|crosses|folds?|points?|shakes?|tilts?|turns?) (his|her|their|its|the|an?) (head|hand|arm|eyebrow|finger|eyes?|hair)s?|eyes? (narrow|widen|close|glow|roll)\w*|changes? (clothes|outfit|expression))\b/i;
+// Anything worn that would cover him or change his outfit (a hat on top is fine).
+const OUTFIT_RE = /\b(outfits?|costumes?|capes?|cloaks?|masks?|armou?r|coats?|jackets?|robes?|uniforms?|sweaters?|hoodies?|suits?|aprons?|scar(f|ves)|dress(es)?|kimonos?|clothes|clothing)\b/i;
+// Wording that names a pose the character does have drawn is allowed.
+const POSE_WORDS = {
+  wave: /\b(waves?|waving) ((his|her|their|its|the|an?) (hand|arm)s?)?|\bbows?\b|\bbowing\b/gi,
+  shrug: /\bshrug\w*/gi,
+  think: /\b(tilts?|turns?) (his|her|their|its|the) head\b/gi,
+};
+function needsArt(s, poses = []) {
+  let t = String(s || '');
+  for (const k of poses) if (POSE_WORDS[k]) t = t.replace(POSE_WORDS[k], ' ');
+  return ART_RE.test(t) || OUTFIT_RE.test(t);
+}
 
-function clean(out) {
+function clean(out, { poses = [] } = {}) {
   let tossed = 0;
   const ideas = [];
   const seen = new Set();
@@ -82,7 +94,7 @@ function clean(out) {
     if (!title || !summary || seen.has(title.toLowerCase())) continue;
     // Tossed: anything the run itself says needs new art or memory, and anything
     // whose wording still asks for a body part to move or a new pose.
-    if (i.needs_new_art === true || i.needs_memory === true || needsArt(`${title}. ${summary}`)) { tossed++; continue; }
+    if (i.needs_new_art === true || i.needs_memory === true || needsArt(`${title}. ${summary}`, poses)) { tossed++; continue; }
     seen.add(title.toLowerCase());
     const size = i.size === 'M' ? 'M' : 'S';
     const [lo, hi] = SIZE_RANGE[size];
@@ -121,7 +133,7 @@ function withoutRepeats(ideas, existingTitles) {
   return kept;
 }
 
-function buildPrompt({ name, personality, abilities, avoid }) {
+function buildPrompt({ name, personality, abilities, avoid, limits }) {
   return [
     `A desktop pet app shows a small character called "${name}" who walks along the taskbar, says short lines, and does paperwork at a tiny desk. Its owner wants upgrade ideas that suit this character.`,
     personality ? `The owner describes the character like this: ${personality}` : 'The owner gave no description.',
@@ -129,7 +141,7 @@ function buildPrompt({ name, personality, abilities, avoid }) {
     `1. Use web search to look up the name "${name}" (try it alone, and with words like "character"). Search only for the name; do not put the owner's description into a search. One to three searches is enough.`,
     '2. If a known character with that name fits the description, write short factual notes about it in your own words: setting, role, themes, likes and dislikes, manner of speaking. If nothing fits (an original character), set found to false and base the notes on the owner\'s description alone.',
     `3. Propose ${MAX_IDEAS} small upgrades that suit this character, within these limits:`,
-    LIMITS,
+    limits || LIMITS,
     'Check each idea against the limits before you list it, and answer needs_new_art and needs_memory honestly for each: ideas marked true are discarded, so replace them with ideas that fit.',
     abilities ? `\nWhat the character already does in the app:\n${abilities}\n${ABILITY_RULE}` : '',
     avoid ? `\nIdeas the owner has already been shown. Every new idea must be clearly different from all of these: a different subject, not a variation, rewording, or second version of one:\n${avoid}` : '',
@@ -141,7 +153,7 @@ function buildPrompt({ name, personality, abilities, avoid }) {
 }
 
 // One search-only run. Returns { ok, profile } and stores the profile on success.
-async function research({ userData, id, name, personality, abilities, avoid, log = () => {}, onRateLimit }) {
+async function research({ userData, id, name, personality, abilities, avoid, limits, poses = [], log = () => {}, onRateLimit }) {
   const who = { name: text(name, 60), personality: text(personality, 600) };
   const has = String(abilities || '').slice(0, 4000);
   if (!who.name) return { ok: false, error: 'the character has no name' };
@@ -150,7 +162,7 @@ async function research({ userData, id, name, personality, abilities, avoid, log
   let res;
   try {
     const run = runClaude({
-      prompt: buildPrompt({ ...who, abilities: has, avoid: String(avoid || '').slice(0, 4000) }),
+      prompt: buildPrompt({ ...who, abilities: has, avoid: String(avoid || '').slice(0, 4000), limits }),
       cwd,
       args: ['--model', 'haiku', '--effort', 'low', '--max-turns', '8', '--max-budget-usd', '0.15',
         '--allowedTools', 'WebSearch',
@@ -170,7 +182,7 @@ async function research({ userData, id, name, personality, abilities, avoid, log
     try { out = JSON.parse(res.result.slice(res.result.indexOf('{'), res.result.lastIndexOf('}') + 1)); } catch (_) { out = null; }
   }
   if (!out) return { ok: false, error: (res.errors && res.errors[0]) || res.error || res.subtype || 'no answer came back', tokens: res.tokens, rateLimit: res.rateLimit };
-  const c = clean(out);
+  const c = clean(out, { poses });
   if (!c.profile && !c.ideas.length) return { ok: false, error: 'the answer was empty', tokens: res.tokens, rateLimit: res.rateLimit };
   const profile = { id, name: who.name, signature: signature(who), at: Date.now(), ...c };
   const file = profileFile(userData, id);

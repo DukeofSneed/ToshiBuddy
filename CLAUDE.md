@@ -35,6 +35,12 @@ upgrade runs that write mods. Kori (`characters/kori-test`, drawn in
 - Prompts also get a list of what the character already does (`src/main/abilities.js`:
   app behaviors, the names of its mapped animations, built tricks, listed ideas) with a
   rule not to repeat or imitate them. Animation names only; never what a pose looks like.
+- Upgrades may play only poses the character's sheet already has (`playablePoses` and
+  `limits` in `src/main/abilities.js`), add only small props that don't cover or change
+  the outfit, and keep only simple saved counts (`count` on a behavior; stored in the
+  pet window's localStorage). Ideas outside that are tossed (`clean` in `profile.js`).
+- The `app-switch` event is a yes/no computed in memory from the foreground app name;
+  the name itself still never leaves the activity handler.
 - A user can attach pictures to a goal (`src/main/jar/attachments.js`): validated like
   character images, kept in userData, copied into `mods/<slug>/assets/` (shown as-is by
   a picture prop) or `mods/<slug>/reference/` (removed after the run). These are the
