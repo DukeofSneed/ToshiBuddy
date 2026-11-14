@@ -16,6 +16,13 @@ Bring your own characters too: a sprite sheet, a personality, and quips are all 
 Right-click the pet or the tray snowflake for the menu. Click him, drag him, drop him,
 double-click him. `start.cmd` also starts it without a shortcut.
 
+## Updating
+
+Right-click the buddy and choose **Check for updates…**. If there is a newer version it
+asks before downloading, then restarts. Characters you imported or edited, tricks the
+buddy has learned, the jar and your settings are all kept. The app also looks once at
+startup and only tells you; turn that off with **Look for updates at startup**.
+
 ## The jar on screen
 
 The jar in the bottom-right corner fills up as tokens come in. **Double-click** it to
