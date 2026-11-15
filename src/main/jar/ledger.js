@@ -149,6 +149,30 @@ class Ledger {
     }
     goal.status = goal.funded >= goal.goalTokens ? 'funded' : 'open';
   }
+  // A goal still marked "building" when no run is active was cut off (the app
+  // was closed or crashed mid-build). Left alone it can't be funded, started or
+  // removed. Put it back: ready to start again when it still holds enough
+  // tokens, otherwise paused and asking for more. Returns the goals it changed.
+  recoverInterrupted() {
+    const changed = [];
+    for (const goal of this.data.goals) {
+      if (goal.status !== 'building') continue;
+      const avail = Math.max(0, (goal.funded || 0) - (goal.spent || 0));
+      goal.waiting = false;
+      if (avail >= 1000) {
+        goal.status = 'funded';
+        goal.needTokens = 0;
+        goal.note = 'This build was cut off when the app closed. Start it again to carry on.';
+      } else {
+        goal.status = 'paused';
+        goal.needTokens = Math.max(5000, Math.round((goal.goalTokens || 0) * 0.5 / 1000) * 1000);
+        goal.note = `This build was cut off when the app closed. Needs +${goal.needTokens} tokens to carry on.`;
+      }
+      changed.push(goal);
+    }
+    if (changed.length) this.save();
+    return changed;
+  }
   fundGoal(goalId, tokens) {
     const goal = this.goal(goalId);
     tokens = Math.max(0, Math.floor(Number(tokens) || 0));

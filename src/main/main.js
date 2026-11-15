@@ -656,6 +656,19 @@ function start() {
   ipcMain.handle('jar:state', () => jarState());
   // One donation path for the panel and the jar on screen, so the guard's
   // ceiling, pledges, and the donation reaction are always the same.
+  // No run can be active when the app starts (or when "Stop run" is pressed
+  // with nothing running), so a goal still marked as building is stuck.
+  function unstickBuilds() {
+    if (upgrader.isBusy()) return [];
+    const fixed = ledger.recoverInterrupted();
+    if (fixed.length) {
+      log(`${fixed.length} build(s) were cut off earlier and are ready to start again`);
+      // half-written files from the cut-off run (mods/ and content/ only)
+      git.discardRunChanges().catch((e) => log(`discard failed: ${e.message}`));
+    }
+    return fixed;
+  }
+  unstickBuilds();
   // A build that stopped short ("paused" or "failed") was already started by
   // the user. When their top-up covers what it asked for, it carries on by
   // itself instead of waiting for another click. Only a top-up triggers this,
@@ -818,7 +831,7 @@ function start() {
     if (!r.ok && r.reason) notify(`Can't resume: ${r.reason}.`, 7000);
     return { ...r, state: jarState() };
   });
-  ipcMain.handle('jar:cancel-run', () => { upgrader.cancel(); return jarState(); });
+  ipcMain.handle('jar:cancel-run', () => { upgrader.cancel(); unstickBuilds(); return jarState(); });
   // Switch one built trick off or on without undoing it.
   ipcMain.handle('jar:toggle-upgrade', async (_e, { upgradeId, enabled } = {}) => {
     const up = ledger.upgrade(String(upgradeId || ''));
