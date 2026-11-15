@@ -120,6 +120,28 @@ function runSelftest(ctx, selftestDir) {
         fs.writeFileSync(path.join(selftestDir, `desk-work-${n}.png`), fr.toPNG());
       }
       await overlay.webContents.executeJavaScript(`document.getElementById('pet').classList.remove('scribbling'); 1`);
+      // At the desk a sheet character may only stand still or blink, whatever
+      // pose or trick is asked for.
+      const deskPoses = await overlay.webContents.executeJavaScript(`(async () => {
+        const p = document.getElementById('pet');
+        const players = (window.BuddyApp && BuddyApp.sheetPlayers) || {};
+        const out = { atDesk: p.classList.contains('desk'), seen: {}, bad: [] };
+        if (!players.base) return JSON.stringify({ ...out, skipped: 'not a sheet character' });
+        for (const k of ['think', 'surprised', 'huff', 'shrug', 'wave', 'frost', 'release', 'stamp', 'working', 'scribbling', 'talk', 'walk', 'drag', 'fall', 'land', 'sleep', 'blink']) {
+          p.classList.add(k);
+          await new Promise((r) => setTimeout(r, 40));
+          for (const [name, pl] of Object.entries(players)) {
+            if (!pl) continue;
+            out.seen[pl.key] = (out.seen[pl.key] || 0) + 1;
+            if (pl.key !== 'idle' && pl.key !== 'blink') out.bad.push(name + ' sheet showed ' + pl.key + ' for ' + k);
+          }
+          const moving = getComputedStyle(document.getElementById('sprite')).animationName;
+          if (moving && moving !== 'none') out.bad.push('whole-body motion ' + moving + ' for ' + k);
+          p.classList.remove(k);
+        }
+        return JSON.stringify(out, null, 1);
+      })()`);
+      fs.writeFileSync(path.join(selftestDir, 'desk-poses.json'), deskPoses);
       // Frost Release, captured mid-transformation.
       await overlay.webContents.executeJavaScript(`BuddyBubble.hide(); BuddyBrain.exitDesk({ quiet: true }); BuddyBrain.playAnimation('release'); 1`);
       await new Promise((r) => setTimeout(r, 1700));

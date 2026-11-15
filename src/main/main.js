@@ -964,7 +964,7 @@ function start() {
       { label: 'Mute voice', type: 'checkbox', checked: !!settings.get('muted'), click: (m) => toggleSetting('muted', m.checked) },
       { label: 'Sound effects', type: 'checkbox', checked: settings.get('sfx') !== false, click: (m) => toggleSetting('sfx', m.checked) },
       { label: 'Desk mode (writing and labs)', type: 'checkbox', checked: settings.get('deskMode') !== false, click: (m) => toggleSetting('deskMode', m.checked) },
-      { label: 'Desk sounds (scribbling, stamping)', submenu: [['off', 'Off'], ['quiet', 'Quiet'], ['normal', 'Normal']].map(([v, l]) => ({ label: l, type: 'radio', checked: (settings.get('deskSounds') || 'quiet') === v, click: () => toggleSetting('deskSounds', v) })) },
+      { label: 'Desk sounds (desk thump, stamping)', submenu: [['off', 'Off'], ['quiet', 'Quiet'], ['normal', 'Normal']].map(([v, l]) => ({ label: l, type: 'radio', checked: (settings.get('deskSounds') || 'quiet') === v, click: () => toggleSetting('deskSounds', v) })) },
       { label: 'Nudge me when I slack off', type: 'checkbox', checked: settings.get('slackNudges') !== false, click: (m) => toggleSetting('slackNudges', m.checked) },
       { label: 'Character', submenu: skinItems },
       { label: 'Pause wandering', type: 'checkbox', checked: !!settings.get('paused'), click: (m) => toggleSetting('paused', m.checked) },

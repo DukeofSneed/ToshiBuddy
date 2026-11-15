@@ -129,6 +129,11 @@ equals a number in `at`. `{count}` in `say` is replaced with the number. Example
 `{ trigger: 'desk-done', count: { name: 'sessions', every: 5 }, action: { animate: 'wave', say: 'Session {count}. Acceptable.' } }`
 There is no other storage: no dates, scores, or settings.
 
+### At the desk
+While a sprite-sheet character sits at the desk it only stands still and blinks: no
+other pose plays and whole-body animations are off, so a behavior's `animate` does
+nothing there. Lines, props and sounds still work.
+
 ### Poses and props
 - `action.animate` may name a built-in pose only if the prompt lists it as one the
   character has drawn. Never ask for a pose that is not listed, and never imitate one

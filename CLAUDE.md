@@ -62,6 +62,9 @@ upgrade runs that write mods. Kori (`characters/kori-test`, drawn in
   Keep it a rule with no setting: do not add an option that can mirror a mark. A user can
   box a sign by hand in the editor (`markBoxes`, for one that touches the figure) or box
   something that is not a sign (`plainBoxes`); both only decide what counts as a mark.
+- At the desk a sheet character only shows its idle pose and blink (`resolveKey` in
+  `sheet.js`, plus the `#pet.skin.desk #sprite` rule in styles.css). Keep the desk
+  calm: no action poses, no whole-body motion, and writing makes no sound.
 - New sheets are mapped automatically from row counts (`src/main/character-check.js`:
   `autoMap`, `checkCharacter`); it never looks at the image.
 - Updates for zip installs live in `src/main/updater.js`: `version.txt` is filled in by

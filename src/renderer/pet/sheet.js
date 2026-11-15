@@ -551,6 +551,10 @@
   }
 
   function resolveKey(pet, anims) {
+    // At the desk: the standing pose and a blink, nothing else. No action poses
+    // (sword swings, tricks, reactions) while the character sits and works,
+    // whatever the brain or an upgrade asks for. True for every sheet character.
+    if (pet.classList.contains('desk')) return anims.blink && pet.classList.contains('blink') ? 'blink' : 'idle';
     for (const c of pet.classList) if (c.startsWith('anim-') && anims[c]) return c;
     for (const k of ORDER) if (anims[k] && pet.classList.contains(k)) return k;
     return 'idle';

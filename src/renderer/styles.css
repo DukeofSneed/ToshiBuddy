@@ -362,3 +362,7 @@ html, body {
 #pet.ultimate.has-ultimate #skin-img-marks { display: none; }
 #pet.ultimate.has-ultimate #skin-ultimate-marks { display: inline; }
 #pet.skin.desk #skin-img-marks, #pet.skin.desk #skin-ultimate-marks { transform: translateY(-14px); transition: transform 400ms ease; }
+
+/* Sheet characters stay calm at the desk: no hops, shakes or other whole-body
+   motion (from reactions, tricks, or upgrades) while seated. */
+#pet.skin.desk #sprite { animation: none !important; transform: none !important; }

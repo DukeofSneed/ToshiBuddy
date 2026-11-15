@@ -271,13 +271,13 @@
     st.nextQuip = now() + rand(150000, 300000);
     scheduleDeskWork();
   }
-  // Scribbling and stamping repeat for as long as the user works, so they have
-  // their own level: 'off', 'quiet' (soft background) or 'normal'.
+  // The desk's own sounds (the thump when it appears, and stamping on a
+  // character that has a stamping pose) have their own level: 'off', 'quiet'
+  // or 'normal'. Writing makes no sound.
   function deskSound(name) {
     const level = st.deskSounds || 'quiet';
     if (level === 'off') return;
-    if (level === 'normal') { BuddySfx.play(name); return; }
-    BuddySfx.play(name, name === 'scribble' ? 0.5 : 0.2);
+    BuddySfx.play(name, level === 'normal' ? 1 : 0.2);
   }
   function setDeskSounds(level) { st.deskSounds = ['off', 'quiet', 'normal'].includes(level) ? level : 'quiet'; }
   function scheduleDeskWork() {
@@ -294,7 +294,6 @@
     loop(() => {
       const el = pet();
       el.classList.add('scribbling');
-      deskSound('scribble');
       setTimeout(() => el.classList.remove('scribbling'), rand(1800, 3600));
     }, 3500, 7000);
     loop(() => stamp(), 11000, 24000);
