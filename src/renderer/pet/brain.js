@@ -420,6 +420,7 @@
   // time and acts only on its Nth time or milestones; then the usual chance.
   function attempt(b, extra) {
     let more = extra;
+    if (b.onlyIf && BuddyMods.countOf(b.onlyIf.mod || b.slug, b.onlyIf.count) < b.onlyIf.atLeast) return false;
     if (b.count) {
       const c = BuddyMods.bump(b.slug, b.count);
       if (!c.hit) return false;

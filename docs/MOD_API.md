@@ -133,6 +133,14 @@ whenever that saved count of the same mod has reached the number, including afte
 restart. Use one prop per step to make something grow (one sheet per session, say).
 A count only goes up through a behavior that names it.
 
+**Building on another trick.** A mod may read (never change) another mod's saved
+counts by naming that mod's folder: `showAfter: { mod: 'growing-paperwork-stack', count: 'sheets', at: 9 }`
+on a prop, or `onlyIf: { mod: 'growing-paperwork-stack', count: 'sheets', atLeast: 9 }` on a
+behavior (it acts only while that count has reached the number; without `mod` it reads
+this mod's own count). Write a new mod for this; do not edit the other mod's files.
+Naming another mod's folder in quotes anywhere in mod.js makes yours depend on it: when
+the user switches that one off or undoes it, yours is switched off too.
+
 Every mod gets a **Test** button in the jar: it shows all of the mod's props for a few
 seconds (at the desk if a prop or trigger belongs there) and runs each behavior once.
 Wrap helper code in `(() => { ... })();` so its names don't clash with other mods.

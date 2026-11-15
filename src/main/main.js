@@ -136,9 +136,18 @@ function start() {
       theme: characterStyle().theme,
     };
   }
+  // Titles of the tricks an upgrade's mods use that are off right now (so it is off too).
+  function waitsOn(up) {
+    if (up.reverted || up.disabled) return [];
+    const mods = modsForActive();
+    const titleOf = (slug) => { const u = ledger.data.upgrades.find((x) => (x.slugs || []).includes(slug)); return u ? u.title : slug; };
+    const names = new Set();
+    for (const m of mods) if ((up.slugs || []).includes(m.slug)) for (const s of m.offBecause || []) names.add(titleOf(s));
+    return [...names];
+  }
   function jarState() {
     return {
-      ledger: { ...ledger.snapshot(), goals: ledger.data.goals.filter(isActiveGoal), upgrades: ledger.data.upgrades.filter(isActiveGoal).slice(0, 50) },
+      ledger: { ...ledger.snapshot(), goals: ledger.data.goals.filter(isActiveGoal), upgrades: ledger.data.upgrades.filter(isActiveGoal).slice(0, 50).map((u) => ({ ...u, waitsOn: waitsOn(u) })) },
       ideas: ideasState(),
       guard: guard.status(),
       settings: publicSettings(),
@@ -870,13 +879,14 @@ function start() {
     log(`trick "${up.title}" switched ${enabled ? 'on' : 'off'}`);
     await reloadAndAwaitMods([], 1500);
     quipsChanged();
-    notify(`"${up.title}" is ${enabled ? 'on' : 'off'}.`, 4000);
+    const alsoOff = enabled ? [] : ledger.data.upgrades.filter((u) => u !== up && waitsOn(u).includes(up.title)).map((u) => `"${u.title}"`);
+    notify(`"${up.title}" is ${enabled ? 'on' : 'off'}.${alsoOff.length ? ` Also off, since they use it: ${alsoOff.join(', ')}.` : ''}`, 6000);
     return { ok: true, state: jarState() };
   });
   // Test button: the pet plays the trick once (only tricks loaded for this character).
   ipcMain.handle('jar:test-upgrade', (_e, { upgradeId } = {}) => {
     const up = ledger.upgrade(String(upgradeId || ''));
-    if (!up || up.reverted || up.disabled) return { ok: false, state: jarState() };
+    if (!up || up.reverted || up.disabled || waitsOn(up).length) return { ok: false, state: jarState() };
     if (overlay && !overlay.isDestroyed()) for (const slug of up.slugs || []) overlay.webContents.send('test-mod', { slug: String(slug) });
     return { ok: true, state: jarState() };
   });

@@ -125,7 +125,7 @@ class Upgrader {
       goal.request ? `\nOriginal words from the human: "${goal.request}"` : '',
       '',
       '## Rules',
-      `- Read docs/MOD_API.md first, then write exactly one mod folder: mods/${slugify(goal.title)}/mod.js (plus an optional NOTES.md). You may also add a quip pack under content/quips/.`,
+      `- Read docs/MOD_API.md first, then write exactly one mod folder: mods/${slugify(goal.title)}/mod.js (plus an optional NOTES.md). You may also add a quip pack under content/quips/. Never edit another mod's folder; to build on another trick, read its counts as the Mod API describes.`,
       '- Never create or edit anything under src/, docs/, prompts/, package.json, or any file outside mods/ and content/. Such a run is reverted automatically.',
       '- The mod must be self-contained browser JavaScript calling BuddyMods.register(...). No require, no fetch, no eval, no network, no timers longer than needed.',
       `- Token budget for this run: about ${goal.goalTokens} tokens total. Be economical: read MOD_API.md and at most one existing mod, then write.`,

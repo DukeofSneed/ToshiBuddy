@@ -133,6 +133,19 @@ check('upgrade prompts get the name, personality and notes, and nothing from the
   assert.deepStrictEqual(own('toshitoshi'), { 'bad-owner': false, 'shared-sample': false, 'toshi-tea': true });
   assert.deepStrictEqual(readQuipPacks(d, { upgrades: ups, characterId: 'toshitoshi', ownedOnly: true }).map((q) => q.text), ['Tea time.']);
   assert.deepStrictEqual(readQuipPacks(d, { upgrades: ups, characterId: 'bambietta', ownedOnly: true }), []);
+  // A mod that uses another is off whenever that one is off, undone, or not this character's.
+  fs.writeFileSync(path.join(d, 'mods', 'toshi-tea', 'mod.js'), "BuddyMods.register({ id: 'toshi-tea' });");
+  mod('tea-panic', 'toshitoshi'); fs.writeFileSync(path.join(d, 'mods', 'tea-panic', 'mod.js'), "onlyIf: { mod: 'toshi-tea', count: 'cups', atLeast: 3 }");
+  mod('panic-echo', 'toshitoshi'); fs.writeFileSync(path.join(d, 'mods', 'panic-echo', 'mod.js'), 'showAfter: { mod: "tea-panic", count: "x", at: 1 }');
+  const state = (disabled, id = 'toshitoshi') => Object.fromEntries(modsFor(d, disabled, [], id).filter((m) => ['toshi-tea', 'tea-panic', 'panic-echo'].includes(m.slug)).map((m) => [m.slug, m.enabled ? 'on' : `off:${(m.offBecause || []).join(',')}`]));
+  assert.deepStrictEqual(state([]), { 'toshi-tea': 'on', 'tea-panic': 'on', 'panic-echo': 'on' });
+  assert.deepStrictEqual(state(['toshi-tea']), { 'toshi-tea': 'off:', 'tea-panic': 'off:toshi-tea', 'panic-echo': 'off:tea-panic' });
+  assert.deepStrictEqual(state(['panic-echo']), { 'toshi-tea': 'on', 'tea-panic': 'on', 'panic-echo': 'off:' });
+  fs.rmSync(path.join(d, 'mods', 'toshi-tea'), { recursive: true });
+  // Undone (folder gone): the jar still remembers the name, so what used it stays off.
+  const undone = [{ slugs: ['toshi-tea'], reverted: true, characterId: 'toshitoshi' }];
+  const st2 = Object.fromEntries(modsFor(d, [], undone, 'toshitoshi').filter((m) => m.slug.includes('panic')).map((m) => [m.slug, m.enabled ? 'on' : `off:${m.offBecause.join(',')}`]));
+  assert.deepStrictEqual(st2, { 'tea-panic': 'off:toshi-tea', 'panic-echo': 'off:tea-panic' });
   fs.rmSync(d, { recursive: true, force: true });
   console.log('ownership checks passed');
 }

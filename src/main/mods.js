@@ -47,13 +47,38 @@ function modOwners(projectRoot, upgrades) {
 }
 // Slugs of tricks the user switched off in the jar.
 const switchedOff = (upgrades) => (upgrades || []).filter((u) => u.disabled && !u.reverted).flatMap((u) => u.slugs || []);
+// Which other installed mods each mod uses: any other mod's folder name written
+// in its mod.js as a quoted string (countOf('other-mod', ...), setProp("other-mod", ...)).
+// known: other names to look for (tricks the jar remembers, undone ones included,
+// so a mod whose base was undone is not left running on its own).
+function modNeeds(projectRoot, slugs, known = []) {
+  const names = [...new Set([...slugs, ...known])];
+  const needs = new Map();
+  for (const s of slugs) {
+    let src = '';
+    try { src = fs.readFileSync(path.join(projectRoot, 'mods', s, 'mod.js'), 'utf8'); } catch (_) { /* unreadable: needs nothing */ }
+    needs.set(s, names.filter((o) => o !== s && new RegExp('[\'"`]' + o.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '[\'"`]').test(src)));
+  }
+  return needs;
+}
 // own: built for this character (its lines count as the character's own, even
 // for a character that otherwise speaks only its own quip file).
+// A mod that uses another mod is off whenever that one is off, missing, or
+// belongs to another character (offBecause lists the ones it is waiting on).
 function modsFor(projectRoot, disabled, upgrades, characterId) {
   const owner = modOwners(projectRoot, upgrades);
-  return listMods(projectRoot, [...(disabled || []), ...switchedOff(upgrades)])
+  const all = listMods(projectRoot, [...(disabled || []), ...switchedOff(upgrades)]);
+  const needs = modNeeds(projectRoot, all.map((m) => m.slug), (upgrades || []).flatMap((u) => u.slugs || []));
+  const mods = all
     .filter((m) => !owner.has(m.slug) || owner.get(m.slug) === characterId)
-    .map((m) => ({ ...m, own: !!characterId && owner.get(m.slug) === characterId }));
+    .map((m) => ({ ...m, own: !!characterId && owner.get(m.slug) === characterId, needs: needs.get(m.slug) || [] }));
+  const on = new Set(mods.filter((m) => m.enabled).map((m) => m.slug));
+  for (let changed = true; changed;) {
+    changed = false;
+    for (const m of mods) if (on.has(m.slug) && m.needs.some((n) => !on.has(n))) { on.delete(m.slug); changed = true; }
+  }
+  for (const m of mods) if (m.enabled && !on.has(m.slug)) { m.enabled = false; m.offBecause = m.needs.filter((n) => !on.has(n)); }
+  return mods;
 }
 // Quip packs an upgrade wrote under content/quips/ belong to that upgrade's character.
 function quipPackOwners(upgrades) {
@@ -185,4 +210,4 @@ function readCharacterDialogue(projectRoot, id) {
   }
 }
 
-module.exports = { listMods, modsFor, modOwners, quipPackOwners, readQuipPacks, readCharacterDialogue, readCharacterConfig, parseQuipList, listCharacters, invalidateCharacters, charactersRoot, readJson, ID_RE, IMG_RE };
+module.exports = { listMods, modsFor, modNeeds, modOwners, quipPackOwners, readQuipPacks, readCharacterDialogue, readCharacterConfig, parseQuipList, listCharacters, invalidateCharacters, charactersRoot, readJson, ID_RE, IMG_RE };

@@ -5,6 +5,7 @@
   const registry = []; // { slug, def }
   let currentSlug = null;
   let currentRegistered = false;
+  const SLUG_RE = /^[a-z0-9][a-z0-9-]{0,63}$/; // a mod's folder name
   let currentBase = null; // URL of the folder the mod being loaded lives in
   let currentOwn = false; // built for the active character
   const IMAGE_FILE = /^[a-z0-9][a-z0-9-]{0,39}\.(png|webp|gif|jpg)$/;
@@ -47,6 +48,7 @@
           // growing pile stays after a restart). Read from the counts; no other memory.
           const s = p.showAfter;
           if (!s || typeof s !== 'object' || !/^[a-z0-9-]{1,30}$/.test(String(s.count)) || !(Number.isInteger(s.at) && s.at >= 1 && s.at <= 1000000)) fail('prop showAfter needs { count: <a count name>, at: <whole number> }');
+          if (s.mod !== undefined && !SLUG_RE.test(String(s.mod))) fail('prop showAfter.mod must be another mod\'s folder name');
         }
         if (p.svg && /<script|<foreignObject|on\w+=|href\s*=|url\(/i.test(p.svg)) fail('prop svg may not contain scripts, links, or urls');
         if (p.image !== undefined) {
@@ -75,6 +77,12 @@
           const every = c.every === undefined || (Number.isInteger(c.every) && c.every >= 2 && c.every <= 100000);
           const at = c.at === undefined || (Array.isArray(c.at) && c.at.length >= 1 && c.at.length <= 20 && c.at.every((n) => Number.isInteger(n) && n >= 1 && n <= 1000000));
           if (!every || !at || (c.every === undefined && c.at === undefined)) fail('behavior count needs every (2-100000) and/or at (a list of up to 20 whole numbers)');
+        }
+        if (b.onlyIf !== undefined) {
+          // Act only while a saved count (this mod's, or another mod's) has reached a number.
+          const o = b.onlyIf;
+          if (!o || typeof o !== 'object' || !/^[a-z0-9-]{1,30}$/.test(String(o.count)) || !(Number.isInteger(o.atLeast) && o.atLeast >= 1 && o.atLeast <= 1000000)) fail('behavior onlyIf needs { count: <a count name>, atLeast: <whole number> }');
+          if (o.mod !== undefined && !SLUG_RE.test(String(o.mod))) fail('behavior onlyIf.mod must be another mod\'s folder name');
         }
         const a = b.action;
         if (a.animate !== undefined && typeof a.animate !== 'string') fail('action.animate must be a string');
@@ -189,7 +197,7 @@
     mine[count.name] = n;
     try { localStorage.setItem(COUNT_KEY, JSON.stringify(all)); } catch (_) { /* storage full or blocked: counts just don't persist */ }
     const hit = (count.every ? n % count.every === 0 : false) || (Array.isArray(count.at) && count.at.includes(n));
-    refreshCounted(slug);
+    refreshCounted();
     return { n, hit };
   }
   function countOf(slug, name) { const m = readCounts()[slug]; return (m && Number(m[name])) || 0; }
@@ -200,7 +208,7 @@
       for (const p of r.def.props || []) {
         if (!p.showAfter || !p.id) continue;
         const el = document.getElementById(`prop-${r.slug}-${p.id}`);
-        if (el) el.setAttribute('display', countOf(r.slug, p.showAfter.count) >= p.showAfter.at ? 'inline' : 'none');
+        if (el) el.setAttribute('display', countOf(p.showAfter.mod || r.slug, p.showAfter.count) >= p.showAfter.at ? 'inline' : 'none');
       }
     }
   }
