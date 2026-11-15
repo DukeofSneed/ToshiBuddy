@@ -10,7 +10,7 @@
   let currentOwn = false; // built for the active character
   const IMAGE_FILE = /^[a-z0-9][a-z0-9-]{0,39}\.(png|webp|gif|jpg)$/;
   const ANCHORS = new Set(['head', 'hand-r', 'hand-l', 'back', 'front', 'desk']);
-  const TRIGGERS = new Set(['idle', 'click', 'dblclick', 'drop', 'hour', 'wake', 'sleep', 'interval', 'donate', 'upgrade', 'lean', 'desk', 'ultimate', 'desk-done', 'desk-long', 'app-switch']);
+  const TRIGGERS = new Set(['idle', 'click', 'dblclick', 'drop', 'hour', 'wake', 'sleep', 'interval', 'donate', 'upgrade', 'lean', 'desk', 'ultimate', 'desk-done', 'desk-long', 'desk-active', 'app-switch']);
   const RESERVED_ANIMS = new Set(['idle', 'walk', 'lean', 'sleep', 'drag', 'fall', 'land', 'talk', 'blink', 'face-left', 'face-right',
     'desk', 'desk-in', 'release', 'stamp', 'stamped', 'scribbling', 'skin', 'working', 'frost', 'huff', 'shrug', 'think', 'wave', 'surprised',
     'ultimate', 'ultimate-in', 'ultimate-out', 'has-ultimate']);
@@ -77,6 +77,7 @@
           const every = c.every === undefined || (Number.isInteger(c.every) && c.every >= 2 && c.every <= 100000);
           const at = c.at === undefined || (Array.isArray(c.at) && c.at.length >= 1 && c.at.length <= 20 && c.at.every((n) => Number.isInteger(n) && n >= 1 && n <= 1000000));
           if (!every || !at || (c.every === undefined && c.at === undefined)) fail('behavior count needs every (2-100000) and/or at (a list of up to 20 whole numbers)');
+          if (c.cycle !== undefined && !(Number.isInteger(c.cycle) && c.cycle >= 2 && c.cycle <= 1000000)) fail('behavior count.cycle must be a whole number from 2 to 1000000');
         }
         if (b.onlyIf !== undefined) {
           // Act only while a saved count (this mod's, or another mod's) has reached a number.
@@ -88,6 +89,8 @@
         if (a.animate !== undefined && typeof a.animate !== 'string') fail('action.animate must be a string');
         if (a.say !== undefined && typeof a.say !== 'string' && !Array.isArray(a.say)) fail('action.say must be a string or array');
         if (a.prop !== undefined && (typeof a.prop !== 'object' || !a.prop.id)) fail('action.prop needs { id, show|toggle }');
+        if (a.prop && a.prop.for !== undefined && !(Number(a.prop.for) >= 500 && Number(a.prop.for) <= 10000)) fail('action.prop.for must be 500-10000 ms');
+        if (a.standUp !== undefined && a.standUp !== true && !(a.standUp && typeof a.standUp === 'object' && Number(a.standUp.after) >= 0 && Number(a.standUp.after) <= 5000)) fail('action.standUp must be true or { after: 0-5000 ms }');
         if (a.sound !== undefined && (!window.BuddySfx || !BuddySfx.names.includes(a.sound))) fail(`action.sound must be one of ${window.BuddySfx ? BuddySfx.names.join(', ') : 'the built-in sounds'}`);
       }
     }
@@ -197,6 +200,10 @@
     mine[count.name] = n;
     try { localStorage.setItem(COUNT_KEY, JSON.stringify(all)); } catch (_) { /* storage full or blocked: counts just don't persist */ }
     const hit = (count.every ? n % count.every === 0 : false) || (Array.isArray(count.at) && count.at.includes(n));
+    if (count.cycle && n >= count.cycle) {
+      mine[count.name] = 0;
+      try { localStorage.setItem(COUNT_KEY, JSON.stringify(all)); } catch (_) { /* as above */ }
+    }
     refreshCounted();
     return { n, hit };
   }
@@ -220,6 +227,11 @@
     const visible = el.getAttribute('display') !== 'none';
     const next = show === 'toggle' ? !visible : !!show;
     el.setAttribute('display', next ? 'inline' : 'none');
+    // Hidden SVG still runs its CSS animations, so a one-off effect would be over
+    // before it is shown: start them from the beginning each time it appears.
+    if (next && !visible && el.getAnimations) {
+      try { for (const a of el.getAnimations({ subtree: true })) { a.currentTime = 0; a.play(); } } catch (_) { /* older engine: plays as it is */ }
+    }
   }
 
   // Load each mod script in turn and report success or failure to the main process.

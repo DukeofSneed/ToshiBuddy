@@ -149,6 +149,25 @@ function runSelftest(ctx, selftestDir) {
       const slugs = JSON.parse(await overlay.webContents.executeJavaScript(`JSON.stringify(window.BuddyMods ? BuddyMods.list() : [])`));
       for (const slug of slugs) {
         const s = JSON.stringify(slug);
+        const file = (tag) => path.join(selftestDir, `mod-test-${String(slug).replace(/[^a-z0-9-]/gi, '_')}${tag}.png`);
+        // Counted props at their fullest, seated at the desk.
+        const full = await overlay.webContents.executeJavaScript(`(() => {
+          const def = BuddyMods.get(${s});
+          const counted = (def.props || []).filter((p) => p.showAfter && !p.showAfter.mod);
+          if (!counted.length) return false;
+          window.__keepCounts = localStorage.getItem('buddy.counts');
+          const all = JSON.parse(window.__keepCounts || '{}'); all[${s}] = {};
+          for (const p of counted) all[${s}][p.showAfter.count] = Math.max(all[${s}][p.showAfter.count] || 0, p.showAfter.at);
+          localStorage.setItem('buddy.counts', JSON.stringify(all)); BuddyMods.refreshCounted();
+          BuddyBubble.hide(); BuddyBrain.enterDesk('writing', { quiet: true });
+          return true;
+        })()`);
+        if (full) {
+          await new Promise((r) => setTimeout(r, 900));
+          fs.writeFileSync(file('-full'), (await capture(overlay, { x: cx, y: Math.max(0, Math.round(pos.y) - 130), width: 400, height: 330 })).toPNG());
+          await overlay.webContents.executeJavaScript(`(() => { const k = window.__keepCounts; if (k === null || k === undefined) localStorage.removeItem('buddy.counts'); else localStorage.setItem('buddy.counts', k); BuddyMods.refreshCounted(); BuddyBubble.hide(); BuddyBrain.exitDesk({ quiet: true }); return 1; })()`);
+          await new Promise((r) => setTimeout(r, 800));
+        }
         const before = JSON.parse(await overlay.webContents.executeJavaScript(`JSON.stringify((() => {
           const shown = () => [...document.querySelectorAll('[data-mod=' + JSON.stringify(${s}) + ']')].filter((e) => e.getAttribute('display') !== 'none').length;
           const total = document.querySelectorAll('[data-mod=' + JSON.stringify(${s}) + ']').length;
@@ -167,14 +186,21 @@ function runSelftest(ctx, selftestDir) {
           r.started = BuddyBrain.testMod(${s});
           return r;
         })())`));
-        await new Promise((r) => setTimeout(r, 2200));
+        await new Promise((r) => setTimeout(r, 1500));
+        before.probe = await overlay.webContents.executeJavaScript(`(() => { const w = document.querySelector('[id$="-rain"][data-mod=' + JSON.stringify(${s}) + ']'); if (!w) return null; const rc = w.querySelector("rect"); const cs = rc && getComputedStyle(rc); const b = rc && rc.getBoundingClientRect(); return { display: w.getAttribute("display"), opacity: cs && cs.opacity, anim: cs && cs.animationName, transform: cs && cs.transform, box: b && [Math.round(b.x), Math.round(b.y), Math.round(b.width)] }; })()`);
+        fs.writeFileSync(file('-early'), (await capture(overlay, { x: cx, y: Math.max(0, Math.round(pos.y) - 130), width: 400, height: 330 })).toPNG());
+        await new Promise((r) => setTimeout(r, 700));
         before.shownDuringTest = await overlay.webContents.executeJavaScript(`[...document.querySelectorAll('[data-mod=' + JSON.stringify(${s}) + ']')].filter((e) => e.getAttribute('display') !== 'none').length`);
         before.atDeskDuringTest = await overlay.webContents.executeJavaScript(`document.getElementById('pet').classList.contains('desk')`);
         // what the trick made him say (only lines from mods are expected here)
         before.saidDuringTest = await overlay.webContents.executeJavaScript(`(() => { const b = document.getElementById('bubble'); return b && !b.classList.contains('hidden') ? document.getElementById('bubble-text').textContent : ''; })()`);
         const shot = await capture(overlay, { x: cx, y: Math.max(0, Math.round(pos.y) - 130), width: 400, height: 330 });
         fs.writeFileSync(path.join(selftestDir, `mod-test-${String(slug).replace(/[^a-z0-9-]/gi, '_')}.png`), shot.toPNG());
-        await new Promise((r) => setTimeout(r, 9000));
+        await new Promise((r) => setTimeout(r, 1800));
+        before.saidLater = await overlay.webContents.executeJavaScript(`(() => { const b = document.getElementById('bubble'); return b && !b.classList.contains('hidden') ? document.getElementById('bubble-text').textContent : ''; })()`);
+        before.atDeskLater = await overlay.webContents.executeJavaScript(`document.getElementById('pet').classList.contains('desk')`);
+        fs.writeFileSync(file('-late'), (await capture(overlay, { x: cx, y: Math.max(0, Math.round(pos.y) - 130), width: 400, height: 330 })).toPNG());
+        await new Promise((r) => setTimeout(r, 7200));
         before.shownAfterTest = await overlay.webContents.executeJavaScript(`[...document.querySelectorAll('[data-mod=' + JSON.stringify(${s}) + ']')].filter((e) => e.getAttribute('display') !== 'none').length`);
         modReport.mods.push({ slug, ...before });
       }

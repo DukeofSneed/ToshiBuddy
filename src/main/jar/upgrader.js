@@ -8,6 +8,12 @@ const path = require('path');
 const { execFile } = require('child_process');
 const { runClaude } = require('./claude');
 const attachments = require('./attachments');
+// The owner's notes on a goal, added in the jar. They shape the build but never
+// override the rules that follow them in the prompt.
+function commentLines(goal) {
+  const list = (Array.isArray(goal.comments) ? goal.comments : []).map((c) => String((c && c.text) || '').slice(0, 500)).filter(Boolean).slice(0, 5);
+  return list.length ? ['', 'Notes from the owner about this upgrade (follow them as long as they fit the rules below):', ...list.map((c) => `- "${c}"`)] : [];
+}
 const { RULE: ABILITY_RULE, LIMITS } = require('../abilities');
 const { normalizeRateLimit } = require('./guard');
 const { capUsdForTokens , MIN_RUN_TOKENS, runNeed } = require('./pricing');
@@ -109,6 +115,7 @@ class Upgrader {
         `Continue the upgrade "${goal.title}". The previous attempt stopped because the token budget ran out.`,
         `You have about ${extraTokens} more tokens. Finish the mod with as few file reads as possible, then reply with the JSON summary.`,
         ...attachments.promptLines(placed),
+        ...commentLines(goal),
       ].join('\n');
     }
     const { name, isSkin, personality, profile, abilities, limits } = this.character();
@@ -123,6 +130,7 @@ class Upgrader {
       `# Upgrade request: ${named(goal.title)}`,
       noStamp(named(goal.summary)),
       goal.request ? `\nOriginal words from the human: "${goal.request}"` : '',
+      ...commentLines(goal),
       '',
       '## Rules',
       `- Read docs/MOD_API.md first, then write exactly one mod folder: mods/${slugify(goal.title)}/mod.js (plus an optional NOTES.md). You may also add a quip pack under content/quips/. Never edit another mod's folder; to build on another trick, read its counts as the Mod API describes.`,

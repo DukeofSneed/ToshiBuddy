@@ -106,7 +106,8 @@ BuddyMods.register({
   `wake`, `sleep`, `lean`, `desk` (Kori sits down at the desk), `ultimate` (the
   ultimate form begins), `donate`, `upgrade`, `desk-done` (a typing session at the desk
   ends; `{minutes}` in `say`), `desk-long` (the same, for sessions of 20 minutes or
-  more), `app-switch` (the user moved to another app; at most once per 20 seconds),
+  more), `desk-active` (every 15 seconds of typing at the desk; count it with
+  `every: 3` for once per 45 seconds), `app-switch` (the user moved to another app; at most once per 20 seconds),
   `interval` (needs `every` >= 30000 ms). `chance` 0-1 (default 1). `action` may
   combine:
   - `animate`: built-in `frost`, `huff`, `shrug`, `think`, `wave`, `surprised`,
@@ -131,7 +132,9 @@ equals a number in `at`. `{count}` in `say` is replaced with the number. Example
 A prop can follow a count with `showAfter: { count: 'sessions', at: 3 }`: it is shown
 whenever that saved count of the same mod has reached the number, including after a
 restart. Use one prop per step to make something grow (one sheet per session, say).
-A count only goes up through a behavior that names it.
+A count only goes up through a behavior that names it. Add `cycle: N` to a count to
+start it over at 0 once it reaches N (after that action has run): a pile that empties
+and grows again. Props that follow the count hide again at the same moment.
 
 **Building on another trick.** A mod may read (never change) another mod's saved
 counts by naming that mod's folder: `showAfter: { mod: 'growing-paperwork-stack', count: 'sheets', at: 9 }`
@@ -149,7 +152,14 @@ There is no other storage: no dates, scores, or settings.
 ### At the desk
 While a sprite-sheet character sits at the desk it only stands still and blinks: no
 other pose plays and whole-body animations are off, so a behavior's `animate` does
-nothing there. Lines, props and sounds still work.
+nothing there. Lines, props and sounds still work. To react with a pose at the desk,
+add `standUp: true` (or `standUp: { after: ms }`, up to 5000) to the action: the
+character gets up, plays `animate` and says the line, then sits back down if the owner
+is still typing. The session carries on; nothing is counted as finished.
+
+A prop an action shows can be shown for a while only: `prop: { id, show: true, for: 3000 }`
+(500-10000 ms), then it hides again. CSS animations on it start over each time it is
+shown, so it suits a one-off effect (falling leaves, a puff of steam).
 
 ### Poses and props
 - `action.animate` may name a built-in pose only if the prompt lists it as one the

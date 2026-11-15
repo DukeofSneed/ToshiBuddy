@@ -46,6 +46,13 @@ upgrade runs that write mods. Kori (`characters/kori-test`, drawn in
   a picture prop) or `mods/<slug>/reference/` (removed after the run). These are the
   only images an upgrade run may see, and only because the user attached them to that
   goal. Mods can show only attached pictures (`props[].image`; the loader builds the tag).
+- A user can add notes to a goal (`goal.comments`, up to 5, in the ledger); they go into
+  the build prompt ahead of the rules and never override them. Unsent jar text, half-written
+  notes, and pictures picked with a suggestion are kept in userData (`src/main/jar/drafts.js`),
+  so a failed estimate or build, closing the jar, or a restart never loses them.
+- `desk-active` fires every 15 s of typing at the desk (typing counts only). A mod action
+  with `standUp` gets up from the desk to play a pose and sits back down; seated, the desk
+  rule below still holds.
 - Profile notes and upgrade ideas come from one search-only run per character
   (`src/main/jar/profile.js`): its only tool is WebSearch, it runs in an empty temp
   folder, it is told to search for the name only, and its answer is cleaned and capped

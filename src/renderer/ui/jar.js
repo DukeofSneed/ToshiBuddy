@@ -55,7 +55,10 @@
 
     // Goals
     const goals = L.goals || [];
+    const focused = document.activeElement && document.activeElement.dataset && document.activeElement.dataset.commentFor;
+    const caret = focused ? document.activeElement.selectionStart : 0;
     $('goals').innerHTML = goals.length ? goals.map(goalHtml).join('') : '<div class="muted">No goals. Suggest something.</div>';
+    if (focused) { const el = document.querySelector(`[data-comment-for="${focused}"]`); if (el) { el.focus(); el.setSelectionRange(caret, caret); } }
     const charName = state.settings.characterName || 'Kori';
     // Ideas tailored to this character (a web lookup of the name + the personality text).
     const I = state.ideas || {};
@@ -136,11 +139,25 @@
       <div class="bar"><div style="width:${pct}%"></div></div>
       <div class="meta"><span>${fmt(shown)} / ${fmt(target)} tokens${['paused', 'failed'].includes(g.status) ? ' to continue' : ''}</span><span>${g.spent ? `spent ${fmt(g.spent)}` : g.source === 'catalog' ? 'catalog idea' : g.source === 'ideas' ? 'made for this character' : 'your idea'}</span></div>
       ${(g.attachments || []).length || !['done', 'building'].includes(g.status) ? `<div class="attach-list">${(g.attachments || []).map((a) => `<span class="attach">${esc(a.file)} <em>${a.use === 'asset' ? 'shown as-is' : 'reference'}</em>${['done', 'building'].includes(g.status) ? '' : `<button class="x" data-unattach="${g.id}" data-file="${esc(a.file)}" title="Remove">✕</button>`}</span>`).join('')}${['done', 'building'].includes(g.status) || g.touchesCore ? '' : `<button class="x add" data-attach="${g.id}" data-use="asset" title="Add a picture that is shown as-is, like a photo on the desk">+ picture</button><button class="x add" data-attach="${g.id}" data-use="reference" title="Add a picture for the upgrade to look at">+ reference</button>`}</div>` : ''}
+      ${commentsHtml(g)}
       ${g.note ? `<div class="note">${esc(g.note)}</div>` : ''}
       <div class="actions">${actions}</div>
     </div>`;
   }
 
+  // Notes for the build: listed under the goal, with a box to add one. What is
+  // typed in the box is saved as you type (drafts survive closing the jar).
+  let drafts = { suggest: '', comments: {}, pending: [] };
+  function commentsHtml(g) {
+    const list = Array.isArray(g.comments) ? g.comments : [];
+    const open = !['done', 'building'].includes(g.status) && !g.touchesCore;
+    if (!list.length && !open) return '';
+    const items = list.map((c, i) => `<div class="comment">“${esc(c.text)}”${open ? `<button class="x" data-uncomment="${g.id}" data-i="${i}" title="Remove this note">✕</button>` : ''}</div>`).join('');
+    const box = open && list.length < 5
+      ? `<div class="row comment-row"><input type="text" maxlength="500" placeholder="Add a note for the build…" data-comment-for="${g.id}" value="${esc(drafts.comments[g.id] || '')}" /><button class="small ghost" data-comment="${g.id}">Add note</button></div>`
+      : '';
+    return `<div class="comments">${items}${box}</div>`;
+  }
   async function act(p) { const r = await p; if (r && r.state) render(r.state); return r; }
 
   // ---- events ----
@@ -176,6 +193,16 @@
   $('attach-ref').onclick = () => pend({ use: 'reference' });
   $('attach-list').addEventListener('click', (e) => { const b = e.target.closest('[data-unpend]'); if (b) pend({ remove: Number(b.dataset.unpend) }); });
   pend({ remove: -1 }); // show whatever is already waiting
+  jar.drafts().then((d) => {
+    drafts = { ...drafts, ...d, comments: { ...d.comments } };
+    if (d.suggest && !$('suggest-text').value) $('suggest-text').value = d.suggest;
+    if (S) render(S);
+  });
+  let suggestTimer = null;
+  $('suggest-text').addEventListener('input', (e) => {
+    clearTimeout(suggestTimer);
+    suggestTimer = setTimeout(() => jar.saveDraft({ kind: 'suggest', text: e.target.value }), 400);
+  });
 
   $('suggest-btn').onclick = async () => {
     const text = $('suggest-text').value.trim();
@@ -215,9 +242,28 @@
   // Soft tick on every jar button.
   document.addEventListener('click', (e) => { if (e.target.closest('button')) BuddySfx.play('tick'); }, true);
 
+  const addNote = async (goalId) => {
+    const el = document.querySelector(`[data-comment-for="${goalId}"]`);
+    const text = el ? el.value.trim() : '';
+    if (!text) return;
+    const r = await act(jar.comment({ goalId, text }));
+    if (r && r.ok) delete drafts.comments[goalId];
+    else if (r && r.error) $('suggest-msg').textContent = r.error;
+  };
+  let draftTimer = null;
+  $('goals').addEventListener('input', (e) => {
+    const id = e.target.dataset && e.target.dataset.commentFor;
+    if (!id) return;
+    drafts.comments[id] = e.target.value;
+    clearTimeout(draftTimer);
+    draftTimer = setTimeout(() => jar.saveDraft({ kind: 'comment', goalId: id, text: e.target.value }), 400);
+  });
+  $('goals').addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.dataset && e.target.dataset.commentFor) addNote(e.target.dataset.commentFor); });
   $('goals').addEventListener('click', async (e) => {
     const b = e.target.closest('button');
     if (!b) return;
+    if (b.dataset.comment) { await addNote(b.dataset.comment); return; }
+    if (b.dataset.uncomment) { await act(jar.comment({ goalId: b.dataset.uncomment, remove: Number(b.dataset.i) })); return; }
     const amtFor = (id) => Number((document.querySelector(`[data-amt-for="${id}"]`) || {}).value) || 0;
     if (b.dataset.fund) await act(jar.fund(b.dataset.fund, amtFor(b.dataset.fund) || (S ? S.ledger.balance : 0)));
     else if (b.dataset.donateGoal) {

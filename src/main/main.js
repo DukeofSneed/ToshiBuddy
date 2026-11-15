@@ -9,6 +9,7 @@ const characterProfile = require('./jar/profile');
 const abilities = require('./abilities');
 const updater = require('./updater');
 const attachments = require('./jar/attachments');
+const { Drafts } = require('./jar/drafts');
 const { QuipStore } = require('./quip-store');
 const { Settings } = require('./settings');
 const { Ledger } = require('./jar/ledger');
@@ -761,7 +762,7 @@ function start() {
   });
   ipcMain.handle('jar:remove-goal', (_e, { goalId }) => {
     const ok = ledger.removeGoal(goalId);
-    if (ok) attachments.removeAll(userData, String(goalId));
+    if (ok) { attachments.removeAll(userData, String(goalId)); drafts.setComment(String(goalId), ''); }
     return { ok, state: jarState() };
   });
   // ---- pictures attached to an upgrade (shown as a prop, or just to look at) ----
@@ -773,23 +774,37 @@ function start() {
     });
     return r.canceled ? null : r.filePaths[0];
   }
-  // Pictures chosen in the "Suggest an upgrade" box wait here until the goal exists.
-  let pendingPictures = []; // { source, use, name }
-  const pendingView = () => pendingPictures.map((p) => ({ name: p.name, use: p.use }));
+  // Pictures chosen in the "Suggest an upgrade" box wait in userData (drafts.js)
+  // until the goal exists, so a failed estimate or a restart keeps them.
+  const drafts = new Drafts(userData);
+  const pendingView = () => drafts.pendingView();
   ipcMain.handle('jar:attach-pending', async (_e, { use, remove } = {}) => {
-    if (remove !== undefined) { pendingPictures = pendingPictures.filter((_p, i) => i !== Number(remove)); return { ok: true, pending: pendingView() }; }
+    if (remove !== undefined) { drafts.removePending(Number(remove)); return { ok: true, pending: pendingView() }; }
     if (!attachments.USES.includes(use)) return { ok: false, error: 'Choose how the picture is used.', pending: pendingView() };
-    if (pendingPictures.length >= attachments.MAX_PER_GOAL) return { ok: false, error: `Up to ${attachments.MAX_PER_GOAL} pictures.`, pending: pendingView() };
+    if (drafts.pendingFiles().length >= attachments.MAX_PER_GOAL) return { ok: false, error: `Up to ${attachments.MAX_PER_GOAL} pictures.`, pending: pendingView() };
     const source = await pickPicture();
     if (!source) return { ok: true, pending: pendingView() };
     try {
       // Validate now (a throwaway goal object), copy later when the goal exists.
       const st = fs.statSync(source);
       if (st.size > attachments.MAX_BYTES) throw new Error(`The picture is larger than ${attachments.MAX_BYTES / 1048576} MB.`);
-      if (!/\.(png|webp|gif|jpe?g)$/i.test(source) || !attachments.kindOf(source)) throw new Error('That file is not a valid image.');
-      pendingPictures.push({ source, use, name: path.basename(source).slice(0, 60) });
+      const kind = /\.(png|webp|gif|jpe?g)$/i.test(source) && attachments.kindOf(source);
+      if (!kind) throw new Error('That file is not a valid image.');
+      drafts.addPending(source, use, kind);
       return { ok: true, pending: pendingView() };
     } catch (e) { return { ok: false, error: e.message, pending: pendingView() }; }
+  });
+  // Notes for the build on a goal, and the jar's unsent text (kept across restarts).
+  ipcMain.handle('jar:comment', (_e, { goalId, text, remove } = {}) => {
+    const id = String(goalId || '');
+    const ok = remove !== undefined ? ledger.removeComment(id, Number(remove)) : ledger.addComment(id, text);
+    if (ok && remove === undefined) drafts.setComment(id, '');
+    return { ok, error: ok ? undefined : 'That note could not be added (up to 5 per goal, and not while it builds).', state: jarState() };
+  });
+  ipcMain.handle('jar:drafts', () => { drafts.prune(ledger.data.goals.map((g) => g.id)); return drafts.view(); });
+  ipcMain.on('jar:draft', (_e, { kind, goalId, text } = {}) => {
+    if (kind === 'suggest') drafts.setSuggest(text);
+    else if (kind === 'comment') drafts.setComment(String(goalId || ''), text);
   });
   ipcMain.handle('jar:attach', async (_e, { goalId, use, remove } = {}) => {
     const goal = ledger.goal(String(goalId || ''));
@@ -837,7 +852,7 @@ function start() {
     if (!text) return { ok: false, error: 'empty suggestion' };
     if (!findClaude()) return { ok: false, error: 'Claude Code is not installed or not logged in' };
     notify('Pricing your suggestion…', 4000);
-    const pictures = pendingPictures;
+    const pictures = drafts.pendingFiles();
     const r = await estimate({ projectRoot: PROJECT_ROOT, ledger, request: text, log, character: characterInfo(), extra: attachments.pricingLine(pictures) });
     if (r.rateLimit) guard.observe(r.rateLimit);
     if (!r.ok) { notify(`Couldn't price that one: ${r.error}`, 7000); return { ok: false, error: r.error, state: jarState() }; }
@@ -852,7 +867,8 @@ function start() {
     for (const p of pictures) {
       try { attachments.add({ userData, goal, source: p.source, use: p.use, sizeOf: sizeOfImage }); } catch (e) { skipped++; log(`picture not attached: ${e.message}`); }
     }
-    pendingPictures = [];
+    drafts.clearPending();
+    drafts.setSuggest('');
     ledger.save();
     if (skipped) notify(`${skipped} picture${skipped === 1 ? '' : 's'} could not be attached.`, 6000);
     notify(`New goal: ${goal.title}. Estimated cost ${fmt(goal.goalTokens)} tokens.`, 7000);
@@ -947,7 +963,7 @@ function start() {
     if (!r.ok) { notify(`Couldn't get ideas: ${r.error}`, 7000); pushJar(); return { ok: false, error: r.error }; }
     // Replace this character's untouched earlier ideas. Kept: anything pinned,
     // anything with tokens or a picture in it, and the user's own suggestions.
-    const replaceable = (g) => g.characterId === id && g.source === 'ideas' && !g.pinned && !g.funded && !g.spent && g.status === 'open' && !(g.attachments || []).length;
+    const replaceable = (g) => g.characterId === id && g.source === 'ideas' && !g.pinned && !g.funded && !g.spent && g.status === 'open' && !(g.attachments || []).length && !(g.comments || []).length;
     const shownBefore = ledger.data.goals.filter((g) => g.characterId === id).map((g) => g.title);
     const keptCount = ledger.data.goals.filter((g) => g.characterId === id && g.source === 'ideas' && !replaceable(g)).length;
     ledger.data.goals = ledger.data.goals.filter((g) => !replaceable(g));

@@ -70,4 +70,18 @@ check('a mod may read another mod\'s count (onlyIf, showAfter.mod); bad ones are
   for (let i = 0; i < 9; i++) m.bump('growing-paperwork-stack', { name: 'sheets', every: 100 });
   assert.strictEqual(m.countOf('growing-paperwork-stack', 'sheets'), 9);
 });
+check('a cycled count starts over after its number; desk-active, prop.for and standUp are accepted', () => {
+  const m = openWindow();
+  const c = { name: 'ticks', at: [5], cycle: 5 };
+  const ns = [];
+  for (let i = 0; i < 12; i++) { const r = m.bump('tower', c); ns.push(r.hit ? `${r.n}!` : r.n); }
+  assert.deepStrictEqual(ns, [1, 2, 3, 4, '5!', 1, 2, 3, 4, '5!', 1, 2]);
+  assert.strictEqual(m.countOf('tower', 'ticks'), 2);
+  m.register({ id: 'tower', props: [{ id: 'rain', anchor: 'desk', svg: '<rect/>', hidden: true }],
+    behaviors: [{ trigger: 'desk-active', count: c, action: { prop: { id: 'rain', show: true, for: 2600 }, standUp: { after: 1700 }, animate: 'huff', say: 'Enough.' } }] });
+  const reg = (b) => m.register({ id: 'bad', behaviors: [b] });
+  assert.throws(() => reg({ trigger: 'desk-active', count: { name: 'x', every: 2, cycle: 1 }, action: {} }), /cycle/);
+  assert.throws(() => reg({ trigger: 'click', action: { prop: { id: 'a', for: 60000 } } }), /prop\.for/);
+  assert.throws(() => reg({ trigger: 'click', action: { standUp: { after: 99999 } } }), /standUp/);
+});
 console.log(`${passed} passed, ${process.exitCode ? 'some' : 0} failed`);

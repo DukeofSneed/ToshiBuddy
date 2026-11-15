@@ -214,6 +214,25 @@ class Ledger {
     this.save();
     return { moved };
   }
+  // The owner's notes for the build. Nothing but removing the goal clears them
+  // (a pause, failure, retry or resume keeps them).
+  addComment(goalId, text) {
+    const goal = this.goal(goalId);
+    const t = String(text || '').replace(/\s+/g, ' ').trim().slice(0, 500);
+    if (!goal || !t || ['building', 'done'].includes(goal.status)) return false;
+    goal.comments = Array.isArray(goal.comments) ? goal.comments : [];
+    if (goal.comments.length >= 5) return false;
+    goal.comments.push({ text: t, at: Date.now() });
+    this.save();
+    return true;
+  }
+  removeComment(goalId, index) {
+    const goal = this.goal(goalId);
+    if (!goal || !Array.isArray(goal.comments) || !goal.comments[index] || ['building', 'done'].includes(goal.status)) return false;
+    goal.comments.splice(index, 1);
+    this.save();
+    return true;
+  }
   removeGoal(goalId) {
     const goal = this.goal(goalId);
     if (!goal || goal.status === 'building') return false;

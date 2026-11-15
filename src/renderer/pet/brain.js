@@ -380,6 +380,7 @@
       quip(['desk-break']);
     }
     // Typing history for the desk.
+    if (st.mode !== 'desk') st.lastActivityReport = t;
     st.typingLog.push({ t, k: typing });
     st.typingLog = st.typingLog.filter((s) => t - s.t <= DESK_WINDOW_MS);
     if (typing >= 2) {
@@ -398,6 +399,13 @@
       }
       return;
     }
+    // Every 15 seconds of typing at the desk, upgrades get a desk-active event
+    // (from the typing counts only; never which keys).
+    if (typing >= 1) {
+      st.deskActiveMs = (st.deskActiveMs || 0) + Math.min(4000, Math.max(0, t - (st.lastActivityReport || t)));
+      if (st.deskActiveMs >= 15000) { st.deskActiveMs -= 15000; fire('desk-active', {}); }
+    }
+    st.lastActivityReport = t;
     // At the desk: short pauses are fine; a longer one gets a remark; a long
     // stretch without typing puts the desk away.
     const quietFor = t - st.lastTypingAt;
@@ -434,14 +442,40 @@
   function runAction(b, extra) {
     const a = b.action;
     try {
-      if (a.animate) playAnimation(a.animate);
-      if (a.sound) BuddySfx.play(a.sound);
-      if (a.say && (b.own || !(window.BuddyApp && BuddyApp.ownQuipsOnly))) {
-        const text = Array.isArray(a.say) ? a.say[Math.floor(Math.random() * a.say.length)] : a.say;
-        say(String(text).replace(/\{(\w+)\}/g, (m, k) => (k in extra ? extra[k] : m)));
+      if (a.prop) {
+        BuddyMods.setProp(b.slug, a.prop.id, a.prop.toggle ? 'toggle' : a.prop.show !== false);
+        if (a.prop.for) setTimeout(() => BuddyMods.setProp(b.slug, a.prop.id, false), Number(a.prop.for));
       }
-      if (a.prop) BuddyMods.setProp(b.slug, a.prop.id, a.prop.toggle ? 'toggle' : a.prop.show !== false);
+      if (a.sound) BuddySfx.play(a.sound);
+      const act = () => {
+        if (a.animate) playAnimation(a.animate);
+        if (a.say && (b.own || !(window.BuddyApp && BuddyApp.ownQuipsOnly))) {
+          const text = Array.isArray(a.say) ? a.say[Math.floor(Math.random() * a.say.length)] : a.say;
+          say(String(text).replace(/\{(\w+)\}/g, (m, k) => (k in extra ? extra[k] : m)));
+        }
+      };
+      if (a.standUp && st.mode === 'desk') standUp(act, a.standUp === true ? 0 : Number(a.standUp.after) || 0);
+      else act();
     } catch (e) { if (window.buddy) buddy.log(`behavior error in ${b.slug}: ${e.message}`); }
+  }
+  // A pose and line at the desk: he gets up for a moment (seated he only idles and
+  // blinks), then sits back down if the owner is still typing. No session ends.
+  function standUp(act, after) {
+    setTimeout(() => {
+      if (st.mode !== 'desk') { act(); return; }
+      const since = st.deskSince;
+      const kind = st.deskKind;
+      exitDesk({ quiet: true });
+      st.nextDecision = now() + 8000;
+      act();
+      setTimeout(() => {
+        const typing = now() - st.lastTypingAt < 8000;
+        if (typing && st.deskEnabled && ['idle', 'lean'].includes(st.mode) && !st.dragging && !st.paused) {
+          enterDesk(kind || 'writing', { quiet: true });
+          st.deskSince = since; // the same session continues
+        }
+      }, 3800);
+    }, after);
   }
   const intervalTimers = [];
   function armIntervals() {
@@ -692,12 +726,14 @@
     if (!def) { BuddyBubble.toast('That trick is not loaded for this character.', 4000); return false; }
     if (testing) return false;
     const deskish = (def.props || []).some((p) => p.anchor === 'desk' || p.anchor === 'papers')
-      || (def.behaviors || []).some((b) => ['desk', 'desk-done', 'desk-long'].includes(b.trigger));
+      || (def.behaviors || []).some((b) => ['desk', 'desk-done', 'desk-long', 'desk-active'].includes(b.trigger));
     const wasDesk = st.mode === 'desk';
     if (deskish && !wasDesk) enterDesk('writing', { quiet: true });
     BuddyBubble.hide();
     const shown = [];
+    const timed = new Set((def.behaviors || []).filter((b) => b.action && b.action.prop && b.action.prop.for).map((b) => b.action.prop.id));
     for (const p of def.props || []) {
+      if (timed.has(p.id)) continue;
       const el = p.id && document.getElementById(`prop-${slug}-${p.id}`);
       if (el) { shown.push([el, el.getAttribute('display')]); el.setAttribute('display', 'inline'); }
     }
@@ -705,7 +741,7 @@
       const at = b.count && (Array.isArray(b.count.at) ? b.count.at[0] : b.count.every);
       // props stay shown during the test, whatever the action says about them
       const action = { ...b.action };
-      delete action.prop;
+      if (!(action.prop && action.prop.for)) delete action.prop;
       runAction({ ...b, action, slug, own: BuddyMods.isOwn(slug) }, { count: at || 1, minutes: 25, kind: 'writing' });
     });
     if (!steps.length && !shown.length) BuddyBubble.toast('This trick has nothing to show on its own.', 4000);
