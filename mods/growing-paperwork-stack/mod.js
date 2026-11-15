@@ -74,7 +74,7 @@ BuddyMods.register({
         standUp: { after: 1700 },
         animate: 'huff',
         say: [
-          'Enough. Who keeps printing these?',
+          'Damn it! Work never ends',
           'Buried. By forms. Again. We start over.',
           'That is it. The pile is dismissed.',
           'I did not sign up to be filed.',
