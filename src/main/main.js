@@ -151,7 +151,9 @@ function start() {
   }
   function jarState() {
     return {
-      ledger: { ...ledger.snapshot(), goals: ledger.data.goals.filter(isActiveGoal), upgrades: ledger.data.upgrades.filter(isActiveGoal).slice(0, 50).map((u) => ({ ...u, waitsOn: waitsOn(u) })) },
+      // Built goals leave the suggestions list (the trick shows under built
+      // tricks). They stay in the ledger so new ideas never repeat them.
+      ledger: { ...ledger.snapshot(), goals: ledger.data.goals.filter((g) => isActiveGoal(g) && g.status !== 'done'), upgrades: ledger.data.upgrades.filter(isActiveGoal).slice(0, 50).map((u) => ({ ...u, waitsOn: waitsOn(u) })) },
       ideas: ideasState(),
       guard: guard.status(),
       settings: publicSettings(),
