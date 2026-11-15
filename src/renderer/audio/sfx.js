@@ -50,7 +50,8 @@
   }
 
   // A burst of filtered noise, optionally sweeping the filter.
-  function noise(t, { dur, type = 'bandpass', freq = 1000, to = freq, q = 1, gain = 0.3, attack = 0.005 }) {
+  // hold: seconds the burst stays at full level after the attack, before it fades.
+  function noise(t, { dur, type = 'bandpass', freq = 1000, to = freq, q = 1, gain = 0.3, attack = 0.005, hold = 0 }) {
     const src = ctx.createBufferSource();
     src.buffer = noiseBuf;
     const f = ctx.createBiquadFilter();
@@ -61,6 +62,7 @@
     const env = ctx.createGain();
     env.gain.setValueAtTime(0.0001, t);
     env.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain * scale), t + attack);
+    if (hold > 0) env.gain.setValueAtTime(Math.max(0.0002, gain * scale), t + Math.min(dur * 0.9, attack + hold));
     env.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     src.connect(f);
     f.connect(env);
@@ -169,10 +171,25 @@
       tone(t, { freq: 140, to: 70, dur: 0.12, gain: 0.5 });
       noise(t, { dur: 0.06, type: 'bandpass', freq: 1800, q: 1.5, gain: 0.3 });
     },
-    // Quill scratching.
+    // A pencil writing on paper: a short phrase of soft strokes. Modelled on a
+    // recording of real pencil scribbling: nearly all of its energy sits below
+    // 2 kHz (most of it below 500 Hz), strokes last about 30-200 ms (typically
+    // 80) with gaps of about 30 ms, and each stroke swells and fades instead of
+    // clicking. So: low, broad noise with a slow attack, and only a little
+    // paper hiss above it.
     scribble(t) {
-      for (let i = 0; i < 5; i++) {
-        noise(t + i * 0.09 + Math.random() * 0.03, { dur: 0.06 + Math.random() * 0.04, type: 'bandpass', freq: 4500 + Math.random() * 2500, q: 6, gain: 0.05 });
+      const strokes = 4 + Math.floor(Math.random() * 5);
+      let at = t;
+      for (let i = 0; i < strokes; i++) {
+        const dur = 0.07 + Math.random() * Math.random() * 0.2;        // mostly short, some long
+        const loud = 0.6 + Math.random() * 0.4;
+        const pitch = 240 + Math.random() * 200;
+        // the body of the stroke: the graphite dragging
+        noise(at, { dur, type: 'lowpass', freq: pitch * 1.4, to: pitch, q: 0.5, gain: 0.26 * loud, attack: dur * 0.25, hold: dur * 0.4 });
+        // a little of the paper's grain on top
+        noise(at, { dur, type: 'bandpass', freq: 1200 + Math.random() * 400, q: 1.3, gain: 0.07 * loud, attack: dur * 0.25, hold: dur * 0.4 });
+        // strokes follow closely; now and then the pencil lifts for a moment
+        at += dur + 0.02 + Math.random() * 0.03 + (Math.random() < 0.15 ? 0.12 + Math.random() * 0.15 : 0);
       }
     },
     // An annoyed little huff.

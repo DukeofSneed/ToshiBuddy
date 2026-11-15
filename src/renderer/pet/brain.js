@@ -272,13 +272,12 @@
     scheduleDeskWork();
   }
   // Scribbling and stamping repeat for as long as the user works, so they have
-  // their own level: 'off', 'quiet' (softer, and not every time) or 'normal'.
+  // their own level: 'off', 'quiet' (soft background) or 'normal'.
   function deskSound(name) {
     const level = st.deskSounds || 'quiet';
     if (level === 'off') return;
     if (level === 'normal') { BuddySfx.play(name); return; }
-    if (name === 'scribble' && Math.random() < 0.6) return;
-    BuddySfx.play(name, 0.3);
+    BuddySfx.play(name, name === 'scribble' ? 0.5 : 0.2);
   }
   function setDeskSounds(level) { st.deskSounds = ['off', 'quiet', 'normal'].includes(level) ? level : 'quiet'; }
   function scheduleDeskWork() {

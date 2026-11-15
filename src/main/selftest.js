@@ -106,6 +106,20 @@ function runSelftest(ctx, selftestDir) {
       await new Promise((r) => setTimeout(r, 1000));
       const desk = await capture(overlay, { x: cx, y: Math.max(0, Math.round(pos.y) - 130), width: 400, height: 330 });
       fs.writeFileSync(path.join(selftestDir, 'desk.png'), desk.resize({ width: 800 }).toPNG());
+      // The desk at work, frame by frame (a stamp and a writing burst), to see
+      // exactly what moves on it.
+      await overlay.webContents.executeJavaScript(`BuddyBubble.hide(); 1`);
+      await new Promise((r) => setTimeout(r, 1800));
+      // (If the computer has been idle he may have dozed off: wake him and sit him back down.)
+      await overlay.webContents.executeJavaScript(`BuddyBrain.onIdleSeconds(0); BuddyBrain.enterDesk('lab'); 1`);
+      await new Promise((r) => setTimeout(r, 700));
+      await overlay.webContents.executeJavaScript(`BuddyBubble.hide(); BuddyBrain.playAnimation('stamp'); document.getElementById('pet').classList.add('scribbling'); 1`);
+      for (let n = 0; n < 8; n++) {
+        await new Promise((r) => setTimeout(r, n < 6 ? 140 : 700));
+        const fr = await capture(overlay, { x: cx, y: Math.max(0, Math.round(pos.y) - 130), width: 400, height: 330 });
+        fs.writeFileSync(path.join(selftestDir, `desk-work-${n}.png`), fr.toPNG());
+      }
+      await overlay.webContents.executeJavaScript(`document.getElementById('pet').classList.remove('scribbling'); 1`);
       // Frost Release, captured mid-transformation.
       await overlay.webContents.executeJavaScript(`BuddyBubble.hide(); BuddyBrain.exitDesk({ quiet: true }); BuddyBrain.playAnimation('release'); 1`);
       await new Promise((r) => setTimeout(r, 1700));
