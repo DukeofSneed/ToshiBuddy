@@ -69,7 +69,7 @@ function profileText(userData, id, who) {
 // Whatever the run returned is data: strip control characters, cap every length,
 // keep only known fields, clamp token estimates to the usual size ranges.
 // Wording that can only be done with new artwork or separately moving parts.
-const ART_RE = /\b(nods?|nodding|blinks?|winks?|smiles?|smirks?|frowns?|grins?|pouts?|yawns?|salutes?|facial expression|new (pose|sprite|expression|frame)s?|redraw\w*|sprite ?sheet|(raises?|waves?|lifts?|moves?|crosses|folds?|points?|shakes?|tilts?|turns?) (his|her|their|its|the|an?) (head|hand|arm|eyebrow|finger|eyes?|hair)s?|eyes? (narrow|widen|close|glow|roll)\w*|changes? (clothes|outfit|expression))\b/i;
+const ART_RE = /\b(stamp(s|ed|ing)?|nods?|nodding|blinks?|winks?|smiles?|smirks?|frowns?|grins?|pouts?|yawns?|salutes?|facial expression|new (pose|sprite|expression|frame)s?|redraw\w*|sprite ?sheet|(raises?|waves?|lifts?|moves?|crosses|folds?|points?|shakes?|tilts?|turns?) (his|her|their|its|the|an?) (head|hand|arm|eyebrow|finger|eyes?|hair)s?|eyes? (narrow|widen|close|glow|roll)\w*|changes? (clothes|outfit|expression))\b/i;
 // Anything worn that would cover him or change his outfit (a hat on top is fine).
 const OUTFIT_RE = /\b(outfits?|costumes?|capes?|cloaks?|masks?|armou?r|coats?|jackets?|robes?|uniforms?|sweaters?|hoodies?|suits?|aprons?|scar(f|ves)|dress(es)?|kimonos?|clothes|clothing)\b/i;
 // Wording that names a pose the character does have drawn is allowed.

@@ -47,16 +47,22 @@ function cleanEnv() {
   return env;
 }
 
+// Jar tokens. Every turn re-reads the whole conversation from the cache, so
+// raw cache reads pile up to many times the real work (a small build showed
+// 63k against a 13k goal and was stopped at once). A cache read costs about a
+// tenth of a fresh input token, so it counts as a tenth here. Real spending is
+// still bounded by --max-budget-usd and the plan guard, which don't use this.
+const CACHE_READ_WEIGHT = 0.1;
 function sumUsage(u) {
   if (!u) return 0;
-  return (u.input_tokens || 0) + (u.output_tokens || 0) + (u.cache_creation_input_tokens || 0) + (u.cache_read_input_tokens || 0);
+  return Math.round((u.input_tokens || 0) + (u.output_tokens || 0) + (u.cache_creation_input_tokens || 0) + (u.cache_read_input_tokens || 0) * CACHE_READ_WEIGHT);
 }
 
 function tokensFromModelUsage(modelUsage) {
   let total = 0;
   const perModel = {};
   for (const [model, mu] of Object.entries(modelUsage || {})) {
-    const t = (mu.inputTokens || 0) + (mu.outputTokens || 0) + (mu.cacheCreationInputTokens || 0) + (mu.cacheReadInputTokens || 0);
+    const t = Math.round((mu.inputTokens || 0) + (mu.outputTokens || 0) + (mu.cacheCreationInputTokens || 0) + (mu.cacheReadInputTokens || 0) * CACHE_READ_WEIGHT);
     perModel[model] = { ...mu, tokens: t };
     total += t;
   }
@@ -212,4 +218,4 @@ function runClaude(opts) {
   return { promise, kill, pid: child.pid };
 }
 
-module.exports = { runClaude, findClaude, cleanEnv };
+module.exports = { sumUsage, tokensFromModelUsage, CACHE_READ_WEIGHT, runClaude, findClaude, cleanEnv };

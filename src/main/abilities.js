@@ -50,7 +50,7 @@ const RULE = 'Do not repeat, replace, or imitate anything in this list. In parti
 // if the character's sheet has them mapped.
 const PLAYABLE = {
   wave: 'wave or bow', think: 'think / look confused', surprised: 'look surprised', huff: 'look annoyed', shrug: 'shrug',
-  frost: 'the double-click trick', stamp: 'stamp a form (at the desk only)',
+  frost: 'the double-click trick',
 };
 // Which of those this character has. config: character.json; builtin: the drawn test character has all of them.
 function playablePoses({ config = null, builtin = false } = {}) {
@@ -69,6 +69,7 @@ function limits(poses = []) {
         ? ` The ONLY poses that may be used are the ones already drawn in the character's own sheet, played as they are: ${have.map((k) => `${k} (${PLAYABLE[k]})`).join(', ')}. Anything not in that list (a nod, a blink, a smile, a salute, a new pose) does not exist and cannot be used.`
         : ' This character has no extra drawn poses to play.')
       + ' Besides those, the only motion available is moving the whole existing picture (slide, hop, tilt, sway, shrink, grow, fade).',
+    'There is no stamping: the character never stamps a form or anything else, at the desk or away from it. If a goal mentions stamping, leave that part out.',
     'Props are small add-ons that sit on top of or beside the character: a hat on top of the head, something held in a hand, something on the desk, something floating nearby. Never clothing, costumes, masks, capes, armour, or anything else that covers the body or face or changes how the outfit looks.',
     'An upgrade may add: spoken lines; the motion and poses above; small props drawn from simple shapes (or a picture the owner attached); and reactions to these events only: a click, a double-click, being dropped, the hour changing, waking up, falling asleep, leaning on the screen edge, sitting down at the desk, finishing a typing session at the desk, finishing a long typing session (20 minutes or more), the owner switching to another app, a donation, an upgrade finishing, the donation transformation starting, and a repeating timer.',
     'An upgrade may keep a simple count of how many times one of its events has happened (saved on this computer, so it survives restarts and sleep) and react every so many times or at set milestones. That is the only memory there is: no other saved data, scores, dates, or settings. It cannot know what the owner is doing beyond those events, read files or the screen, use the network, or play new sounds.',
