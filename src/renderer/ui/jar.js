@@ -236,7 +236,6 @@
     } else if (b.dataset.unattach) await act(jar.attach({ goalId: b.dataset.unattach, remove: b.dataset.file }));
     else if (b.dataset.remove) await act(jar.removeGoal(b.dataset.remove));
     else if (b.dataset.cancel) render(await jar.cancelRun());
-    else if (b.dataset.testUpgrade) await act(jar.testUpgrade(b.dataset.testUpgrade));
   });
   $('upgrades').addEventListener('change', async (e) => {
     const c = e.target.closest('input[data-toggle-upgrade]');
@@ -245,6 +244,9 @@
   $('upgrades').addEventListener('click', async (e) => {
     const b = e.target.closest('button[data-undo]');
     if (b) { b.disabled = true; await act(jar.undo(b.dataset.undo)); }
+    // Test lives in this list (built tricks), not in the goals list.
+    const tb = e.target.closest('button[data-test-upgrade]');
+    if (tb) await act(jar.testUpgrade(tb.dataset.testUpgrade));
   });
 
   jar.on('jar:changed', render);

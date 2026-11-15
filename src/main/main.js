@@ -886,7 +886,10 @@ function start() {
   // Test button: the pet plays the trick once (only tricks loaded for this character).
   ipcMain.handle('jar:test-upgrade', (_e, { upgradeId } = {}) => {
     const up = ledger.upgrade(String(upgradeId || ''));
-    if (!up || up.reverted || up.disabled || waitsOn(up).length) return { ok: false, state: jarState() };
+    if (!up || up.reverted || up.disabled || waitsOn(up).length) {
+      notify(up && waitsOn(up).length ? `"${up.title}" is off while ${waitsOn(up).join(', ')} is off.` : 'That trick is off, so there is nothing to test.', 4000);
+      return { ok: false, state: jarState() };
+    }
     if (overlay && !overlay.isDestroyed()) for (const slug of up.slugs || []) overlay.webContents.send('test-mod', { slug: String(slug) });
     return { ok: true, state: jarState() };
   });
