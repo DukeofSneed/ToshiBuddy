@@ -157,6 +157,10 @@ add `standUp: true` (or `standUp: { after: ms }`, up to 5000) to the action: the
 character gets up, plays `animate` and says the line, then sits back down if the owner
 is still typing. The session carries on; nothing is counted as finished.
 
+The one pose allowed while seated: an action with `deskPose: true`, an `animate` pose,
+and a prop shown for a while (`prop.for`), meaning something lands on the character.
+The pose plays in the seat and is held for 2.5 seconds while the effect falls.
+
 A prop an action shows can be shown for a while only: `prop: { id, show: true, for: 3000 }`
 (500-10000 ms), then it hides again. CSS animations on it start over each time it is
 shown, so it suits a one-off effect (falling leaves, a puff of steam).

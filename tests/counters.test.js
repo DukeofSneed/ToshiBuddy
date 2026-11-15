@@ -83,5 +83,8 @@ check('a cycled count starts over after its number; desk-active, prop.for and st
   assert.throws(() => reg({ trigger: 'desk-active', count: { name: 'x', every: 2, cycle: 1 }, action: {} }), /cycle/);
   assert.throws(() => reg({ trigger: 'click', action: { prop: { id: 'a', for: 60000 } } }), /prop\.for/);
   assert.throws(() => reg({ trigger: 'click', action: { standUp: { after: 99999 } } }), /standUp/);
+  m.register({ id: 'tower2', props: [{ id: 'rain', anchor: 'desk', svg: '<rect/>', hidden: true }], behaviors: [{ trigger: 'desk-active', action: { prop: { id: 'rain', show: true, for: 2600 }, deskPose: true, animate: 'huff' } }] });
+  assert.throws(() => reg({ trigger: 'desk-active', action: { deskPose: true, animate: 'huff' } }), /deskPose/, 'only with something landing on him');
+  assert.throws(() => reg({ trigger: 'desk-active', action: { deskPose: true, prop: { id: 'a', for: 1000 } } }), /deskPose/);
 });
 console.log(`${passed} passed, ${process.exitCode ? 'some' : 0} failed`);

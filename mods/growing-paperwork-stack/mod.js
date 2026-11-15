@@ -1,8 +1,8 @@
 // A paper tower on the desk. Every 45 seconds of typing at the desk adds a
 // bundle of pages (desk-active fires every 15 s; three of them per bundle).
 // After eight bundles the tower is taller than he is; half a minute later it
-// rains down over him, he gets up, huffs, says so, and sits back down at an
-// empty desk. About six and a half minutes of typing per round. The pile is
+// rains down over him; he huffs in his seat while it lands, says so, and
+// carries on at an empty desk. About six and a half minutes of typing per round. The pile is
 // drawn from the saved count, so it survives restarts.
 (() => {
 const SLUG = 'growing-paperwork-stack';
@@ -71,7 +71,7 @@ BuddyMods.register({
       count: { name: 'ticks', at: [RAIN_AT], cycle: RAIN_AT },
       action: {
         prop: { id: 'rain', show: true, for: 2600 },
-        standUp: { after: 1700 },
+        deskPose: true, // reacts in his seat while the pages land on him
         animate: 'huff',
         say: 'Damn it! Work never ends',
       },

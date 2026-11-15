@@ -187,7 +187,7 @@ function runSelftest(ctx, selftestDir) {
           return r;
         })())`));
         await new Promise((r) => setTimeout(r, 1500));
-        before.probe = await overlay.webContents.executeJavaScript(`(() => { const w = document.querySelector('[id$="-rain"][data-mod=' + JSON.stringify(${s}) + ']'); if (!w) return null; const rc = w.querySelector("rect"); const cs = rc && getComputedStyle(rc); const b = rc && rc.getBoundingClientRect(); return { display: w.getAttribute("display"), opacity: cs && cs.opacity, anim: cs && cs.animationName, transform: cs && cs.transform, box: b && [Math.round(b.x), Math.round(b.y), Math.round(b.width)] }; })()`);
+        before.probe = await overlay.webContents.executeJavaScript(`(() => { const w = document.querySelector('[id$="-rain"][data-mod=' + JSON.stringify(${s}) + ']'); if (!w) return null; const rc = w.querySelector("rect"); const cs = rc && getComputedStyle(rc); const b = rc && rc.getBoundingClientRect(); const pe = document.getElementById("pet"); return { atDesk: pe.classList.contains("desk"), deskPose: pe.classList.contains("desk-pose"), huff: pe.classList.contains("huff"), display: w.getAttribute("display"), opacity: cs && cs.opacity, anim: cs && cs.animationName, transform: cs && cs.transform, box: b && [Math.round(b.x), Math.round(b.y), Math.round(b.width)] }; })()`);
         fs.writeFileSync(file('-early'), (await capture(overlay, { x: cx, y: Math.max(0, Math.round(pos.y) - 130), width: 400, height: 330 })).toPNG());
         await new Promise((r) => setTimeout(r, 700));
         before.shownDuringTest = await overlay.webContents.executeJavaScript(`[...document.querySelectorAll('[data-mod=' + JSON.stringify(${s}) + ']')].filter((e) => e.getAttribute('display') !== 'none').length`);

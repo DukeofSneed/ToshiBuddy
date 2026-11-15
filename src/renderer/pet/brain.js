@@ -324,7 +324,7 @@
   function leaveDeskVisuals() {
     clearDeskTimers();
     const el = pet();
-    el.classList.remove('scribbling', 'stamp', 'stamped', 'desk-in');
+    el.classList.remove('scribbling', 'stamp', 'stamped', 'desk-in', 'desk-pose');
     delete el.dataset.papers;
   }
   function exitDesk({ quiet = false } = {}) {
@@ -447,16 +447,29 @@
         if (a.prop.for) setTimeout(() => BuddyMods.setProp(b.slug, a.prop.id, false), Number(a.prop.for));
       }
       if (a.sound) BuddySfx.play(a.sound);
-      const act = () => {
-        if (a.animate) playAnimation(a.animate);
+      const act = ({ noPose = false } = {}) => {
+        if (a.animate && !noPose) playAnimation(a.animate);
         if (a.say && (b.own || !(window.BuddyApp && BuddyApp.ownQuipsOnly))) {
           const text = Array.isArray(a.say) ? a.say[Math.floor(Math.random() * a.say.length)] : a.say;
           say(String(text).replace(/\{(\w+)\}/g, (m, k) => (k in extra ? extra[k] : m)));
         }
       };
-      if (a.standUp && st.mode === 'desk') standUp(act, a.standUp === true ? 0 : Number(a.standUp.after) || 0);
+      if (a.deskPose && st.mode === 'desk') deskPose(a.animate, () => act({ noPose: true }));
+      else if (a.standUp && st.mode === 'desk') standUp(act, a.standUp === true ? 0 : Number(a.standUp.after) || 0);
       else act();
     } catch (e) { if (window.buddy) buddy.log(`behavior error in ${b.slug}: ${e.message}`); }
+  }
+  // Something a trick drops on him at the desk (its prop.for effect): he reacts
+  // in his seat with the pose and holds it for 2.5 seconds. The only pose the
+  // desk allows, and only for this.
+  const DESK_POSE_MS = 2500;
+  function deskPose(name, then) {
+    const el = pet();
+    el.classList.add('desk-pose');
+    playAnimation(name, DESK_POSE_MS);
+    then();
+    clearTimeout(st.deskPoseTimer);
+    st.deskPoseTimer = setTimeout(() => el.classList.remove('desk-pose'), DESK_POSE_MS);
   }
   // A pose and line at the desk: he gets up for a moment (seated he only idles and
   // blinks), then sits back down if the owner is still typing. No session ends.

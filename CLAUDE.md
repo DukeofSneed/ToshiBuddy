@@ -71,7 +71,9 @@ upgrade runs that write mods. Kori (`characters/kori-test`, drawn in
   something that is not a sign (`plainBoxes`); both only decide what counts as a mark.
 - At the desk a sheet character only shows its idle pose and blink (`resolveKey` in
   `sheet.js`, plus the `#pet.skin.desk #sprite` rule in styles.css). Keep the desk
-  calm: no action poses, no whole-body motion, and writing makes no sound.
+  calm: no action poses, no whole-body motion, and writing makes no sound. The one
+  exception (the owner's call): a mod action with `deskPose` may play its pose, held
+  2.5 s, while a timed effect (`prop.for`) lands on him; the `desk-pose` class allows it.
 - New sheets are mapped automatically from row counts (`src/main/character-check.js`:
   `autoMap`, `checkCharacter`); it never looks at the image.
 - Updates for zip installs live in `src/main/updater.js`: `version.txt` is filled in by

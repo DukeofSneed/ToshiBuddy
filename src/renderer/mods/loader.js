@@ -90,6 +90,7 @@
         if (a.say !== undefined && typeof a.say !== 'string' && !Array.isArray(a.say)) fail('action.say must be a string or array');
         if (a.prop !== undefined && (typeof a.prop !== 'object' || !a.prop.id)) fail('action.prop needs { id, show|toggle }');
         if (a.prop && a.prop.for !== undefined && !(Number(a.prop.for) >= 500 && Number(a.prop.for) <= 10000)) fail('action.prop.for must be 500-10000 ms');
+        if (a.deskPose !== undefined && (a.deskPose !== true || typeof a.animate !== 'string' || !(a.prop && a.prop.for) || a.standUp)) fail('action.deskPose needs animate and a prop shown for a while (prop.for): the pose is only for something landing on the character at the desk');
         if (a.standUp !== undefined && a.standUp !== true && !(a.standUp && typeof a.standUp === 'object' && Number(a.standUp.after) >= 0 && Number(a.standUp.after) <= 5000)) fail('action.standUp must be true or { after: 0-5000 ms }');
         if (a.sound !== undefined && (!window.BuddySfx || !BuddySfx.names.includes(a.sound))) fail(`action.sound must be one of ${window.BuddySfx ? BuddySfx.names.join(', ') : 'the built-in sounds'}`);
       }
