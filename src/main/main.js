@@ -656,10 +656,31 @@ function start() {
   ipcMain.handle('jar:state', () => jarState());
   // One donation path for the panel and the jar on screen, so the guard's
   // ceiling, pledges, and the donation reaction are always the same.
+  // A build that stopped short ("paused" or "failed") was already started by
+  // the user. When their top-up covers what it asked for, it carries on by
+  // itself instead of waiting for another click. Only a top-up triggers this,
+  // never the stop itself, so a build that keeps failing can't loop. It still
+  // starts through upgrader.build(), so the plan guard decides as always.
+  const stoppedShort = (goalId) => { const g = ledger.goal(goalId); return !!g && ['paused', 'failed'].includes(g.status); };
+  function continueIfToppedUp(goalId, wasStopped) {
+    const g = ledger.goal(goalId);
+    if (!wasStopped || !g || g.status !== 'funded' || g.touchesCore || !isActiveGoal(g)) return false;
+    if (upgrader.isBusy()) { notify(`"${g.title}" is topped up. It can continue once the current build is done.`, 7000); return false; }
+    notify(`"${g.title}" is topped up. Carrying on.`, 5000);
+    setTimeout(async () => {
+      if (upgrader.isBusy()) return;
+      const r = await upgrader.build(g.id, { resume: !!g.sessionId });
+      if (!r.ok && r.reason) notify(`Can't continue: ${r.reason}.`, 7000);
+      pushJar();
+    }, 1500);
+    return true;
+  }
   function donate(tokens, goalId) {
     const ceiling = guard.maxSafeDonation();
     const levelBefore = ledger.level().level;
+    const wasStopped = goalId ? stoppedShort(goalId) : false;
     const r = ledger.donate(tokens, { ceiling, goalId });
+    if (goalId) continueIfToppedUp(goalId, wasStopped);
     if (r.accepted && overlay && !overlay.isDestroyed()) overlay.webContents.send('sfx', { name: 'coin' });
     // The jar is the thing he tends: a donation is growth (the character's
     // 'activity_bonsai' lines when it has them), a new level is a milestone.
@@ -682,7 +703,9 @@ function start() {
     return { accepted: r.accepted || 0, pledged: r.pledged || 0, balance: ledger.data.balance };
   });
   ipcMain.handle('jar:fund', (_e, { goalId, tokens }) => {
+    const wasStopped = stoppedShort(goalId);
     const r = ledger.fundGoal(goalId, tokens);
+    if (r && r.moved > 0) continueIfToppedUp(goalId, wasStopped);
     if (r && r.moved > 0 && overlay && !overlay.isDestroyed()) overlay.webContents.send('quip', { tags: ['jar-grow'] });
     return { ...r, state: jarState() };
   });
