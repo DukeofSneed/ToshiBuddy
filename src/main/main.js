@@ -16,7 +16,7 @@ const { Ledger } = require('./jar/ledger');
 const { Guard } = require('./jar/guard');
 const { Upgrader } = require('./jar/upgrader');
 const { WaitingQueue } = require('./jar/waiting');
-const { Git, RUN_DIRS } = require('./jar/git');
+const { Git, ModHistory } = require('./jar/git');
 const { estimate } = require('./jar/estimator');
 const { listMods, modsFor, readQuipPacks, readCharacterDialogue, listCharacters, invalidateCharacters, charactersRoot } = require('./mods');
 const { trayIcon } = require('./tray-icon');
@@ -62,6 +62,9 @@ function start() {
   process.on('uncaughtException', (e) => log(`error: ${(e && e.stack) || e}`));
   process.on('unhandledRejection', (e) => log(`error (promise): ${(e && e.stack) || e}`));
   const git = new Git(PROJECT_ROOT);
+  // Built tricks and quip packs are recorded only here, in userData, never in
+  // the project's repo (which ignores them), so they stay with their owner.
+  const history = new ModHistory(path.join(userData, 'mod-history'), PROJECT_ROOT);
   const guard = new Guard({ ledger, settings, projectRoot: PROJECT_ROOT, log });
   // Dialogue belongs to the active character (characters/<id>/quips.json, plus
   // quip packs from upgrades); the user's edits are kept per character.
@@ -107,7 +110,7 @@ function start() {
   });
 
   const upgrader = new Upgrader({
-    projectRoot: PROJECT_ROOT, ledger, guard, settings, git, log, userData,
+    projectRoot: PROJECT_ROOT, ledger, guard, settings, git, history, log, userData,
     character: () => characterInfo(),
     emit: (ev) => {
       if (overlay && !overlay.isDestroyed()) overlay.webContents.send('upgrade-event', ev);
@@ -676,7 +679,7 @@ function start() {
     if (fixed.length) {
       log(`${fixed.length} build(s) were cut off earlier and are ready to start again`);
       // half-written files from the cut-off run (mods/ and content/ only)
-      git.discardRunChanges().catch((e) => log(`discard failed: ${e.message}`));
+      history.discardRunChanges().catch((e) => log(`discard failed: ${e.message}`));
     }
     return fixed;
   }
@@ -1110,8 +1113,8 @@ function start() {
     try {
       const r = await updater.update(PROJECT_ROOT, { log });
       if (r.updated) {
-        // Tricks and quip packs are tracked in the local git history upgrades use: record the update there.
-        try { if (fs.existsSync(path.join(PROJECT_ROOT, '.git')) && !(await git.isClean(RUN_DIRS))) await git.commitAll('chore: app update', RUN_DIRS); } catch (e) { log(`update: ${e.message}`); }
+        // Record what the update changed under mods/ and content/ in the private history.
+        try { if (await history.available()) { await history.ensureRepo(); await history.commitAll('chore: app update'); } } catch (e) { log(`update: ${e.message}`); }
         if (r.needsSetup) {
           await dialog.showMessageBox({ type: 'info', buttons: ['OK'], title: 'ToshiBuddy update', message: 'Updated. One more step.', detail: 'This version needs a newer engine. Close ToshiBuddy and run "Setup ToshiBuddy.cmd" once.' });
           return;

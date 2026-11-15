@@ -22,6 +22,11 @@ upgrade runs that write mods. Kori (`characters/kori-test`, drawn in
   with `TOSHI_USERDATA=<dir>` so it never touches real data).
 - Upgrade runs only ever check, clean, and commit `mods/` and `content/` (`RUN_DIRS` in
   `src/main/jar/git.js`); never widen that to the whole project.
+- Built tricks belong to whoever built them and never go to GitHub: `.gitignore` ignores
+  `mods/*` and `content/*` except what ships (`mods/sample-earmuffs/`, `content/catalog.json`),
+  and the jar commits, reverts, and cleans them in a private history in userData
+  (`ModHistory`, `mod-history/`). Never `git add -f` a built trick into the project repo.
+  The project's own repo is only used to spot and undo a run's changes elsewhere.
 - Main process: `src/main/` (windows, tray, activity watcher for desk mode, ledger,
   guard, estimator, upgrader, git).
 - Renderer: `src/renderer/` (SVG sprite, animation CSS, brain, quips, animalese

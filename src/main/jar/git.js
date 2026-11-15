@@ -64,7 +64,7 @@ class Git {
   }
 
   async revert(hash) {
-    await this.run(['revert', '--no-edit', '--no-verify', hash]);
+    await this.run(['revert', '--no-edit', hash]);
     return (await this.run(['rev-parse', 'HEAD'])).trim();
   }
 
@@ -95,4 +95,89 @@ class Git {
   }
 }
 
-module.exports = { Git, RUN_DIRS };
+// The jar's own history of mods/ and content/: a private git folder in userData
+// whose work tree is the project. Tricks belong to whoever built them, so the
+// shared repo ignores them (.gitignore) and they are recorded only here, never
+// in the project's .git and never pushed. Because the project's .gitignore
+// applies to any git using this work tree, ignored files are listed and added
+// on purpose (--ignored, -f, clean -x), and only under mods/ and content/.
+class ModHistory {
+  constructor(gitDir, workTree) { this.gitDir = gitDir; this.cwd = workTree; }
+  dirs(dirs = RUN_DIRS) { return dirs.filter((d) => fs.existsSync(path.join(this.cwd, d))); }
+  run(args) { return git(this.cwd, ['--git-dir', this.gitDir, '--work-tree', this.cwd, ...args]); }
+
+  async available() {
+    try { await git(this.cwd, ['--version']); return true; } catch (_) { return false; }
+  }
+
+  async ensureRepo() {
+    if (!fs.existsSync(path.join(this.gitDir, 'HEAD'))) {
+      fs.mkdirSync(this.gitDir, { recursive: true });
+      await this.run(['init', '-q', '-b', 'main']);
+    }
+    // Its own name, so a missing global git identity never blocks a commit.
+    await this.run(['config', 'user.name', 'ToshiBuddy']);
+    await this.run(['config', 'user.email', 'toshibuddy@localhost']);
+    await this.run(['config', 'core.autocrlf', 'false']);
+  }
+
+  async hasCommits() {
+    try { await this.run(['rev-parse', '--verify', '-q', 'HEAD']); return true; } catch (_) { return false; }
+  }
+
+  async hasCommit(hash) {
+    if (!/^[0-9a-f]{7,40}$/i.test(String(hash || ''))) return false;
+    try { await this.run(['cat-file', '-e', `${hash}^{commit}`]); return true; } catch (_) { return false; }
+  }
+
+  // Changed, new, or deleted files under mods/ and content/ (ignored ones included).
+  async status() {
+    const spec = this.dirs();
+    if (!spec.length) return [];
+    const out = await this.run(['status', '--porcelain', '--untracked-files=all', '--ignored=traditional', '--', ...spec]);
+    return out.split(/\r?\n/).filter(Boolean)
+      .map((l) => ({ code: l.slice(0, 2) === '!!' ? '??' : l.slice(0, 2), file: l.slice(3).replace(/^"|"$/g, '') }))
+      .filter((s) => !s.file.endsWith('/'));
+  }
+
+  async isClean() { return (await this.status()).length === 0; }
+
+  // Record mods/ and content/ as they are now. Returns the commit, or null if
+  // nothing changed.
+  async commitAll(message) {
+    const spec = this.dirs();
+    if (spec.length) await this.run(['add', '-A', '-f', '--', ...spec]);
+    try { await this.run(['diff', '--cached', '--quiet']); if (await this.hasCommits()) return null; } catch (_) { /* staged changes */ }
+    await this.run(['commit', '-q', '--no-verify', '--allow-empty', '-m', message]);
+    return (await this.run(['rev-parse', 'HEAD'])).trim();
+  }
+
+  async revert(hash) {
+    try {
+      await this.run(['revert', '--no-edit', hash]);
+    } catch (e) {
+      try { await this.run(['revert', '--abort']); } catch (_) { /* nothing to abort */ }
+      throw e;
+    }
+    return (await this.run(['rev-parse', 'HEAD'])).trim();
+  }
+
+  // Throw away what a run left unrecorded under mods/ and content/. Never before
+  // the first snapshot: until then nothing there is known, so nothing is removed.
+  async discardRunChanges() {
+    if (!(await this.hasCommits())) return;
+    const spec = this.dirs();
+    if (!spec.length) return;
+    try { await this.run(['checkout', '--', ...spec]); } catch (_) { /* nothing recorded there */ }
+    await this.run(['clean', '-fdxq', '--', ...spec]);
+  }
+
+  async log(n = 20) {
+    try {
+      const out = await this.run(['log', `-${n}`, '--pretty=format:%H%x09%s']);
+      return out.split(/\r?\n/).filter(Boolean).map((l) => { const [hash, ...rest] = l.split('\t'); return { hash, subject: rest.join('\t') }; });
+    } catch (_) { return []; }
+  }
+}
+
+module.exports = { Git, ModHistory, RUN_DIRS };

@@ -78,7 +78,12 @@ function nodeCheck(file) {
 }
 
 class Upgrader {
-  constructor({ projectRoot, ledger, guard, settings, git, log, emit, reloadAndAwaitMods, character, userData }) {
+  // git: the project's own repo, only used to see what a run touched outside
+  // mods/ and content/ and to put those files back. history: the private record
+  // of mods/ and content/ in userData (ModHistory); every trick commit, revert and
+  // cleanup happens there, so built tricks never enter the shared repo.
+  constructor({ projectRoot, ledger, guard, settings, git, history, log, emit, reloadAndAwaitMods, character, userData }) {
+    this.history = history;
     this.userData = userData || null; // where attached pictures are kept
     // () => { id, name, isSkin, personality, profile }: who the pet is right now
     // (name and personality text from character.json, plus the stored web-lookup
@@ -187,7 +192,10 @@ class Upgrader {
     try {
       await this.git.ensureRepo();
       if (!(await this.git.hasCommits())) await this.git.commitAll('chore: initial snapshot before first upgrade');
-      if (!(await this.git.isClean(RUN_DIRS))) return { ok: false, reason: 'mods/ or content/ has unsaved changes; finish or undo them first' };
+      // Hand edits or an app update since the last run are recorded first, so
+      // undoing this run undoes only this run.
+      await this.history.ensureRepo();
+      await this.history.commitAll('chore: tricks and quip packs as found before a run');
       // Files outside mods/ and content/ that already have unsaved changes (an
       // imported character, a mapper save) are not the run's doing.
       this.preRun = await this.dirtySnapshot();
@@ -287,11 +295,11 @@ class Upgrader {
     try {
       const before = this.preRun || new Map();
       const now = await this.dirtySnapshot();
-      changed = [...now.keys()].filter((f) => ALLOWED_PREFIXES.some((p) => f.startsWith(p)));
+      changed = (await this.history.status()).map((s) => s.file.replace(/\\/g, '/')).filter((f) => ALLOWED_PREFIXES.some((p) => f.startsWith(p)));
       outside = [...now.entries()].filter(([f, m]) => !ALLOWED_PREFIXES.some((p) => f.startsWith(p)) && (!before.has(f) || before.get(f) !== m)).map(([f]) => f);
     } catch (_) { /* ignore */ }
     if (outside.length) {
-      await this.git.discardRunChanges();
+      await this.history.discardRunChanges();
       // Undo the run's own changes there, but never an edit that was already
       // unsaved before the run (that one is the user's).
       const before = this.preRun || new Map();
@@ -306,7 +314,7 @@ class Upgrader {
     for (const f of changed.filter((x) => x.endsWith('.js'))) {
       const err = await nodeCheck(path.join(this.projectRoot, f));
       if (err) {
-        await this.git.discardRunChanges();
+        await this.history.discardRunChanges();
         return this._fail(goal, `syntax error in ${f}: ${err.split('\n').slice(0, 3).join(' ')}`);
       }
     }
@@ -322,16 +330,16 @@ class Upgrader {
     }
     let hash;
     try {
-      hash = await this.git.commitAll(`upgrade: ${out.title || goal.title} (${tokens} tokens, ${model})`, RUN_DIRS);
+      hash = await this.history.commitAll(`upgrade: ${out.title || goal.title} (${tokens} tokens, ${model})`);
     } catch (e) {
-      await this.git.discardRunChanges();
+      await this.history.discardRunChanges();
       return this._fail(goal, `commit failed: ${e.message}`);
     }
     // Load it for real; a mod that throws on load is reverted.
     const statuses = await this.reloadAndAwaitMods(slugs, 15000);
     const broken = statuses.find((s) => s && s.ok === false);
     if (broken) {
-      try { await this.git.revert(hash); } catch (e) { this.log(`revert failed: ${e.message}`); }
+      try { await this.history.revert(hash); } catch (e) { this.log(`revert failed: ${e.message}`); }
       await this.reloadAndAwaitMods([], 3000);
       return this._fail(goal, `mod ${broken.slug} failed to load: ${broken.error}`);
     }
@@ -357,7 +365,7 @@ class Upgrader {
   }
 
   async _finishFailure(goal, res, tokens) {
-    try { await this.git.discardRunChanges(); } catch (e) { this.log(`discard failed: ${e.message}`); }
+    try { await this.history.discardRunChanges(); } catch (e) { this.log(`discard failed: ${e.message}`); }
     // Its files are gone, so the next attempt starts fresh. Resuming the old
     // conversation made the run believe its work was already written, and it
     // finished without writing anything.
@@ -392,8 +400,15 @@ class Upgrader {
     if (!up || up.reverted) return { ok: false, reason: 'nothing to undo' };
     if (this.active) return { ok: false, reason: 'wait for the running upgrade to finish' };
     try {
-      if (!(await this.git.isClean(RUN_DIRS))) return { ok: false, reason: 'mods/ or content/ has unsaved changes' };
-      const hash = await this.git.revert(up.commit);
+      await this.history.ensureRepo();
+      await this.history.commitAll('chore: tricks and quip packs as found before an undo');
+      let hash = null;
+      if (await this.history.hasCommit(up.commit)) {
+        try { hash = await this.history.revert(up.commit); } catch (e) { this.log(`undo "${up.title}": revert did not apply (${e.message.split('\n')[0]}); removing its files instead`); }
+      }
+      // Built before tricks had their own history, or edited since: remove the
+      // trick's own files and record that.
+      if (!hash) hash = await this.removeTrickFiles(up);
       up.reverted = true;
       up.revertCommit = hash;
       this.ledger.save();
@@ -403,6 +418,38 @@ class Upgrader {
     } catch (e) {
       return { ok: false, reason: `revert failed: ${e.message}` };
     }
+  }
+
+  // The trick's mod folders and the files it wrote, all under mods/ or content/.
+  // Files the app itself ships (tracked by the project's repo) are never removed.
+  async removeTrickFiles(up) {
+    const safe = (rel) => /^(mods|content)\/[A-Za-z0-9._\-/]+$/.test(rel) && !rel.split('/').includes('..');
+    const targets = [
+      ...(up.slugs || []).filter((s) => /^[a-z0-9][a-z0-9-]{0,39}$/.test(s)).map((s) => `mods/${s}`),
+      ...(up.files || []).map((f) => String(f).replace(/\\/g, '/')),
+    ].filter(safe);
+    let shipped = new Set();
+    try {
+      // Tracked and not covered by .gitignore. (A zip install's local repo may
+      // still track tricks built before they had their own history; those
+      // match the ignore rules, so they do not count as shipped.)
+      const dirs = this.git.dirs(RUN_DIRS);
+      const lines = (s) => s.split(/\r?\n/).filter(Boolean);
+      const ignored = new Set(lines(await this.git.run(['ls-files', '--cached', '--ignored', '--exclude-standard', '--', ...dirs])));
+      shipped = new Set(lines(await this.git.run(['ls-files', '--', ...dirs])).filter((f) => !ignored.has(f)));
+    } catch (_) { /* no project repo: nothing counts as shipped */ }
+    for (const rel of targets) {
+      const full = path.join(this.projectRoot, rel);
+      let st = null;
+      try { st = fs.statSync(full); } catch (_) { continue; }
+      if (st.isDirectory()) {
+        if ([...shipped].some((f) => f.startsWith(`${rel}/`))) continue;
+        fs.rmSync(full, { recursive: true, force: true });
+      } else if (!shipped.has(rel)) {
+        fs.rmSync(full, { force: true });
+      }
+    }
+    return this.history.commitAll(`undo: ${up.title}`);
   }
 }
 

@@ -7,3 +7,10 @@ dist/
 Thumbs.db
 # Written by the updater on zip installs.
 .install-manifest.json
+# Tricks the jar builds belong to whoever built them: they never go into the
+# shared repo. The jar records them in a private history in userData instead
+# (ModHistory in src/main/jar/git.js). Only what ships with the app is tracked.
+/mods/*
+!/mods/sample-earmuffs/
+/content/*
+!/content/catalog.json

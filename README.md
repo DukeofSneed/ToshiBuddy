@@ -73,7 +73,9 @@ in the app's data folder, so the pack files stay untouched.
    right now. The rest becomes a pledge that unlocks as your usage window resets.
 4. **Suggest an upgrade.** He prices it and adds a goal bar.
 5. **Fill a goal and press Build it.** A capped headless run writes a mod under
-   `mods/`, which is checked, committed to git, and loaded live. Undo reverts it.
+   `mods/`, which is checked, recorded in a private history on your computer, and
+   loaded live. Undo reverts it. Your tricks are yours: they are never part of the
+   shared repo or an update.
 
 ## Files
 - `src/main/` Electron main process: overlay window, tray, activity watcher, jar
