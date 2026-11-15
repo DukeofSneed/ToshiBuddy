@@ -5,6 +5,7 @@ const { spawn, execSync } = require('child_process');
 const os = require('os');
 const path = require('path');
 const fs = require('fs');
+const { killTree } = require('../kill');
 
 function findClaude() {
   const candidates = [
@@ -62,16 +63,6 @@ function tokensFromModelUsage(modelUsage) {
   return { total, perModel };
 }
 
-function killTree(child) {
-  if (!child || child.killed || child.exitCode !== null) return;
-  try {
-    if (process.platform === 'win32') {
-      spawn('taskkill', ['/PID', String(child.pid), '/T', '/F'], { stdio: 'ignore', windowsHide: true });
-    } else {
-      child.kill('SIGTERM');
-    }
-  } catch (_) { /* ignore */ }
-}
 
 /**
  * @param {object} opts

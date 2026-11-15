@@ -12,6 +12,7 @@
 // Nothing here is logged, stored, or sent anywhere; samples are classified and
 // dropped immediately.
 const { spawn } = require('child_process');
+const { killTree } = require('./kill');
 
 const SCRIPT = `
 $ErrorActionPreference = 'SilentlyContinue'
@@ -139,7 +140,7 @@ class ActivityWatcher {
   stop() {
     this.stopped = true;
     if (this.child) {
-      try { spawn('taskkill', ['/PID', String(this.child.pid), '/T', '/F'], { stdio: 'ignore', windowsHide: true }); } catch (_) { /* ignore */ }
+      killTree(this.child, { log: this.log });
       this.child = null;
     }
   }

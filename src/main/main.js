@@ -55,6 +55,10 @@ function start() {
     } catch (_) { /* logging must never break the app */ }
     if (jarWin && !jarWin.isDestroyed()) jarWin.webContents.send('jar:run-log', entry);
   };
+  // A problem in the background must never put up Electron's error box and stop
+  // the buddy: write it to the log and carry on.
+  process.on('uncaughtException', (e) => log(`error: ${(e && e.stack) || e}`));
+  process.on('unhandledRejection', (e) => log(`error (promise): ${(e && e.stack) || e}`));
   const git = new Git(PROJECT_ROOT);
   const guard = new Guard({ ledger, settings, projectRoot: PROJECT_ROOT, log });
   // Dialogue belongs to the active character (characters/<id>/quips.json, plus
