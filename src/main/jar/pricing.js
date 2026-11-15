@@ -44,4 +44,12 @@ function formatTokens(n) {
   return String(n);
 }
 
-module.exports = { PRICES, priceFor, capUsdForTokens, usdForUsage, formatTokens };
+// The least a build can finish on, in jar tokens. Claude Code starts every run
+// with its own instructions and tool list (many thousands of tokens) before it
+// reads docs/MOD_API.md and writes the mod, so a 13k or 25k budget was used up
+// before the work began and the run was stopped every time.
+const MIN_RUN_TOKENS = 60000;
+// What a stopped or new build must hold, unspent, before it starts.
+function runNeed(goal) { return Math.max(MIN_RUN_TOKENS, Math.round(((goal && goal.goalTokens) || 0) / 1000) * 1000); }
+
+module.exports = { MIN_RUN_TOKENS, runNeed, PRICES, priceFor, capUsdForTokens, usdForUsage, formatTokens };

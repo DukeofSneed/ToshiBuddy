@@ -1,4 +1,5 @@
 'use strict';
+const { runNeed } = require('./pricing');
 // The jar's book of record. Everything is in raw tokens (input + output +
 // cache writes + cache reads as reported by the run). Persisted as JSON.
 const fs = require('fs');
@@ -181,13 +182,13 @@ class Ledger {
       const avail = Math.max(0, (goal.funded || 0) - (goal.spent || 0));
       goal.waiting = false;
       goal.sessionId = null; // the cut-off run's files are discarded: start fresh
-      if (avail >= 1000) {
+      if (avail >= runNeed(goal)) {
         goal.status = 'funded';
         goal.needTokens = 0;
         goal.note = 'This build was cut off when the app closed. Start it again to carry on.';
       } else {
         goal.status = 'paused';
-        goal.needTokens = Math.max(5000, Math.round((goal.goalTokens || 0) * 0.5 / 1000) * 1000);
+        goal.needTokens = runNeed(goal);
         goal.note = `This build was cut off when the app closed. Needs +${goal.needTokens} tokens to carry on.`;
       }
       changed.push(goal);

@@ -48,8 +48,8 @@ let passed = 0;
 const step = async (name, fn) => { try { await fn(); passed++; } catch (e) { console.log(`FAIL ${name}: ${e.stack}`); process.exitCode = 1; } };
 
 (async () => {
-  const goal = ledger.addGoal({ title: 'Party hat', goalTokens: 20000 });
-  ledger.donate(20000, { goalId: goal.id });
+  const goal = ledger.addGoal({ title: 'Party hat', goalTokens: 60000 });
+  ledger.donate(60000, { goalId: goal.id });
 
   await step('over the cap: the build is refused and the goal waits', async () => {
     observe();
@@ -58,7 +58,7 @@ const step = async (name, fn) => { try { await fn(); passed++; } catch (e) { con
     const g = ledger.goal(goal.id);
     assert.strictEqual(g.waiting, true);
     assert.strictEqual(g.status, 'funded');
-    assert.strictEqual(g.funded, 20000, 'the tokens stay on the goal');
+    assert.strictEqual(g.funded, 60000, 'the tokens stay on the goal');
     assert.match(g.note, /Waiting for room in your plan/);
     assert.strictEqual(events.filter((e) => e.phase === 'blocked').length, 1);
     assert.strictEqual(events[0].willRetry, true);

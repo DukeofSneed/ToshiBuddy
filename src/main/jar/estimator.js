@@ -1,4 +1,5 @@
 'use strict';
+const { MIN_RUN_TOKENS } = require('./pricing');
 // Turns a free-text suggestion into a Goal with a token price tag, using one
 // cheap haiku turn with an enforced JSON schema.
 const fs = require('fs');
@@ -51,7 +52,7 @@ function buildPrompt(projectRoot, request, ledger, character = { name: 'Kori', i
     'Mods can only add quips, CSS animations, SVG props, and simple behaviors through the Mod API below; they cannot touch src/.',
     'Hard limits (a suggestion that needs any of these broken is not feasible: set feasible to false and say why in risk_note; if only part of it breaks them, narrow the title and summary to the part that fits):',
     limits || LIMITS,
-    'Be realistic about tokens: a run reads docs/MOD_API.md (~2k tokens), one or two existing mods, then writes one mod.js. Small cosmetic mods land in 10k-30k tokens; animation-heavy or behavior-heavy mods 40k-120k; anything needing new core support is not feasible (set touches_core true).',
+    'Be realistic about tokens: a run reads docs/MOD_API.md (~2k tokens), one or two existing mods, then writes one mod.js. Every run also starts with Claude Code\'s own instructions and tools, so even the smallest mod needs about 60k tokens; small mods land in 60k-90k, animation-heavy or behavior-heavy mods 90k-160k; anything needing new core support is not feasible (set touches_core true).',
     '',
     '## Mod API',
     api,
@@ -97,7 +98,7 @@ async function estimate({ projectRoot, ledger, request, log, character, extra })
       summary: String(out.summary || ''),
       request,
       size,
-      goalTokens: Math.round(est / 1000) * 1000,
+      goalTokens: Math.max(MIN_RUN_TOKENS, Math.round(est / 1000) * 1000),
       risk: String(out.risk_note || ''),
       touchesCore: !!out.touches_core,
       feasible: out.feasible !== false,

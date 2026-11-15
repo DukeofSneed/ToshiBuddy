@@ -20,6 +20,7 @@ const { estimate } = require('./jar/estimator');
 const { listMods, modsFor, readQuipPacks, readCharacterDialogue, listCharacters, invalidateCharacters, charactersRoot } = require('./mods');
 const { trayIcon } = require('./tray-icon');
 const { findClaude } = require('./jar/claude');
+const { MIN_RUN_TOKENS } = require('./jar/pricing');
 const { ActivityWatcher, classify } = require('./activity');
 
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..');
@@ -672,6 +673,12 @@ function start() {
   // Older versions kept the conversation of a stopped build to "resume" it,
   // though its files had been discarded. Start those afresh.
   for (const g of ledger.data.goals) if (g.sessionId && !['building', 'done'].includes(g.status)) g.sessionId = null;
+  // Older estimates were below what any build can finish on: show the real cost.
+  for (const g of ledger.data.goals) {
+    if (['building', 'done'].includes(g.status) || !(g.goalTokens < MIN_RUN_TOKENS)) continue;
+    g.goalTokens = MIN_RUN_TOKENS;
+    if (g.status === 'funded' && g.funded - g.spent < MIN_RUN_TOKENS) g.status = 'open';
+  }
   ledger.save();
   for (const { goal, refund } of ledger.repairOverspent()) {
     log(`goal "${goal.title}": cleared a spending gap${refund ? `, ${refund} tokens back to the jar` : ''}`);

@@ -10,7 +10,7 @@ const { runClaude } = require('./claude');
 const attachments = require('./attachments');
 const { RULE: ABILITY_RULE, LIMITS } = require('../abilities');
 const { normalizeRateLimit } = require('./guard');
-const { capUsdForTokens } = require('./pricing');
+const { capUsdForTokens , MIN_RUN_TOKENS, runNeed } = require('./pricing');
 
 const RESULT_SCHEMA = {
   type: 'object',
@@ -151,10 +151,15 @@ class Upgrader {
     if (this.active) return { ok: false, reason: 'another upgrade is already running' };
     if (!['funded', 'paused', 'failed'].includes(goal.status)) return { ok: false, reason: `goal is ${goal.status}` };
     const available = goal.funded - goal.spent;
-    if (available < 1000) return { ok: false, reason: 'not enough funded tokens' };
     if (goal.touchesCore) return { ok: false, reason: 'this idea needs core changes; mods cannot do it yet' };
     const activeId = this.character().id;
     if (goal.characterId && activeId && goal.characterId !== activeId) return { ok: false, reason: 'this goal belongs to another character; switch to them first' };
+    // Never start a run that can't finish: it would only burn tokens.
+    if (available < MIN_RUN_TOKENS) {
+      const need = runNeed(goal);
+      this.ledger.updateGoal(goalId, { status: 'paused', needTokens: need, note: `A build needs at least ${Math.round(need / 1000)}k tokens to finish. Fund +${Math.max(0, need - Math.max(0, available))} more and it starts.` });
+      return { ok: false, reason: `a build needs at least ${Math.round(need / 1000)}k tokens; this one has ${Math.max(0, available)}` };
+    }
 
     // Guard first.
     const status = await this.guard.refresh();
@@ -352,7 +357,7 @@ class Upgrader {
     const budgetish = ['error_max_budget_usd', 'error_max_turns'].includes(res.subtype) || (res.killed && /funded tokens|budget/.test(res.killReason || ''));
     const guardKill = res.killed && /plan/.test(res.killReason || '');
     if (budgetish || guardKill) {
-      const need = Math.max(5000, Math.round(goal.goalTokens * 0.5 / 1000) * 1000);
+      const need = runNeed(goal);
       this.ledger.updateGoal(goal.id, {
         status: 'paused',
         needTokens: need,
@@ -367,7 +372,7 @@ class Upgrader {
 
   _fail(goal, reason) {
     goal.sessionId = null; // see _finishFailure: never resume work that was discarded
-    const need = Math.max(5000, Math.round(goal.goalTokens * 0.5 / 1000) * 1000);
+    const need = runNeed(goal);
     this.ledger.updateGoal(goal.id, { status: 'failed', needTokens: need, note: `failed: ${reason}. Fund +${need} tokens to retry.` });
     this.emit({ phase: 'failed', goalId: goal.id, title: goal.title, reason });
     this.log(`upgrade "${goal.title}" failed: ${reason}`);

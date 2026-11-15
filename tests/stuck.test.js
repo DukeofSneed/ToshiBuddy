@@ -15,7 +15,7 @@ const mk = (title, patch) => {
   ledger.data.goals.push(g);
   return g;
 };
-const rich = mk('rich', { funded: 4000, spent: 1500, status: 'building', waiting: true });
+const rich = mk('rich', { funded: 70000, spent: 1500, status: 'building', waiting: true });
 const broke = mk('broke', { funded: 4000, spent: 3800, status: 'building' });
 const done = mk('done', { funded: 4000, spent: 3000, status: 'done' });
 const open = mk('open', {});
@@ -32,10 +32,14 @@ assert.strictEqual(rich.status, 'funded');
 assert.strictEqual(rich.waiting, false);
 assert.ok(/cut off/.test(rich.note));
 
-// not enough: paused, asks for more, and a top-up makes it ready
+// not enough: paused, asks for enough to finish a whole build, and a top-up
+// that covers it makes it ready (taking only what it still needs)
 assert.strictEqual(broke.status, 'paused');
-assert.strictEqual(broke.needTokens, 5000);
-assert.strictEqual(ledger.fundGoal('broke', 13000).moved, 4800, 'takes only what it still needs');
+assert.strictEqual(broke.needTokens, 60000);
+assert.strictEqual(ledger.fundGoal('broke', 13000).moved, 13000);
+assert.strictEqual(broke.status, 'paused');
+ledger.data.balance = 100000;
+assert.strictEqual(ledger.fundGoal('broke', 99999).moved, 60000 - 200 - 13000);
 assert.strictEqual(broke.status, 'funded');
 
 // others untouched, and nothing more to recover
