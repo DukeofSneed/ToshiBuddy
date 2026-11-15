@@ -73,12 +73,7 @@ BuddyMods.register({
         prop: { id: 'rain', show: true, for: 2600 },
         standUp: { after: 1700 },
         animate: 'huff',
-        say: [
-          'Damn it! Work never ends',
-          'Buried. By forms. Again. We start over.',
-          'That is it. The pile is dismissed.',
-          'I did not sign up to be filed.',
-        ],
+        say: 'Damn it! Work never ends',
       },
     },
   ],
