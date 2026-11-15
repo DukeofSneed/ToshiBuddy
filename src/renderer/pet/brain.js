@@ -305,6 +305,10 @@
   }
   function stamp() {
     if (st.mode !== 'desk') return false;
+    // A sheet character with no stamping pose just keeps working: no pose
+    // change, no thump, nothing on the paper.
+    const skin = window.BuddyApp && BuddyApp.skin;
+    if (skin && skin.sheet && !(skin.sheet.anims && skin.sheet.anims.stamp)) return false;
     const el = pet();
     el.classList.remove('stamp');
     void el.offsetWidth;

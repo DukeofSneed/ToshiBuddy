@@ -70,9 +70,6 @@
       "working": {
         "frames": "2:0-3",
         "fps": 3
-      },
-      "stamp": {
-        "frames": "2:7"
       }
     },
     "moveMarks": [

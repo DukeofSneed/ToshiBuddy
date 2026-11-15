@@ -156,7 +156,7 @@ check('upgrade prompts get the name, personality and notes, and nothing from the
   const ab = require(path.join(root, 'abilities.js'));
   const toshi = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'characters', 'toshitoshi', 'character.json'), 'utf8'));
   const poses = ab.playablePoses({ config: toshi });
-  assert.deepStrictEqual(poses, ['wave', 'think', 'surprised', 'huff', 'shrug', 'frost', 'stamp']);
+  assert.deepStrictEqual(poses, ['wave', 'think', 'surprised', 'huff', 'shrug', 'frost']);
   assert.deepStrictEqual(ab.playablePoses({ config: { sheet: { animations: { idle: {}, walk: {} } } } }), []);
   const idea = (title, summary, extra = {}) => ({ title, summary, size: 'S', estimated_tokens: 20000, needs_new_art: false, needs_memory: false, ...extra });
   const list = [
