@@ -233,6 +233,10 @@ class Upgrader {
     const tokens = res.tokens || res.liveTokens || 0;
     const g = this.ledger.goal(goalId);
     g.spent += tokens;
+    // A run can go a little past its funding before it is stopped (the plan
+    // guard and --max-budget-usd bound the real cost). That excess is not a
+    // debt: later top-ups must go toward the next attempt, not fill a gap.
+    if (g.spent > g.funded) { g.overspent = (g.overspent || 0) + (g.spent - g.funded); g.spent = g.funded; }
     g.sessionId = res.sessionId || g.sessionId;
     g.history.push({ at: Date.now(), subtype: res.subtype, tokens, usd: res.totalCostUsd, killReason: res.killReason });
     this.ledger.recordSpend({ kind: 'upgrade', goalId, tokens, usd: res.totalCostUsd, model, sessionId: res.sessionId, subtype: res.subtype });

@@ -48,3 +48,28 @@ assert.strictEqual(new Ledger(dir).goal('rich').status, 'funded');
 
 fs.rmSync(dir, { recursive: true, force: true });
 console.log('stuck.test.js: ok');
+
+// A run that booked more than the goal held must not swallow top-ups.
+{
+  const d = fs.mkdtempSync(path.join(os.tmpdir(), 'toshi-gap-'));
+  const l = new Ledger(d);
+  l.data.balance = 20000;
+  // old data: 30k booked against 4k funding, then the user moved 13k in
+  l.data.goals.push({ id: 'gap', title: 'gap', goalTokens: 4000, funded: 17000, spent: 30000, needTokens: 5000, status: 'paused' });
+  const fixed = l.repairOverspent();
+  assert.strictEqual(fixed.length, 1);
+  assert.strictEqual(fixed[0].refund, 13000, 'the top-up comes back');
+  assert.strictEqual(l.data.balance, 33000);
+  const g = l.goal('gap');
+  assert.strictEqual(g.funded - g.spent, 0);
+  // now funding goes toward the build, and only what it needs
+  assert.strictEqual(l.fundGoal('gap', 99999).moved, 5000);
+  assert.strictEqual(g.funded - g.spent, 5000);
+  assert.strictEqual(g.status, 'funded');
+  assert.deepStrictEqual(l.repairOverspent(), []);
+  // even without the repair, a gap never eats a top-up
+  l.data.goals.push({ id: 'gap2', title: 'gap2', goalTokens: 4000, funded: 4000, spent: 9000, needTokens: 5000, status: 'paused' });
+  assert.strictEqual(l.fundGoal('gap2', 99999).moved, 5000);
+  fs.rmSync(d, { recursive: true, force: true });
+  console.log('stuck.test.js: gap ok');
+}

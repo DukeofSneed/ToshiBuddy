@@ -669,6 +669,10 @@ function start() {
     return fixed;
   }
   unstickBuilds();
+  for (const { goal, refund } of ledger.repairOverspent()) {
+    log(`goal "${goal.title}": cleared a spending gap${refund ? `, ${refund} tokens back to the jar` : ''}`);
+    if (refund) setTimeout(() => notify(`${fmt(refund)} tokens that went into "${goal.title}" without counting are back in the jar.`, 9000), 4000);
+  }
   // A build that stopped short ("paused" or "failed") was already started by
   // the user. When their top-up covers what it asked for, it carries on by
   // itself instead of waiting for another click. Only a top-up triggers this,

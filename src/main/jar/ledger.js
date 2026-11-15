@@ -144,7 +144,7 @@ class Ledger {
   _refreshGoalStatus(goal) {
     if (['building', 'done'].includes(goal.status)) return;
     if (goal.status === 'paused' || goal.status === 'failed') {
-      if (goal.needTokens > 0 && goal.funded - goal.spent >= goal.needTokens) goal.status = 'funded';
+      if (goal.needTokens > 0 && Math.max(0, goal.funded - goal.spent) >= goal.needTokens) goal.status = 'funded';
       return;
     }
     goal.status = goal.funded >= goal.goalTokens ? 'funded' : 'open';
@@ -153,6 +153,27 @@ class Ledger {
   // was closed or crashed mid-build). Left alone it can't be funded, started or
   // removed. Put it back: ready to start again when it still holds enough
   // tokens, otherwise paused and asking for more. Returns the goals it changed.
+  // Older runs could book more tokens than the goal held (cache reads count as
+  // tokens), leaving spent > funded. Top-ups then vanished into that gap: the
+  // jar went down and the bar didn't move. Repair once per goal: what was put in
+  // beyond the goal's own cost goes back to the jar, and the goal no longer
+  // owes anything. Returns [{ goal, refund }].
+  repairOverspent() {
+    const fixed = [];
+    for (const goal of this.data.goals) {
+      if (goal.status === 'building' || !(goal.spent > goal.funded)) continue;
+      const keep = Math.min(goal.funded, goal.goalTokens || goal.funded);
+      const refund = Math.max(0, goal.funded - keep);
+      this.data.balance += refund;
+      goal.overspent = (goal.overspent || 0) + (goal.spent - goal.funded);
+      goal.funded = keep;
+      goal.spent = keep;
+      this._refreshGoalStatus(goal);
+      fixed.push({ goal, refund });
+    }
+    if (fixed.length) this.save();
+    return fixed;
+  }
   recoverInterrupted() {
     const changed = [];
     for (const goal of this.data.goals) {
@@ -178,8 +199,12 @@ class Ledger {
     tokens = Math.max(0, Math.floor(Number(tokens) || 0));
     if (!goal || !tokens) return { moved: 0 };
     // Never move more than the goal still needs.
-    const target = ['paused', 'failed'].includes(goal.status) && goal.needTokens ? goal.spent + goal.needTokens : goal.goalTokens;
-    const stillNeeded = Math.max(0, target - goal.funded);
+    // A stopped build needs needTokens on top of what it still has unspent;
+    // what a run spent beyond its funding is never a debt that eats top-ups.
+    const unspent = Math.max(0, goal.funded - goal.spent);
+    const stillNeeded = ['paused', 'failed'].includes(goal.status) && goal.needTokens
+      ? Math.max(0, goal.needTokens - unspent)
+      : Math.max(0, goal.goalTokens - goal.funded);
     const moved = Math.max(0, Math.min(tokens, this.data.balance, stillNeeded));
     this.data.balance -= moved;
     goal.funded += moved;
