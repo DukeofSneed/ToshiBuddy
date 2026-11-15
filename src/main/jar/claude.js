@@ -102,6 +102,7 @@ function runClaude(opts) {
 
   const state = {
     liveTokens: 0,
+    usageById: new Map(),
     turns: 0,
     rateLimit: null,
     result: null,
@@ -136,11 +137,21 @@ function runClaude(opts) {
           if (msg.subtype === 'init') log(`session ${msg.session_id} model=${msg.model || '?'}`);
           break;
         case 'assistant': {
+          // One reply arrives as several events (one per thinking, text or tool
+          // block), each carrying the same usage for the whole reply. Count each
+          // reply once, by its id, or a run looks two or three times as costly
+          // and is stopped for "spending more than funded".
           const u = msg.message && msg.message.usage;
           if (u) {
-            state.liveTokens += sumUsage(u);
-            state.turns += 1;
-            if (opts.onUsage) opts.onUsage({ tokens: state.liveTokens, turns: state.turns });
+            const mid = (msg.message && msg.message.id) || `event-${state.events.length}`;
+            const prev = state.usageById.get(mid);
+            const cur = sumUsage(u);
+            if (prev === undefined) state.turns += 1;
+            if (prev === undefined || cur > prev) {
+              state.liveTokens += cur - (prev || 0);
+              state.usageById.set(mid, cur);
+              if (opts.onUsage) opts.onUsage({ tokens: state.liveTokens, turns: state.turns });
+            }
           }
           const blocks = (msg.message && msg.message.content) || [];
           for (const b of blocks) {
