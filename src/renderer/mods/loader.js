@@ -6,6 +6,7 @@
   let currentSlug = null;
   let currentRegistered = false;
   let currentBase = null; // URL of the folder the mod being loaded lives in
+  let currentOwn = false; // built for the active character
   const IMAGE_FILE = /^[a-z0-9][a-z0-9-]{0,39}\.(png|webp|gif|jpg)$/;
   const ANCHORS = new Set(['head', 'hand-r', 'hand-l', 'back', 'front', 'desk']);
   const TRIGGERS = new Set(['idle', 'click', 'dblclick', 'drop', 'hour', 'wake', 'sleep', 'interval', 'donate', 'upgrade', 'lean', 'desk', 'ultimate', 'desk-done', 'desk-long', 'app-switch']);
@@ -116,7 +117,7 @@
       currentRegistered = true;
       return;
     }
-    registry.push({ slug: def.slug, def });
+    registry.push({ slug: def.slug, def, own: currentOwn });
     currentRegistered = true;
     apply(def);
   }
@@ -154,9 +155,11 @@
     }
   }
 
-  function quips() {
+  // ownOnly: only lines from mods built for the active character.
+  function quips({ ownOnly = false } = {}) {
     const out = [];
-    for (const { slug, def } of registry) {
+    for (const { slug, def, own } of registry) {
+      if (ownOnly && !own) continue;
       for (const q of def.quips || []) out.push({ text: q.text, tags: q.tags && q.tags.length ? q.tags : ['idle'], weight: q.weight || 1, pack: `mod:${slug}` });
     }
     return out;
@@ -170,7 +173,7 @@
 
   function behaviors(trigger) {
     const out = [];
-    for (const { slug, def } of registry) for (const b of def.behaviors || []) if (b.trigger === trigger) out.push({ ...b, slug });
+    for (const { slug, def, own } of registry) for (const b of def.behaviors || []) if (b.trigger === trigger) out.push({ ...b, slug, own });
     return out;
   }
 
@@ -220,6 +223,7 @@
     if (!mod.enabled) return Promise.resolve();
     return new Promise((resolve) => {
       currentSlug = mod.slug;
+      currentOwn = !!mod.own;
       currentBase = String(mod.url).split('?')[0].replace(/[^/]*$/, '');
       currentRegistered = false;
       let error = null;
@@ -243,5 +247,5 @@
     });
   }
 
-  window.BuddyMods = { register, loadAll, quips, animations, behaviors, setProp, bump, countOf, refreshCounted, get, list: () => registry.map((r) => r.slug), skipped: () => skipped.slice() };
+  window.BuddyMods = { register, loadAll, quips, animations, behaviors, setProp, bump, countOf, refreshCounted, get, isOwn: (slug) => !!(registry.find((r) => r.slug === slug) || {}).own, list: () => registry.map((r) => r.slug), skipped: () => skipped.slice() };
 })();

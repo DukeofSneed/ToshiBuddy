@@ -73,7 +73,8 @@ function start() {
   const activePacks = () => {
     const d = readCharacterDialogue(PROJECT_ROOT, activeCharacterId());
     // "ownQuipsOnly": true in character.json: only the character's own file.
-    return [...(d ? d.quips : []), ...(ownQuipsOnly() ? [] : readQuipPacks(PROJECT_ROOT, { upgrades: ledger.data.upgrades, characterId: activeCharacterId() }))];
+    // Lines from upgrades built for this character always count as its own.
+    return [...(d ? d.quips : []), ...readQuipPacks(PROJECT_ROOT, { upgrades: ledger.data.upgrades, characterId: activeCharacterId(), ownedOnly: ownQuipsOnly() })];
   };
   const quipsForPet = () => quipStore().merged(activePacks());
 

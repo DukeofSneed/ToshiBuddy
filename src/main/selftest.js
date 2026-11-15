@@ -170,6 +170,8 @@ function runSelftest(ctx, selftestDir) {
         await new Promise((r) => setTimeout(r, 2200));
         before.shownDuringTest = await overlay.webContents.executeJavaScript(`[...document.querySelectorAll('[data-mod=' + JSON.stringify(${s}) + ']')].filter((e) => e.getAttribute('display') !== 'none').length`);
         before.atDeskDuringTest = await overlay.webContents.executeJavaScript(`document.getElementById('pet').classList.contains('desk')`);
+        // what the trick made him say (only lines from mods are expected here)
+        before.saidDuringTest = await overlay.webContents.executeJavaScript(`(() => { const b = document.getElementById('bubble'); return b && !b.classList.contains('hidden') ? document.getElementById('bubble-text').textContent : ''; })()`);
         const shot = await capture(overlay, { x: cx, y: Math.max(0, Math.round(pos.y) - 130), width: 400, height: 330 });
         fs.writeFileSync(path.join(selftestDir, `mod-test-${String(slug).replace(/[^a-z0-9-]/gi, '_')}.png`), shot.toPNG());
         await new Promise((r) => setTimeout(r, 9000));

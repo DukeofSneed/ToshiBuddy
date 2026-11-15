@@ -435,7 +435,7 @@
     try {
       if (a.animate) playAnimation(a.animate);
       if (a.sound) BuddySfx.play(a.sound);
-      if (a.say && !(window.BuddyApp && BuddyApp.ownQuipsOnly)) {
+      if (a.say && (b.own || !(window.BuddyApp && BuddyApp.ownQuipsOnly))) {
         const text = Array.isArray(a.say) ? a.say[Math.floor(Math.random() * a.say.length)] : a.say;
         say(String(text).replace(/\{(\w+)\}/g, (m, k) => (k in extra ? extra[k] : m)));
       }
@@ -705,7 +705,7 @@
       // props stay shown during the test, whatever the action says about them
       const action = { ...b.action };
       delete action.prop;
-      runAction({ ...b, action, slug }, { count: at || 1, minutes: 25, kind: 'writing' });
+      runAction({ ...b, action, slug, own: BuddyMods.isOwn(slug) }, { count: at || 1, minutes: 25, kind: 'writing' });
     });
     if (!steps.length && !shown.length) BuddyBubble.toast('This trick has nothing to show on its own.', 4000);
     steps.forEach((fn, i) => setTimeout(fn, 900 + i * 3500));

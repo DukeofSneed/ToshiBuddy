@@ -46,7 +46,8 @@ Images can be PNG, WebP, GIF, or JPG. The pet uses the sheet when there is one.
      thing from a pack that upgrade runs see: they write his new lines in this voice.
      Images, sheets, and quips are never sent.
    - `ownQuipsOnly`: `true` means the character only ever says lines from its own
-     `quips.json` (and your edits), never lines that upgrades or mods add. App
+     `quips.json` (and your edits), plus lines from upgrades built for this
+     character, never lines that other mods add. App
      information (usage, pledges, upgrade status) always shows as a small notice,
      not as speech.
    - `theme`: `{ "accent": "#d92b22" }` recolors the speech bubble, the jar on screen,

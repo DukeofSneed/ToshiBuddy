@@ -152,7 +152,8 @@
   await BuddyMods.loadAll(boot.mods);
   if (BuddyMods.skipped().length) buddy.log(`mods not used on this character: ${BuddyMods.skipped().join(', ')}`);
   // Characters with "ownQuipsOnly" never use lines that mods add.
-  BuddyQuips.setFromMods(BuddyApp.ownQuipsOnly ? [] : BuddyMods.quips());
+  // ...except lines from upgrades built for this very character.
+  BuddyQuips.setFromMods(BuddyMods.quips({ ownOnly: BuddyApp.ownQuipsOnly }));
 
   BuddyJarProp.mount(boot.jar);
   buddy.on('jar-state', (s) => BuddyJarProp.update(s));

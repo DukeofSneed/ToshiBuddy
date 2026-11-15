@@ -47,9 +47,13 @@ function modOwners(projectRoot, upgrades) {
 }
 // Slugs of tricks the user switched off in the jar.
 const switchedOff = (upgrades) => (upgrades || []).filter((u) => u.disabled && !u.reverted).flatMap((u) => u.slugs || []);
+// own: built for this character (its lines count as the character's own, even
+// for a character that otherwise speaks only its own quip file).
 function modsFor(projectRoot, disabled, upgrades, characterId) {
   const owner = modOwners(projectRoot, upgrades);
-  return listMods(projectRoot, [...(disabled || []), ...switchedOff(upgrades)]).filter((m) => !owner.has(m.slug) || owner.get(m.slug) === characterId);
+  return listMods(projectRoot, [...(disabled || []), ...switchedOff(upgrades)])
+    .filter((m) => !owner.has(m.slug) || owner.get(m.slug) === characterId)
+    .map((m) => ({ ...m, own: !!characterId && owner.get(m.slug) === characterId }));
 }
 // Quip packs an upgrade wrote under content/quips/ belong to that upgrade's character.
 function quipPackOwners(upgrades) {
@@ -82,12 +86,13 @@ function parseQuipList(data, pack) {
 }
 
 // content/quips/*.json: quip packs added by upgrades. They apply to every character.
-function readQuipPacks(projectRoot, { upgrades = [], characterId = null } = {}) {
+// ownedOnly: just the packs an upgrade wrote for this character.
+function readQuipPacks(projectRoot, { upgrades = [], characterId = null, ownedOnly = false } = {}) {
   const owner = quipPackOwners(upgrades);
   const dir = path.join(projectRoot, 'content', 'quips');
   const quips = [];
   let files = [];
-  try { files = fs.readdirSync(dir).filter((f) => f.endsWith('.json') && (!owner.has(f) || owner.get(f) === characterId)); } catch (_) { return quips; }
+  try { files = fs.readdirSync(dir).filter((f) => f.endsWith('.json') && (ownedOnly ? owner.get(f) === characterId : (!owner.has(f) || owner.get(f) === characterId))); } catch (_) { return quips; }
   for (const f of files) {
     try { quips.push(...parseQuipList(readJson(path.join(dir, f)), f)); } catch (e) { console.error(`quips: bad pack ${f}: ${e.message}`); }
   }

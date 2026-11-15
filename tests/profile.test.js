@@ -128,6 +128,11 @@ check('upgrade prompts get the name, personality and notes, and nothing from the
   const lines = (id) => readQuipPacks(d, { upgrades: ups, characterId: id }).map((q) => q.text).sort();
   assert.deepStrictEqual(lines('toshitoshi'), ['Hello.', 'Tea time.']);
   assert.deepStrictEqual(lines('bambietta'), ['Hello.']);
+  // A character that speaks only its own lines still says lines built for it.
+  const own = (id) => Object.fromEntries(modsFor(d, [], [], id).map((m) => [m.slug, m.own]));
+  assert.deepStrictEqual(own('toshitoshi'), { 'bad-owner': false, 'shared-sample': false, 'toshi-tea': true });
+  assert.deepStrictEqual(readQuipPacks(d, { upgrades: ups, characterId: 'toshitoshi', ownedOnly: true }).map((q) => q.text), ['Tea time.']);
+  assert.deepStrictEqual(readQuipPacks(d, { upgrades: ups, characterId: 'bambietta', ownedOnly: true }), []);
   fs.rmSync(d, { recursive: true, force: true });
   console.log('ownership checks passed');
 }
