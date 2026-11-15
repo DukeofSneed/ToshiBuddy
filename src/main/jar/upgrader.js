@@ -115,9 +115,13 @@ class Upgrader {
     const voice = personality || 'serious, clipped, dry; understated humor; never cruel. Short lines.';
     // Catalog ideas were written for Kori; on a skin they're about the active character.
     const named = (s) => (isSkin ? String(s || '').replace(/\bKori\b/g, name) : String(s || ''));
+    // Stamping is not available (abilities.js); older ideas may still ask for it.
+    const noStamp = (s) => String(s || '')
+      .replace(/\b(uses|use|using|plays?|playing|does|doing|strikes?) (the |a |his |her |their )?stamp(ing)? pose,? (and |then )?/gi, '')
+      .replace(/\bstamps? (it|them|the \w+|a \w+) (and |then )?/gi, '');
     return [
       `# Upgrade request: ${named(goal.title)}`,
-      named(goal.summary),
+      noStamp(named(goal.summary)),
       goal.request ? `\nOriginal words from the human: "${goal.request}"` : '',
       '',
       '## Rules',
@@ -282,7 +286,8 @@ class Upgrader {
       return this._fail(goal, `run touched files outside mods/ and content/: ${outside.slice(0, 5).join(', ')}`);
     }
     if (!changed.length) {
-      return this._fail(goal, 'run finished without changing any files');
+      const said = String((res.structuredOutput && res.structuredOutput.summary) || res.result || '').replace(/\s+/g, ' ').trim().slice(0, 220);
+      return this._fail(goal, `run finished without changing any files${said ? ` (it said: "${said}")` : ''}`);
     }
     // Syntax check every JS file it wrote.
     for (const f of changed.filter((x) => x.endsWith('.js'))) {
@@ -340,6 +345,10 @@ class Upgrader {
 
   async _finishFailure(goal, res, tokens) {
     try { await this.git.discardRunChanges(); } catch (e) { this.log(`discard failed: ${e.message}`); }
+    // Its files are gone, so the next attempt starts fresh. Resuming the old
+    // conversation made the run believe its work was already written, and it
+    // finished without writing anything.
+    goal.sessionId = null;
     const budgetish = ['error_max_budget_usd', 'error_max_turns'].includes(res.subtype) || (res.killed && /funded tokens|budget/.test(res.killReason || ''));
     const guardKill = res.killed && /plan/.test(res.killReason || '');
     if (budgetish || guardKill) {
@@ -357,6 +366,7 @@ class Upgrader {
   }
 
   _fail(goal, reason) {
+    goal.sessionId = null; // see _finishFailure: never resume work that was discarded
     const need = Math.max(5000, Math.round(goal.goalTokens * 0.5 / 1000) * 1000);
     this.ledger.updateGoal(goal.id, { status: 'failed', needTokens: need, note: `failed: ${reason}. Fund +${need} tokens to retry.` });
     this.emit({ phase: 'failed', goalId: goal.id, title: goal.title, reason });

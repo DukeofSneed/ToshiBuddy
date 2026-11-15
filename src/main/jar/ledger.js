@@ -180,6 +180,7 @@ class Ledger {
       if (goal.status !== 'building') continue;
       const avail = Math.max(0, (goal.funded || 0) - (goal.spent || 0));
       goal.waiting = false;
+      goal.sessionId = null; // the cut-off run's files are discarded: start fresh
       if (avail >= 1000) {
         goal.status = 'funded';
         goal.needTokens = 0;

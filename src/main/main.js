@@ -669,6 +669,10 @@ function start() {
     return fixed;
   }
   unstickBuilds();
+  // Older versions kept the conversation of a stopped build to "resume" it,
+  // though its files had been discarded. Start those afresh.
+  for (const g of ledger.data.goals) if (g.sessionId && !['building', 'done'].includes(g.status)) g.sessionId = null;
+  ledger.save();
   for (const { goal, refund } of ledger.repairOverspent()) {
     log(`goal "${goal.title}": cleared a spending gap${refund ? `, ${refund} tokens back to the jar` : ''}`);
     if (refund) setTimeout(() => notify(`${fmt(refund)} tokens that went into "${goal.title}" without counting are back in the jar.`, 9000), 4000);
