@@ -679,6 +679,15 @@ function start() {
     g.goalTokens = MIN_RUN_TOKENS;
     if (g.status === 'funded' && g.funded - g.spent < MIN_RUN_TOKENS) g.status = 'open';
   }
+  // Once: ideas listed before estimates got their headroom cost half again.
+  // Only goals that haven't been funded yet, so nothing already paid changes.
+  if (!ledger.data.estimatesRaised) {
+    for (const g of ledger.data.goals) {
+      if (g.status !== 'open' || g.funded > 0 || g.spent > 0) continue;
+      g.goalTokens = Math.max(MIN_RUN_TOKENS, Math.round((g.goalTokens || 0) * 1.5 / 1000) * 1000);
+    }
+    ledger.data.estimatesRaised = true;
+  }
   ledger.save();
   for (const { goal, refund } of ledger.repairOverspent()) {
     log(`goal "${goal.title}": cleared a spending gap${refund ? `, ${refund} tokens back to the jar` : ''}`);
@@ -693,6 +702,9 @@ function start() {
   function continueIfToppedUp(goalId, wasStopped) {
     const g = ledger.goal(goalId);
     if (!wasStopped || !g || g.status !== 'funded' || g.touchesCore || !isActiveGoal(g)) return false;
+    // Starting by itself is the auto-build setting's job; with it off, the
+    // topped-up goal just shows its Build button.
+    if (!settings.get('autoBuild')) { notify(`"${g.title}" is topped up. Press Build it to start.`, 6000); return false; }
     if (upgrader.isBusy()) { notify(`"${g.title}" is topped up. It can continue once the current build is done.`, 7000); return false; }
     notify(`"${g.title}" is topped up. Carrying on.`, 5000);
     setTimeout(async () => {
@@ -858,6 +870,13 @@ function start() {
     await reloadAndAwaitMods([], 1500);
     quipsChanged();
     notify(`"${up.title}" is ${enabled ? 'on' : 'off'}.`, 4000);
+    return { ok: true, state: jarState() };
+  });
+  // Test button: the pet plays the trick once (only tricks loaded for this character).
+  ipcMain.handle('jar:test-upgrade', (_e, { upgradeId } = {}) => {
+    const up = ledger.upgrade(String(upgradeId || ''));
+    if (!up || up.reverted || up.disabled) return { ok: false, state: jarState() };
+    if (overlay && !overlay.isDestroyed()) for (const slug of up.slugs || []) overlay.webContents.send('test-mod', { slug: String(slug) });
     return { ok: true, state: jarState() };
   });
   ipcMain.handle('jar:undo', async (_e, { upgradeId }) => {

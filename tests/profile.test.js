@@ -39,9 +39,9 @@ check('the answer is cleaned: lengths capped, control characters gone, sizes cla
   assert.strictEqual(c.found, true);
   assert.ok(c.profile.startsWith('A B C') && c.profile.length <= 800);
   assert.strictEqual(c.ideas.length, 8);
-  assert.deepStrictEqual(c.ideas[0], { title: 'Nap cushion', summary: 'A cushion on the desk.', size: 'S', goalTokens: 8000 });
+  assert.deepStrictEqual(c.ideas[0], { title: 'Nap cushion', summary: 'A cushion on the desk.', size: 'S', goalTokens: 120000 });
   assert.strictEqual(c.ideas[1].title, 'Huge thing');
-  assert.ok(c.ideas[1].goalTokens <= 40000, 'unknown sizes fall back to small');
+  assert.ok(c.ideas[1].goalTokens <= 140000 * 1.5, 'unknown sizes fall back to small');
   assert.deepStrictEqual(profile.clean(null), { found: false, profile: '', ideas: [], tossed: 0 });
 });
 

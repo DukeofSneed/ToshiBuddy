@@ -15,7 +15,7 @@ contextBridge.exposeInMainWorld('buddy', {
   saveSheetIndex: (skin, kind, dataUrl, rows, near, size) => ipcRenderer.send('overlay:sheet-index', { skin, kind, dataUrl, rows, near, size }),
   log: (...args) => ipcRenderer.send('overlay:log', args.map(String).join(' ')),
   on: (channel, handler) => {
-    const allowed = new Set(['work-area', 'idle-seconds', 'say', 'animate', 'settings', 'reload-content', 'upgrade-event', 'sfx', 'activity', 'quips', 'quip', 'jar-state', 'toast', 'pointer-reset']);
+    const allowed = new Set(['work-area', 'idle-seconds', 'say', 'animate', 'settings', 'reload-content', 'upgrade-event', 'sfx', 'activity', 'quips', 'quip', 'test-mod', 'jar-state', 'toast', 'pointer-reset']);
     if (!allowed.has(channel)) return () => {};
     const wrapped = (_e, payload) => handler(payload);
     ipcRenderer.on(channel, wrapped);

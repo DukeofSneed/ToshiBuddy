@@ -41,6 +41,12 @@
         if (!p || (p.svg === undefined && !p.image)) fail('each prop needs svg and/or image');
         if (p.svg !== undefined && (typeof p.svg !== 'string' || p.svg.length > 20000)) fail('prop svg must be a string (<=20k chars)');
         if (!ANCHORS.has(p.anchor)) fail(`prop anchor must be one of ${[...ANCHORS].join(', ')}`);
+        if (p.showAfter !== undefined) {
+          // Shown whenever one of the mod's saved counts has reached a number (so a
+          // growing pile stays after a restart). Read from the counts; no other memory.
+          const s = p.showAfter;
+          if (!s || typeof s !== 'object' || !/^[a-z0-9-]{1,30}$/.test(String(s.count)) || !(Number.isInteger(s.at) && s.at >= 1 && s.at <= 1000000)) fail('prop showAfter needs { count: <a count name>, at: <whole number> }');
+        }
         if (p.svg && /<script|<foreignObject|on\w+=|href\s*=|url\(/i.test(p.svg)) fail('prop svg may not contain scripts, links, or urls');
         if (p.image !== undefined) {
           // A picture the user attached to the upgrade, in the mod's own assets folder.
@@ -130,7 +136,7 @@
         const wrap = document.createElementNS('http://www.w3.org/2000/svg', 'g');
         wrap.setAttribute('data-mod', slug);
         if (p.id) wrap.setAttribute('id', `prop-${slug}-${p.id}`);
-        if (p.hidden) wrap.setAttribute('display', 'none');
+        if (p.hidden || p.showAfter) wrap.setAttribute('display', 'none');
         wrap.innerHTML = p.svg || '';
         if (p.image && def.base) {
           // Built here, never from mod-written markup: the file name was checked
@@ -144,6 +150,7 @@
         }
         g.appendChild(wrap);
       }
+      refreshCounted(slug);
     }
   }
 
@@ -179,8 +186,22 @@
     mine[count.name] = n;
     try { localStorage.setItem(COUNT_KEY, JSON.stringify(all)); } catch (_) { /* storage full or blocked: counts just don't persist */ }
     const hit = (count.every ? n % count.every === 0 : false) || (Array.isArray(count.at) && count.at.includes(n));
+    refreshCounted(slug);
     return { n, hit };
   }
+  function countOf(slug, name) { const m = readCounts()[slug]; return (m && Number(m[name])) || 0; }
+  // Props with showAfter: shown once their count has reached the number.
+  function refreshCounted(slug) {
+    for (const r of registry) {
+      if (slug && r.slug !== slug) continue;
+      for (const p of r.def.props || []) {
+        if (!p.showAfter || !p.id) continue;
+        const el = document.getElementById(`prop-${r.slug}-${p.id}`);
+        if (el) el.setAttribute('display', countOf(r.slug, p.showAfter.count) >= p.showAfter.at ? 'inline' : 'none');
+      }
+    }
+  }
+  function get(slug) { const r = registry.find((x) => x.slug === slug); return r ? r.def : null; }
 
   function setProp(slug, id, show) {
     const el = document.getElementById(`prop-${slug}-${id}`);
@@ -222,5 +243,5 @@
     });
   }
 
-  window.BuddyMods = { register, loadAll, quips, animations, behaviors, setProp, bump, list: () => registry.map((r) => r.slug), skipped: () => skipped.slice() };
+  window.BuddyMods = { register, loadAll, quips, animations, behaviors, setProp, bump, countOf, refreshCounted, get, list: () => registry.map((r) => r.slug), skipped: () => skipped.slice() };
 })();

@@ -11,7 +11,8 @@ const os = require('os');
 const path = require('path');
 const crypto = require('crypto');
 const { runClaude } = require('./claude');
-const { SIZE_RANGE } = require('./estimator');
+const { SIZE_RANGE, ESTIMATE_HEADROOM } = require('./estimator');
+const { MIN_RUN_TOKENS } = require('./pricing');
 const { RULE: ABILITY_RULE, LIMITS } = require('../abilities');
 
 const ID_RE = /^[a-z0-9][a-z0-9-]{0,39}$/;
@@ -99,7 +100,8 @@ function clean(out, { poses = [] } = {}) {
     const size = i.size === 'M' ? 'M' : 'S';
     const [lo, hi] = SIZE_RANGE[size];
     const est = Math.min(hi, Math.max(lo, Math.floor(Number(i.estimated_tokens) || lo)));
-    ideas.push({ title, summary, size, goalTokens: Math.round(est / 1000) * 1000 });
+    // same headroom as typed requests: running short means starting over
+    ideas.push({ title, summary, size, goalTokens: Math.max(MIN_RUN_TOKENS, Math.round(est * ESTIMATE_HEADROOM / 1000) * 1000) });
     if (ideas.length >= MAX_IDEAS) break;
   }
   return { found: !!(out && out.found), profile: text(out && out.profile, MAX_PROFILE), ideas, tossed };

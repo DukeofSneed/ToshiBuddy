@@ -205,6 +205,7 @@
   // Only for the quip editor's Say button: the user's own line, spoken as written.
   buddy.on('say', ({ text }) => BuddyBrain.say(text));
   buddy.on('animate', ({ name, durationMs }) => BuddyBrain.playAnimation(name, durationMs));
+  buddy.on('test-mod', ({ slug }) => { if (typeof slug === 'string') BuddyBrain.testMod(slug); });
   buddy.on('reload-content', () => { try { localStorage.setItem('buddy.pos', JSON.stringify({ x: BuddyBrain.state.x, dir: BuddyBrain.state.dir })); } catch (_) {} location.reload(); });
 
   buddy.on('upgrade-event', (ev) => {

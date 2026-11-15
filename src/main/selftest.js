@@ -142,6 +142,41 @@ function runSelftest(ctx, selftestDir) {
         return JSON.stringify(out, null, 1);
       })()`);
       fs.writeFileSync(path.join(selftestDir, 'desk-poses.json'), deskPoses);
+      // Every loaded trick: its Test button, and props that follow a saved count.
+      await overlay.webContents.executeJavaScript(`BuddyBubble.hide(); BuddyBrain.exitDesk({ quiet: true }); 1`);
+      await new Promise((r) => setTimeout(r, 800));
+      const modReport = { mods: [] };
+      const slugs = JSON.parse(await overlay.webContents.executeJavaScript(`JSON.stringify(window.BuddyMods ? BuddyMods.list() : [])`));
+      for (const slug of slugs) {
+        const s = JSON.stringify(slug);
+        const before = JSON.parse(await overlay.webContents.executeJavaScript(`JSON.stringify((() => {
+          const shown = () => [...document.querySelectorAll('[data-mod=' + JSON.stringify(${s}) + ']')].filter((e) => e.getAttribute('display') !== 'none').length;
+          const total = document.querySelectorAll('[data-mod=' + JSON.stringify(${s}) + ']').length;
+          const r = { total, shownAtRest: shown() };
+          // a pretend count of 4 for every counted prop, then back
+          const def = BuddyMods.get(${s});
+          const names = [...new Set((def.props || []).filter((p) => p.showAfter).map((p) => p.showAfter.count))];
+          if (names.length) {
+            const keep = localStorage.getItem('buddy.counts');
+            const all = JSON.parse(keep || '{}'); all[${s}] = Object.fromEntries(names.map((n) => [n, 4]));
+            localStorage.setItem('buddy.counts', JSON.stringify(all)); BuddyMods.refreshCounted(${s});
+            r.shownAtCount4 = shown();
+            if (keep === null) localStorage.removeItem('buddy.counts'); else localStorage.setItem('buddy.counts', keep);
+            BuddyMods.refreshCounted(${s});
+          }
+          r.started = BuddyBrain.testMod(${s});
+          return r;
+        })())`));
+        await new Promise((r) => setTimeout(r, 2200));
+        before.shownDuringTest = await overlay.webContents.executeJavaScript(`[...document.querySelectorAll('[data-mod=' + JSON.stringify(${s}) + ']')].filter((e) => e.getAttribute('display') !== 'none').length`);
+        before.atDeskDuringTest = await overlay.webContents.executeJavaScript(`document.getElementById('pet').classList.contains('desk')`);
+        const shot = await capture(overlay, { x: cx, y: Math.max(0, Math.round(pos.y) - 130), width: 400, height: 330 });
+        fs.writeFileSync(path.join(selftestDir, `mod-test-${String(slug).replace(/[^a-z0-9-]/gi, '_')}.png`), shot.toPNG());
+        await new Promise((r) => setTimeout(r, 9000));
+        before.shownAfterTest = await overlay.webContents.executeJavaScript(`[...document.querySelectorAll('[data-mod=' + JSON.stringify(${s}) + ']')].filter((e) => e.getAttribute('display') !== 'none').length`);
+        modReport.mods.push({ slug, ...before });
+      }
+      fs.writeFileSync(path.join(selftestDir, 'mods-test.json'), JSON.stringify(modReport, null, 1));
       // Frost Release, captured mid-transformation.
       await overlay.webContents.executeJavaScript(`BuddyBubble.hide(); BuddyBrain.exitDesk({ quiet: true }); BuddyBrain.playAnimation('release'); 1`);
       await new Promise((r) => setTimeout(r, 1700));

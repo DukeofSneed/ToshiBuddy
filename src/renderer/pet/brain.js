@@ -256,7 +256,7 @@
   }
 
   // ---- desk mode: paperwork while the user writes or does labs ----
-  function enterDesk(kind = 'writing') {
+  function enterDesk(kind = 'writing', { quiet = false } = {}) {
     if (st.mode === 'desk') return;
     st.deskKind = kind;
     st.deskSince = now();
@@ -267,7 +267,7 @@
     el.classList.add('desk-in');
     setTimeout(() => el.classList.remove('desk-in'), 600);
     deskSound('stamp');
-    if (!fire('desk', { kind })) quip([`desk-enter-${kind}`, 'desk-enter']);
+    if (!quiet && !fire('desk', { kind })) quip([`desk-enter-${kind}`, 'desk-enter']);
     st.nextQuip = now() + rand(150000, 300000);
     scheduleDeskWork();
   }
@@ -682,7 +682,43 @@
     if (on && st.mode === 'walk') setMode('idle');
   }
 
-  window.BuddyBrain = {
+  // The jar's Test button: show what a trick does without waiting for its
+  // event. Sits at the desk if the trick lives there, shows every prop for a few
+  // seconds, and runs each behavior once. Counts are not changed.
+  let testing = null;
+  function testMod(slug) {
+    const def = window.BuddyMods && BuddyMods.get(slug);
+    if (!def) { BuddyBubble.toast('That trick is not loaded for this character.', 4000); return false; }
+    if (testing) return false;
+    const deskish = (def.props || []).some((p) => p.anchor === 'desk' || p.anchor === 'papers')
+      || (def.behaviors || []).some((b) => ['desk', 'desk-done', 'desk-long'].includes(b.trigger));
+    const wasDesk = st.mode === 'desk';
+    if (deskish && !wasDesk) enterDesk('writing', { quiet: true });
+    BuddyBubble.hide();
+    const shown = [];
+    for (const p of def.props || []) {
+      const el = p.id && document.getElementById(`prop-${slug}-${p.id}`);
+      if (el) { shown.push([el, el.getAttribute('display')]); el.setAttribute('display', 'inline'); }
+    }
+    const steps = (def.behaviors || []).map((b) => () => {
+      const at = b.count && (Array.isArray(b.count.at) ? b.count.at[0] : b.count.every);
+      // props stay shown during the test, whatever the action says about them
+      const action = { ...b.action };
+      delete action.prop;
+      runAction({ ...b, action, slug }, { count: at || 1, minutes: 25, kind: 'writing' });
+    });
+    if (!steps.length && !shown.length) BuddyBubble.toast('This trick has nothing to show on its own.', 4000);
+    steps.forEach((fn, i) => setTimeout(fn, 900 + i * 3500));
+    testing = setTimeout(() => {
+      for (const [el, d] of shown) el.setAttribute('display', d || 'inline');
+      BuddyMods.refreshCounted(slug);
+      if (deskish && !wasDesk) exitDesk({ quiet: true });
+      testing = null;
+    }, Math.max(7000, 900 + steps.length * 3500 + 2500));
+    return true;
+  }
+
+  window.BuddyBrain = { testMod,
     start, resize, say, quip, playAnimation, fire, setPaused, setWorking, setDeskEnabled, setDeskSounds,
     onIdleSeconds, onActivity, enterDesk, exitDesk, enterUltimate, exitUltimate, armIntervals, resetPointer, state: st,
   };

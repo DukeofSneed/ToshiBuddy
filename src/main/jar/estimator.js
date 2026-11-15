@@ -1,5 +1,6 @@
 'use strict';
 const { MIN_RUN_TOKENS } = require('./pricing');
+const ESTIMATE_HEADROOM = 1.5;
 // Turns a free-text suggestion into a Goal with a token price tag, using one
 // cheap haiku turn with an enforced JSON schema.
 const fs = require('fs');
@@ -8,10 +9,10 @@ const { runClaude } = require('./claude');
 const { RULE: ABILITY_RULE, LIMITS } = require('../abilities');
 
 const SIZE_RANGE = {
-  S: [8000, 40000],
-  M: [40000, 120000],
-  L: [120000, 300000],
-  XL: [300000, 800000],
+  S: [80000, 140000],
+  M: [140000, 240000],
+  L: [240000, 420000],
+  XL: [420000, 900000],
 };
 
 const SCHEMA = {
@@ -52,7 +53,7 @@ function buildPrompt(projectRoot, request, ledger, character = { name: 'Kori', i
     'Mods can only add quips, CSS animations, SVG props, and simple behaviors through the Mod API below; they cannot touch src/.',
     'Hard limits (a suggestion that needs any of these broken is not feasible: set feasible to false and say why in risk_note; if only part of it breaks them, narrow the title and summary to the part that fits):',
     limits || LIMITS,
-    'Be realistic about tokens: a run reads docs/MOD_API.md (~2k tokens), one or two existing mods, then writes one mod.js. Every run also starts with Claude Code\'s own instructions and tools, so even the smallest mod needs about 60k tokens; small mods land in 60k-90k, animation-heavy or behavior-heavy mods 90k-160k; anything needing new core support is not feasible (set touches_core true).',
+    'Be realistic about tokens: a run reads docs/MOD_API.md (~2k tokens), one or two existing mods, then writes one mod.js. Every run also starts with Claude Code\'s own instructions and tools, so even the smallest mod needs about 60k tokens; a small mod usually lands near 60k-90k, animation-heavy or behavior-heavy mods 90k-160k; anything needing new core support is not feasible (set touches_core true).',
     '',
     '## Mod API',
     api,
@@ -98,7 +99,9 @@ async function estimate({ projectRoot, ledger, request, log, character, extra })
       summary: String(out.summary || ''),
       request,
       size,
-      goalTokens: Math.max(MIN_RUN_TOKENS, Math.round(est / 1000) * 1000),
+      // Half again on top of the estimate: a build that runs short is stopped and
+      // has to start over, while tokens it doesn't use go back to the jar.
+      goalTokens: Math.max(MIN_RUN_TOKENS, Math.round(est * ESTIMATE_HEADROOM / 1000) * 1000),
       risk: String(out.risk_note || ''),
       touchesCore: !!out.touches_core,
       feasible: out.feasible !== false,
@@ -110,4 +113,4 @@ async function estimate({ projectRoot, ledger, request, log, character, extra })
   };
 }
 
-module.exports = { estimate, SIZE_RANGE };
+module.exports = { estimate, SIZE_RANGE, ESTIMATE_HEADROOM };

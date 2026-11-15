@@ -127,6 +127,15 @@ saved count `name` (per mod, kept on the user's computer across restarts and sle
 goes up by one, and the action runs only when the count is a multiple of `every` or
 equals a number in `at`. `{count}` in `say` is replaced with the number. Example:
 `{ trigger: 'desk-done', count: { name: 'sessions', every: 5 }, action: { animate: 'wave', say: 'Session {count}. Acceptable.' } }`
+
+A prop can follow a count with `showAfter: { count: 'sessions', at: 3 }`: it is shown
+whenever that saved count of the same mod has reached the number, including after a
+restart. Use one prop per step to make something grow (one sheet per session, say).
+A count only goes up through a behavior that names it.
+
+Every mod gets a **Test** button in the jar: it shows all of the mod's props for a few
+seconds (at the desk if a prop or trigger belongs there) and runs each behavior once.
+Wrap helper code in `(() => { ... })();` so its names don't clash with other mods.
 There is no other storage: no dates, scores, or settings.
 
 ### At the desk
