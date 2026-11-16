@@ -125,7 +125,11 @@
     const dur = durationMs || BUILTIN_ANIMS[name] || (modAnims[name] && modAnims[name].durationMs);
     if (!dur) return false;
     const cls = BUILTIN_ANIMS[name] ? name : `anim-${name}`;
-    if (name === 'frost') { if (explosive()) { BuddySfx.play('boom'); const c = petCenter(); miniBlast(c.x + rand(-40, 40), c.y - rand(10, 50), 0.7); } else BuddySfx.play('shimmer'); }
+    if (name === 'frost') {
+      if (explosive()) { BuddySfx.play('boom'); const c = petCenter(); miniBlast(c.x + rand(-40, 40), c.y - rand(10, 50), 0.7); }
+      else if (auraStyle()) { BuddySfx.play('surge'); wisps(8, 0.7); }
+      else BuddySfx.play('shimmer');
+    }
     if (name === 'huff') BuddySfx.play('huff');
     if (name === 'release') releaseFx();
     const el = pet();
@@ -144,6 +148,39 @@
   // Characters with "effects": "explosion" in character.json get blasts and
   // sparks instead of ice.
   const explosive = () => !!(window.BuddyApp && BuddyApp.effects === 'explosion');
+  // "effects": "aura": violet spirit wisps rising around him and rings on the ground.
+  const auraStyle = () => !!(window.BuddyApp && BuddyApp.effects === 'aura');
+  function wisps(n, spread = 1) {
+    const stage = document.getElementById('stage');
+    const c = petCenter();
+    for (let i = 0; i < n; i++) {
+      const w = document.createElement('div');
+      w.className = 'wisp';
+      w.style.left = `${c.x + rand(-55, 55) * spread}px`;
+      w.style.top = `${c.y + rand(-10, 45)}px`;
+      w.style.setProperty('--dx', `${rand(-30, 30)}px`);
+      w.style.setProperty('--dy', `${-rand(70, 170) * (0.6 + spread * 0.4)}px`);
+      w.style.setProperty('--dur', `${rand(900, 1700)}ms`);
+      w.style.animationDelay = `${rand(0, 400)}ms`;
+      stage.appendChild(w);
+      setTimeout(() => w.remove(), 2300);
+    }
+  }
+  function auraReleaseFx() {
+    const stage = document.getElementById('stage');
+    const feet = { x: st.x + PET_W / 2, y: st.y + PET_H - 8 };
+    BuddySfx.play('surge');
+    setTimeout(() => BuddySfx.play('chime'), 900);
+    [600, 1000, 1500].forEach((delay) => setTimeout(() => {
+      const r = document.createElement('div');
+      r.className = 'aura-ring';
+      r.style.left = `${feet.x}px`;
+      r.style.top = `${feet.y}px`;
+      stage.appendChild(r);
+      setTimeout(() => r.remove(), 1300);
+    }, delay));
+    [200, 900, 1600, 2300].forEach((delay) => setTimeout(() => wisps(10, 1.2), delay));
+  }
   function miniBlast(x, y, scale = 1) {
     const stage = document.getElementById('stage');
     const b = document.createElement('div');
@@ -178,6 +215,7 @@
   }
   function releaseFx() {
     if (explosive()) return explosionFx();
+    if (auraStyle()) return auraReleaseFx();
     const stage = document.getElementById('stage');
     const c = petCenter();
     BuddySfx.play('freeze');

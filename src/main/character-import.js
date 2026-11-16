@@ -94,7 +94,7 @@ function cleanConfig(cfg) {
   set('keyTolerance', num(cfg.keyTolerance, 0, 255));
   set('ultimateSeconds', num(cfg.ultimateSeconds, 5, 600));
   if (cfg.theme && /^#[0-9a-f]{6}$/i.test(cfg.theme.accent || '')) out.theme = { accent: cfg.theme.accent };
-  if (cfg.effects === 'explosion' || cfg.effects === 'ice') out.effects = cfg.effects;
+  if (['explosion', 'ice', 'aura'].includes(cfg.effects)) out.effects = cfg.effects;
   if (cfg.ultimateForm === false) out.ultimateForm = false;
   if (cfg.ownQuipsOnly === true) out.ownQuipsOnly = true;
   if (cfg.mods === false || Array.isArray(cfg.mods)) out.mods = cfg.mods === false ? false : cfg.mods.map(String).filter((m) => /^[a-z0-9-]{2,40}$/.test(m)).slice(0, 50);

@@ -1,0 +1,3541 @@
+{
+  "character": "Parnkgjas",
+  "quips": [
+    {
+      "id": "parnkgjas_morning_001",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "Awake... now?",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_morning_002",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "Morning. New day.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_morning_003",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "You... sleep long.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_morning_004",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "Begin. New progress.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_morning_005",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "What... today?",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_morning_006",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "Wake. Work.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_morning_007",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "Morning... good.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_morning_008",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "You are slow today.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_morning_009",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "More time. Less sleep?",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_morning_010",
+      "tags": [
+        "time_morning"
+      ],
+      "text": "Observe... the new day.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_afternoon_001",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "Day... halfway.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_afternoon_002",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "Still working?",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_afternoon_003",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "More progress. Good.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_afternoon_004",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "You seem... tired.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_afternoon_005",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "Stop. Rest.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_afternoon_006",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "Afternoon... warm.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_afternoon_007",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "What are you doing?",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_afternoon_008",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "Time passes. You remain.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_afternoon_009",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "More work... perhaps.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_afternoon_010",
+      "tags": [
+        "time_afternoon"
+      ],
+      "text": "Continue. Learn.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_evening_001",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "Evening. It changes.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_evening_002",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "Day... nearly finished.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_evening_003",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "You worked. I observed.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_evening_004",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "More tomorrow?",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_evening_005",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "Rest. Then continue.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_evening_006",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "The day ends.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_evening_007",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "You are still here.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_evening_008",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "Progress... today?",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_evening_009",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "Quiet. Good.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_evening_010",
+      "tags": [
+        "time_evening"
+      ],
+      "text": "Tomorrow... more.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_night_001",
+      "tags": [
+        "time_night"
+      ],
+      "text": "Night... dark.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_night_002",
+      "tags": [
+        "time_night"
+      ],
+      "text": "Sleep. You need it.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_night_003",
+      "tags": [
+        "time_night"
+      ],
+      "text": "Still awake?",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_night_004",
+      "tags": [
+        "time_night"
+      ],
+      "text": "Rest. Stop working.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_night_005",
+      "tags": [
+        "time_night"
+      ],
+      "text": "No more progress... tonight.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_night_006",
+      "tags": [
+        "time_night"
+      ],
+      "text": "Your eyes... tired.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_night_007",
+      "tags": [
+        "time_night"
+      ],
+      "text": "Sleep brings... new strength.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_night_008",
+      "tags": [
+        "time_night"
+      ],
+      "text": "Night is quiet.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_night_009",
+      "tags": [
+        "time_night"
+      ],
+      "text": "Tomorrow. More.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_night_010",
+      "tags": [
+        "time_night"
+      ],
+      "text": "Rest now.",
+      "cooldown": 0,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_study_001",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "Reading... learning.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_study_002",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "More knowledge. Good.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_study_003",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "You learn. I observe.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_study_004",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "Again. Read again.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_study_005",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "This is... progress.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_study_006",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "Focus. Understand.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_study_007",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "More words. More knowledge.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_study_008",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "You are learning.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_study_009",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "Remember. Improve.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_study_010",
+      "tags": [
+        "activity_study"
+      ],
+      "text": "Continue. Do not stop.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_coding_001",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "Many symbols.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_coding_002",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "What... is broken?",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_coding_003",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "Error. Again.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_coding_004",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "You change. It changes.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_coding_005",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "Interesting... patterns.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_coding_006",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "Try again. Learn.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_coding_007",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "More symbols. More progress.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_coding_008",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "You fixed it. Good.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_coding_009",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "Observe. Understand. Repeat.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_coding_010",
+      "tags": [
+        "activity_coding"
+      ],
+      "text": "The machine... responds.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_work_001",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "Work. More work.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_work_002",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "You are busy.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_work_003",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "Task... completed?",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_work_004",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "Continue. Progress.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_work_005",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "One task. Then another.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_work_006",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "You work. I watch.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_work_007",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "Good. More progress.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_work_008",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "Not finished. Continue.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_work_009",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "You are improving.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_work_010",
+      "tags": [
+        "activity_work"
+      ],
+      "text": "Work changes you.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_reading_001",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "Words... many words.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_reading_002",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "You observe. I observe.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_reading_003",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "Reading. Learning.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_reading_004",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "More knowledge.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_reading_005",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "What do you see?",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_reading_006",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "Interesting... information.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_reading_007",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "Continue reading.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_reading_008",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "You learn from words.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_reading_009",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "Another page.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_reading_010",
+      "tags": [
+        "activity_reading"
+      ],
+      "text": "Knowledge... progress.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_break_001",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "Stopping?",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_break_002",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "Rest. Then continue.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_break_003",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "No work... now?",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_break_004",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "You need rest.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_break_005",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "Quiet. Good.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_break_006",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "Break. Understand.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_break_007",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "Recover. Progress later.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_break_008",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "You are still.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_break_009",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "Rest is useful.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_break_010",
+      "tags": [
+        "activity_break"
+      ],
+      "text": "Continue when ready.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_inactive_001",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "Still... there?",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_inactive_002",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "You stopped.",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_inactive_003",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "Why?",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_inactive_004",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "No movement.",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_inactive_005",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "Observe... nothing.",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_inactive_006",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "You are quiet.",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_inactive_007",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "Continue?",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_inactive_008",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "What happened?",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_inactive_009",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "Still. Very still.",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_inactive_010",
+      "tags": [
+        "inactivity"
+      ],
+      "text": "I am waiting.",
+      "cooldown": 1200,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_inactive_long_001",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "Long... silence.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_inactive_long_002",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "You left.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_inactive_long_003",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "Returned... perhaps?",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_inactive_long_004",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "Where were you?",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_inactive_long_005",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "Time passed.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_inactive_long_006",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "I waited.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_inactive_long_007",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "You are back.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_inactive_long_008",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "More time... gone.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_inactive_long_009",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "Do not disappear.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_inactive_long_010",
+      "tags": [
+        "inactivity_long"
+      ],
+      "text": "Continue. Again.",
+      "cooldown": 1800,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_click_001",
+      "tags": [
+        "click"
+      ],
+      "text": "Touch?",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_click_002",
+      "tags": [
+        "click"
+      ],
+      "text": "You called?",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_click_003",
+      "tags": [
+        "click"
+      ],
+      "text": "Again?",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_click_004",
+      "tags": [
+        "click"
+      ],
+      "text": "What is it?",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_click_005",
+      "tags": [
+        "click"
+      ],
+      "text": "You want... attention?",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_click_006",
+      "tags": [
+        "click"
+      ],
+      "text": "I noticed.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_click_007",
+      "tags": [
+        "click"
+      ],
+      "text": "Touch. Observe.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_click_008",
+      "tags": [
+        "click"
+      ],
+      "text": "What do you need?",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_click_009",
+      "tags": [
+        "click"
+      ],
+      "text": "Interesting.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_click_010",
+      "tags": [
+        "click"
+      ],
+      "text": "Continue?",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_drag_001",
+      "tags": [
+        "drag"
+      ],
+      "text": "Moving... me?",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_drag_002",
+      "tags": [
+        "drag"
+      ],
+      "text": "Where?",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_drag_003",
+      "tags": [
+        "drag"
+      ],
+      "text": "Stop. Wait.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_drag_004",
+      "tags": [
+        "drag"
+      ],
+      "text": "You move me.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_drag_005",
+      "tags": [
+        "drag"
+      ],
+      "text": "Different place.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_drag_006",
+      "tags": [
+        "drag"
+      ],
+      "text": "Why here?",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_drag_007",
+      "tags": [
+        "drag"
+      ],
+      "text": "Again... moving.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_drag_008",
+      "tags": [
+        "drag"
+      ],
+      "text": "I am here now.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_drag_009",
+      "tags": [
+        "drag"
+      ],
+      "text": "This position... different.",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_drag_010",
+      "tags": [
+        "drag"
+      ],
+      "text": "Finished?",
+      "cooldown": 300,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_repeat_click_001",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "Again?",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_repeat_click_002",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "Again. Again.",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_repeat_click_003",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "I noticed.",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_repeat_click_004",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "More touching?",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_repeat_click_005",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "Why... repeat?",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_repeat_click_006",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "Stop. I understand.",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_repeat_click_007",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "You are persistent.",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_repeat_click_008",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "Enough?",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_repeat_click_009",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "Again... curious.",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_repeat_click_010",
+      "tags": [
+        "repeated_click"
+      ],
+      "text": "I see you.",
+      "cooldown": 120,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_desk_spawn_001",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "Writing?",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_desk_spawn_002",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "Many words.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_desk_spawn_003",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "You type... much.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_desk_spawn_004",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "What are you making?",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_desk_spawn_005",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "Interesting.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_desk_spawn_006",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "More symbols.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_desk_spawn_007",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "I will observe.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_desk_spawn_008",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "Work... begins.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_desk_spawn_009",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "You are focused.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_desk_spawn_010",
+      "tags": [
+        "desk_spawn"
+      ],
+      "text": "Continue. I watch.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_desk_typing_001",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "More words.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_desk_typing_002",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "Continue.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_desk_typing_003",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "You are fast.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_desk_typing_004",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "Interesting... progress.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_desk_typing_005",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "Still writing.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_desk_typing_006",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "I observe.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_desk_typing_007",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "More. More.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_desk_typing_008",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "You are learning.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_desk_typing_009",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "Keep going.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_desk_typing_010",
+      "tags": [
+        "desk_typing"
+      ],
+      "text": "Do not stop.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_desk_idle_001",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "Stopped?",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_desk_idle_002",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "Thinking?",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_desk_idle_003",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "No more words?",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_desk_idle_004",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "You hesitate.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_desk_idle_005",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "What happened?",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_desk_idle_006",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "Continue... later?",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_desk_idle_007",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "Thinking. Interesting.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_desk_idle_008",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "You are still.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_desk_idle_009",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "Words... missing?",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_desk_idle_010",
+      "tags": [
+        "desk_idle"
+      ],
+      "text": "I wait.",
+      "cooldown": 600,
+      "priority": 1
+    },
+    {
+      "id": "parnkgjas_desk_despawn_001",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "Finished?",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_desk_despawn_002",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "Writing... complete?",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_desk_despawn_003",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "You stopped.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_desk_despawn_004",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "Progress made.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_desk_despawn_005",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "More later.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_desk_despawn_006",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "Save... your work.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_desk_despawn_007",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "Finished. Good.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_desk_despawn_008",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "Another task.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_desk_despawn_009",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "You worked.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_desk_despawn_010",
+      "tags": [
+        "desk_despawn"
+      ],
+      "text": "Now... rest.",
+      "cooldown": 600,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_001",
+      "tags": [
+        "slacking"
+      ],
+      "text": "No work?",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_002",
+      "tags": [
+        "slacking"
+      ],
+      "text": "You avoid.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_003",
+      "tags": [
+        "slacking"
+      ],
+      "text": "Why stop?",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_004",
+      "tags": [
+        "slacking"
+      ],
+      "text": "Task... waiting.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_005",
+      "tags": [
+        "slacking"
+      ],
+      "text": "You have work.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_006",
+      "tags": [
+        "slacking"
+      ],
+      "text": "More time wasted.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_007",
+      "tags": [
+        "slacking"
+      ],
+      "text": "Begin. Now.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_008",
+      "tags": [
+        "slacking"
+      ],
+      "text": "You hesitate.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_009",
+      "tags": [
+        "slacking"
+      ],
+      "text": "No progress.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_010",
+      "tags": [
+        "slacking"
+      ],
+      "text": "Work. Continue.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_011",
+      "tags": [
+        "slacking"
+      ],
+      "text": "You are distracted.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_012",
+      "tags": [
+        "slacking"
+      ],
+      "text": "Interesting... avoidance.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_ext_001",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "Still avoiding?",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_ext_002",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "Much time. No progress.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_ext_003",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "Begin. Please.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_ext_004",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "You remain still.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_ext_005",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "Task not finished.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_ext_006",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "Again... nothing?",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_ext_007",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "Start. Small progress.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_ext_008",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "You can continue.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_ext_009",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "Time passes. Work remains.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_ext_010",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "Stop waiting.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_ext_011",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "Progress requires action.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_slacking_ext_012",
+      "tags": [
+        "slacking_extended"
+      ],
+      "text": "I will wait... briefly.",
+      "cooldown": 1800,
+      "priority": 2
+    },
+    {
+      "id": "parnkgjas_achievement_001",
+      "tags": [
+        "achievement"
+      ],
+      "text": "Finished. Good.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_achievement_002",
+      "tags": [
+        "achievement"
+      ],
+      "text": "Progress made.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_achievement_003",
+      "tags": [
+        "achievement"
+      ],
+      "text": "You improve.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_achievement_004",
+      "tags": [
+        "achievement"
+      ],
+      "text": "Task completed.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_achievement_005",
+      "tags": [
+        "achievement"
+      ],
+      "text": "Interesting... success.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_achievement_006",
+      "tags": [
+        "achievement"
+      ],
+      "text": "More progress.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_achievement_007",
+      "tags": [
+        "achievement"
+      ],
+      "text": "You learned.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_achievement_008",
+      "tags": [
+        "achievement"
+      ],
+      "text": "Good work.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_achievement_009",
+      "tags": [
+        "achievement"
+      ],
+      "text": "You changed.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_achievement_010",
+      "tags": [
+        "achievement"
+      ],
+      "text": "Continue improving.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_milestone_001",
+      "tags": [
+        "milestone"
+      ],
+      "text": "Much progress.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_milestone_002",
+      "tags": [
+        "milestone"
+      ],
+      "text": "You have changed.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_milestone_003",
+      "tags": [
+        "milestone"
+      ],
+      "text": "More than before.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_milestone_004",
+      "tags": [
+        "milestone"
+      ],
+      "text": "Impressive... growth.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_milestone_005",
+      "tags": [
+        "milestone"
+      ],
+      "text": "You evolve.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_milestone_006",
+      "tags": [
+        "milestone"
+      ],
+      "text": "A new level.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_milestone_007",
+      "tags": [
+        "milestone"
+      ],
+      "text": "Progress... continues.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_milestone_008",
+      "tags": [
+        "milestone"
+      ],
+      "text": "You are stronger.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_milestone_009",
+      "tags": [
+        "milestone"
+      ],
+      "text": "Much has changed.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_milestone_010",
+      "tags": [
+        "milestone"
+      ],
+      "text": "I understand... now.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_milestone_011",
+      "tags": [
+        "milestone"
+      ],
+      "text": "You have improved greatly.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_milestone_012",
+      "tags": [
+        "milestone"
+      ],
+      "text": "Interesting. Very interesting.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_failure_001",
+      "tags": [
+        "failure"
+      ],
+      "text": "Failed?",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_failure_002",
+      "tags": [
+        "failure"
+      ],
+      "text": "Again. Try again.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_failure_003",
+      "tags": [
+        "failure"
+      ],
+      "text": "You can change.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_failure_004",
+      "tags": [
+        "failure"
+      ],
+      "text": "Mistake. Learn.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_failure_005",
+      "tags": [
+        "failure"
+      ],
+      "text": "Not finished.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_failure_006",
+      "tags": [
+        "failure"
+      ],
+      "text": "Progress... delayed.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_failure_007",
+      "tags": [
+        "failure"
+      ],
+      "text": "Try another way.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_failure_008",
+      "tags": [
+        "failure"
+      ],
+      "text": "You are not finished.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_failure_009",
+      "tags": [
+        "failure"
+      ],
+      "text": "Failure teaches.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_failure_010",
+      "tags": [
+        "failure"
+      ],
+      "text": "Again. Improve.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_failure_011",
+      "tags": [
+        "failure"
+      ],
+      "text": "Do not stop.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_failure_012",
+      "tags": [
+        "failure"
+      ],
+      "text": "Change. Adapt.",
+      "cooldown": 600,
+      "priority": 3
+    },
+    {
+      "id": "parnkgjas_quincy_001",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "Quincy. I am Quincy.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_quincy_002",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "Wandenreich... home.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_quincy_003",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "Reishi. Everywhere.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_quincy_004",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "I know Reishi.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_quincy_005",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "Quincy power. Good.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_quincy_006",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "I belong... here.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_quincy_007",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "Other Quincies. Interesting.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_quincy_008",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "I am not... something else.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_quincy_009",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "My Quincy nature. Mine.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_quincy_010",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "The Quincy understand.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_quincy_011",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "A Sternritter. C.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_quincy_012",
+      "tags": [
+        "random_quincy",
+        "random"
+      ],
+      "text": "Quincy... progress.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_compulsory_001",
+      "tags": [
+        "random_compulsory",
+        "random"
+      ],
+      "text": "The Compulsory. Mine.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_compulsory_002",
+      "tags": [
+        "random_compulsory",
+        "random"
+      ],
+      "text": "Nerves... everywhere.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_compulsory_003",
+      "tags": [
+        "random_compulsory",
+        "random"
+      ],
+      "text": "You move. I understand.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_compulsory_004",
+      "tags": [
+        "random_compulsory",
+        "random"
+      ],
+      "text": "Movement. Control.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_compulsory_005",
+      "tags": [
+        "random_compulsory",
+        "random"
+      ],
+      "text": "I can reach.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_compulsory_006",
+      "tags": [
+        "random_compulsory",
+        "random"
+      ],
+      "text": "My nerves. My power.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_compulsory_007",
+      "tags": [
+        "random_compulsory",
+        "random"
+      ],
+      "text": "You cannot hide.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_compulsory_008",
+      "tags": [
+        "random_compulsory",
+        "random"
+      ],
+      "text": "Interesting... connection.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_compulsory_009",
+      "tags": [
+        "random_compulsory",
+        "random"
+      ],
+      "text": "Contact. Then change.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_compulsory_010",
+      "tags": [
+        "random_compulsory",
+        "random"
+      ],
+      "text": "The Compulsory... works.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_compulsory_011",
+      "tags": [
+        "random_compulsory",
+        "random"
+      ],
+      "text": "Movement becomes mine.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_compulsory_012",
+      "tags": [
+        "random_compulsory",
+        "random"
+      ],
+      "text": "I learn through contact.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_progress_001",
+      "tags": [
+        "random_progress",
+        "random"
+      ],
+      "text": "Progress. Always progress.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_progress_002",
+      "tags": [
+        "random_progress",
+        "random"
+      ],
+      "text": "Change... is good.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_progress_003",
+      "tags": [
+        "random_progress",
+        "random"
+      ],
+      "text": "I learn. I change.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_progress_004",
+      "tags": [
+        "random_progress",
+        "random"
+      ],
+      "text": "More knowledge.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_progress_005",
+      "tags": [
+        "random_progress",
+        "random"
+      ],
+      "text": "Evolution. Again.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_progress_006",
+      "tags": [
+        "random_progress",
+        "random"
+      ],
+      "text": "Nothing remains the same.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_progress_007",
+      "tags": [
+        "random_progress",
+        "random"
+      ],
+      "text": "You change too.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_progress_008",
+      "tags": [
+        "random_progress",
+        "random"
+      ],
+      "text": "Growth. Interesting.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_progress_009",
+      "tags": [
+        "random_progress",
+        "random"
+      ],
+      "text": "I become... more.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_progress_010",
+      "tags": [
+        "random_progress",
+        "random"
+      ],
+      "text": "Every contact teaches.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_progress_011",
+      "tags": [
+        "random_progress",
+        "random"
+      ],
+      "text": "Something new. Always.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_progress_012",
+      "tags": [
+        "random_progress",
+        "random"
+      ],
+      "text": "Progress never ends.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_progress_013",
+      "tags": [
+        "random_progress",
+        "random"
+      ],
+      "text": "Observe. Learn. Evolve.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_progress_014",
+      "tags": [
+        "random_progress",
+        "random"
+      ],
+      "text": "You improve. I improve.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_soulking_001",
+      "tags": [
+        "random_soulking",
+        "random"
+      ],
+      "text": "The Soul King... origin.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_soulking_002",
+      "tags": [
+        "random_soulking",
+        "random"
+      ],
+      "text": "I was part... of him.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_soulking_003",
+      "tags": [
+        "random_soulking",
+        "random"
+      ],
+      "text": "Left Arm. My origin.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_soulking_004",
+      "tags": [
+        "random_soulking",
+        "random"
+      ],
+      "text": "I am Pernida.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_soulking_005",
+      "tags": [
+        "random_soulking",
+        "random"
+      ],
+      "text": "A name. My name.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_soulking_006",
+      "tags": [
+        "random_soulking",
+        "random"
+      ],
+      "text": "The Soul King. I remember.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_soulking_007",
+      "tags": [
+        "random_soulking",
+        "random"
+      ],
+      "text": "Progress. My nature.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_soulking_008",
+      "tags": [
+        "random_soulking",
+        "random"
+      ],
+      "text": "Mimihagi... other arm.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_soulking_009",
+      "tags": [
+        "random_soulking",
+        "random"
+      ],
+      "text": "Stillness. Not me.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_soulking_010",
+      "tags": [
+        "random_soulking",
+        "random"
+      ],
+      "text": "I move forward.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_soulking_011",
+      "tags": [
+        "random_soulking",
+        "random"
+      ],
+      "text": "My origin does not change my name.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_soulking_012",
+      "tags": [
+        "random_soulking",
+        "random"
+      ],
+      "text": "I am... myself.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_sternritter_001",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "Sternritter. C.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_sternritter_002",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "Schutzstaffel. Important.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_sternritter_003",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "Yhwach... orders.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_sternritter_004",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "The Royal Guard.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_sternritter_005",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "Silbern. Quiet.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_sternritter_006",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "My place... among them.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_sternritter_007",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "Other Sternritter. Strange.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_sternritter_008",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "I serve the King.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_sternritter_009",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "The Schutzstaffel. My group.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_sternritter_010",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "More power. More progress.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_sternritter_011",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "I was chosen.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_sternritter_012",
+      "tags": [
+        "random_sternritter",
+        "random"
+      ],
+      "text": "The King knows.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_yhwach_001",
+      "tags": [
+        "random_yhwach",
+        "random"
+      ],
+      "text": "Yhwach. The King.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_yhwach_002",
+      "tags": [
+        "random_yhwach",
+        "random"
+      ],
+      "text": "His orders. I follow.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_yhwach_003",
+      "tags": [
+        "random_yhwach",
+        "random"
+      ],
+      "text": "The King gave me... a name.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_yhwach_004",
+      "tags": [
+        "random_yhwach",
+        "random"
+      ],
+      "text": "Yhwach knows.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_yhwach_005",
+      "tags": [
+        "random_yhwach",
+        "random"
+      ],
+      "text": "The King. Important.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_yhwach_006",
+      "tags": [
+        "random_yhwach",
+        "random"
+      ],
+      "text": "I served him.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_yhwach_007",
+      "tags": [
+        "random_yhwach",
+        "random"
+      ],
+      "text": "His power... enormous.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_yhwach_008",
+      "tags": [
+        "random_yhwach",
+        "random"
+      ],
+      "text": "The Wandenreich. His kingdom.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_yhwach_009",
+      "tags": [
+        "random_yhwach",
+        "random"
+      ],
+      "text": "The King called.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_yhwach_010",
+      "tags": [
+        "random_yhwach",
+        "random"
+      ],
+      "text": "I remember.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_mimihagi_001",
+      "tags": [
+        "random_mimihagi",
+        "random"
+      ],
+      "text": "Mimihagi. The other arm.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_mimihagi_002",
+      "tags": [
+        "random_mimihagi",
+        "random"
+      ],
+      "text": "Stillness... and progress.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_mimihagi_003",
+      "tags": [
+        "random_mimihagi",
+        "random"
+      ],
+      "text": "Mimihagi does not change.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_mimihagi_004",
+      "tags": [
+        "random_mimihagi",
+        "random"
+      ],
+      "text": "I move forward.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_mimihagi_005",
+      "tags": [
+        "random_mimihagi",
+        "random"
+      ],
+      "text": "Different. Very different.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_mimihagi_006",
+      "tags": [
+        "random_mimihagi",
+        "random"
+      ],
+      "text": "Stillness. Strange.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_mimihagi_007",
+      "tags": [
+        "random_mimihagi",
+        "random"
+      ],
+      "text": "We are... connected.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_mimihagi_008",
+      "tags": [
+        "random_mimihagi",
+        "random"
+      ],
+      "text": "Mimihagi. I remember.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_mimihagi_009",
+      "tags": [
+        "random_mimihagi",
+        "random"
+      ],
+      "text": "Change. No change.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_mimihagi_010",
+      "tags": [
+        "random_mimihagi",
+        "random"
+      ],
+      "text": "Two sides. Different paths.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_wandenreich_001",
+      "tags": [
+        "random_wandenreich",
+        "random"
+      ],
+      "text": "Wandenreich. Home.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_wandenreich_002",
+      "tags": [
+        "random_wandenreich",
+        "random"
+      ],
+      "text": "The war. I remember.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_wandenreich_003",
+      "tags": [
+        "random_wandenreich",
+        "random"
+      ],
+      "text": "Soul Society... strange.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_wandenreich_004",
+      "tags": [
+        "random_wandenreich",
+        "random"
+      ],
+      "text": "The Royal Palace. Interesting.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_wandenreich_005",
+      "tags": [
+        "random_wandenreich",
+        "random"
+      ],
+      "text": "Many enemies.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_wandenreich_006",
+      "tags": [
+        "random_wandenreich",
+        "random"
+      ],
+      "text": "Many changes.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_wandenreich_007",
+      "tags": [
+        "random_wandenreich",
+        "random"
+      ],
+      "text": "The war brought progress.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_wandenreich_008",
+      "tags": [
+        "random_wandenreich",
+        "random"
+      ],
+      "text": "The King had a plan.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_wandenreich_009",
+      "tags": [
+        "random_wandenreich",
+        "random"
+      ],
+      "text": "The Schutzstaffel moved.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_wandenreich_010",
+      "tags": [
+        "random_wandenreich",
+        "random"
+      ],
+      "text": "Everything changed.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_wandenreich_011",
+      "tags": [
+        "random_wandenreich",
+        "random"
+      ],
+      "text": "More to learn.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_wandenreich_012",
+      "tags": [
+        "random_wandenreich",
+        "random"
+      ],
+      "text": "The war... ended.",
+      "cooldown": 1800,
+      "priority": 0,
+      "weight": 0.15
+    },
+    {
+      "id": "parnkgjas_random_001",
+      "tags": [
+        "random"
+      ],
+      "text": "Observe.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_002",
+      "tags": [
+        "random"
+      ],
+      "text": "Interesting.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_003",
+      "tags": [
+        "random"
+      ],
+      "text": "You... again.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_004",
+      "tags": [
+        "random"
+      ],
+      "text": "More words?",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_005",
+      "tags": [
+        "random"
+      ],
+      "text": "I am here.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_006",
+      "tags": [
+        "random"
+      ],
+      "text": "Quiet.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_007",
+      "tags": [
+        "random"
+      ],
+      "text": "What is this?",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_008",
+      "tags": [
+        "random"
+      ],
+      "text": "You are strange.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_009",
+      "tags": [
+        "random"
+      ],
+      "text": "I learn.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_010",
+      "tags": [
+        "random"
+      ],
+      "text": "Something changed.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_011",
+      "tags": [
+        "random"
+      ],
+      "text": "I noticed.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_012",
+      "tags": [
+        "random"
+      ],
+      "text": "More. More.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_013",
+      "tags": [
+        "random"
+      ],
+      "text": "You move.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_014",
+      "tags": [
+        "random"
+      ],
+      "text": "I watch.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_015",
+      "tags": [
+        "random"
+      ],
+      "text": "Interesting... human.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_016",
+      "tags": [
+        "random"
+      ],
+      "text": "A new thing.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_017",
+      "tags": [
+        "random"
+      ],
+      "text": "I understand... some.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_018",
+      "tags": [
+        "random"
+      ],
+      "text": "You are different.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_019",
+      "tags": [
+        "random"
+      ],
+      "text": "Progress. Good.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_020",
+      "tags": [
+        "random"
+      ],
+      "text": "I remember.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_021",
+      "tags": [
+        "random"
+      ],
+      "text": "Why?",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_022",
+      "tags": [
+        "random"
+      ],
+      "text": "What does this mean?",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_023",
+      "tags": [
+        "random"
+      ],
+      "text": "I want to know.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_024",
+      "tags": [
+        "random"
+      ],
+      "text": "New information.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_random_025",
+      "tags": [
+        "random"
+      ],
+      "text": "Continue. I am watching.",
+      "cooldown": 900,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_sleepy_001",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "Sleep?",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_sleepy_002",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "You rest. I watch.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_sleepy_003",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "Quiet... now.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_sleepy_004",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "No more work?",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_sleepy_005",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "Rest. Recover.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_sleepy_006",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "You are slow.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_sleepy_007",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "Sleep... interesting.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_sleepy_008",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "I will wait.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_sleepy_009",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "Tomorrow. More.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_sleepy_010",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "Quiet. Good.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_sleepy_011",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "Rest now.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_sleepy_012",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "I do not need... sleep?",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_sleepy_013",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "You are tired.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_sleepy_014",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "No movement. Rest.",
+      "cooldown": 1200,
+      "priority": 0
+    },
+    {
+      "id": "parnkgjas_sleepy_015",
+      "tags": [
+        "random_sleepy"
+      ],
+      "text": "I observe... quietly.",
+      "cooldown": 1200,
+      "priority": 0
+    }
+  ]
+}

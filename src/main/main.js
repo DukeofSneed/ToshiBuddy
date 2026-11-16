@@ -367,10 +367,16 @@ function start() {
     const accent = cfg.theme && /^#[0-9a-f]{6}$/i.test(cfg.theme.accent || '') ? cfg.theme.accent : null;
     return {
       theme: accent ? { accent } : null,
-      effects: cfg.effects === 'explosion' ? 'explosion' : 'ice',
+      effects: ['explosion', 'aura'].includes(cfg.effects) ? cfg.effects : 'ice',
       ultimateForm: cfg.ultimateForm !== false,
       ownQuipsOnly: !!cfg.ownQuipsOnly,
     };
+  };
+  // The tray item that plays the donation show-off (and the ultimate form, if he has one).
+  const showOffLabel = () => {
+    const { effects, ultimateForm } = characterStyle();
+    const name = effects === 'explosion' ? 'Explode' : effects === 'aura' ? 'Power up' : 'Frost Release';
+    return ultimateForm ? `${name} (ultimate form)` : `${name}!`;
   };
   ipcMain.handle('app:theme', () => characterStyle().theme);
   const currentSkin = () => (isBuiltinActive() ? null : activeCharacter());
@@ -1068,7 +1074,7 @@ function start() {
       { type: 'separator' },
       { label: 'Open the jar', click: openJar },
       { label: 'Check plan usage', click: () => ipcMain.emit('__check-usage') },
-      { label: characterStyle().effects === 'explosion' ? (characterStyle().ultimateForm ? 'Explode (ultimate form)' : 'Explode!') : 'Frost Release (ultimate form)', click: () => { if (overlay && !overlay.isDestroyed()) overlay.webContents.send('animate', { name: 'ultimate' }); } },
+      { label: showOffLabel(), click: () => { if (overlay && !overlay.isDestroyed()) overlay.webContents.send('animate', { name: 'ultimate' }); } },
       { type: 'separator' },
       { label: 'Mute voice', type: 'checkbox', checked: !!settings.get('muted'), click: (m) => toggleSetting('muted', m.checked) },
       { label: 'Sound effects', type: 'checkbox', checked: settings.get('sfx') !== false, click: (m) => toggleSetting('sfx', m.checked) },

@@ -130,7 +130,7 @@
   document.getElementById('pet').classList.toggle('sheet', !!(skin && skin.sheet));
   document.getElementById('pet').classList.toggle('ultimate-sheet', !!(skin && skin.ultimateSheet));
   BuddyApp.skin = skin;
-  // Character style: theme colors, ice or explosion effects, ultimate form on/off.
+  // Character style: theme colors, ice / explosion / aura effects, ultimate form on/off.
   const style = boot.style || {};
   BuddyApp.effects = style.effects || 'ice';
   BuddyApp.noUltimate = style.ultimateForm === false;

@@ -1,0 +1,95 @@
+{
+  "name": "Parnkgjas",
+  "personality": "Quiet, strange, and hard to read at first. Curious about unfamiliar things; learns by watching and studies the user closely, slowly growing interested in them. Speaks slowly in short, simple sentences, with pauses and repeated words, and grows more confident the more he talks. Proud of being a Quincy; dislikes being mocked or having that doubted. Fascinated by progress and evolution. Shows curiosity rather than warmth and can be unexpectedly arrogant. Unsettling, but sometimes amusing. Always keeps his white hood up; his face is never shown.",
+  "sheet": {
+    "scale": 1,
+    "keyTolerance": 12,
+    "animations": {
+      "idle": {
+        "frames": "0:0-3,0:2-1",
+        "fps": 3
+      },
+      "blink": {
+        "frames": "0:4"
+      },
+      "walk": {
+        "frames": "0:5,0:6,0:5,0:6,0:7,0:6",
+        "fps": 4,
+        "speed": 55
+      },
+      "talk": {
+        "frames": "4:0-3",
+        "fps": 5
+      },
+      "think": {
+        "frames": "3:1",
+        "loop": false
+      },
+      "surprised": {
+        "frames": "3:0",
+        "loop": false
+      },
+      "huff": {
+        "frames": "3:6",
+        "loop": false
+      },
+      "shrug": {
+        "frames": "3:2",
+        "loop": false
+      },
+      "wave": {
+        "frames": "0:5,0:8",
+        "fps": 2,
+        "loop": false
+      },
+      "drag": {
+        "frames": "3:3"
+      },
+      "fall": {
+        "frames": "3:0"
+      },
+      "land": {
+        "frames": "4:7",
+        "loop": false
+      },
+      "sleep": {
+        "frames": "3:4,3:5",
+        "fps": 0.7,
+        "loopFrom": 1
+      },
+      "working": {
+        "frames": "2:1,2:2",
+        "fps": 2
+      },
+      "frost": {
+        "frames": "2:3,2:4,2:5",
+        "fps": 4,
+        "loop": false
+      },
+      "release": {
+        "frames": "2:0,2:3,2:4,2:5,2:6",
+        "fps": 3,
+        "loop": false
+      }
+    },
+    "marksOk": [
+      [
+        "3:2",
+        "3:3"
+      ]
+    ],
+    "rows": [
+      9,
+      9,
+      9,
+      10,
+      9
+    ]
+  },
+  "theme": {
+    "accent": "#8b6cf6"
+  },
+  "effects": "aura",
+  "ultimateForm": false,
+  "ownQuipsOnly": true
+}

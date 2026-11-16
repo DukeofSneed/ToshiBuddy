@@ -1,7 +1,8 @@
 # Characters
 
 Each folder here is one character pack. ToshiToshi (`toshitoshi/`) is the main
-character; `kori-test/` is the built-in drawn test character.
+character; Bambietta (`bambietta/`) and Parnkgjas (`parnkgjas/`) also come with the
+app; `kori-test/` is the built-in drawn test character.
 
 **The easy way:** right-click the pet or the tray icon and choose
 **Import character…**. Give it a name and personality, drop in a sprite sheet (plus
@@ -52,7 +53,8 @@ Images can be PNG, WebP, GIF, or JPG. The pet uses the sheet when there is one.
      not as speech.
    - `theme`: `{ "accent": "#d92b22" }` recolors the speech bubble, the jar on screen,
      and the app's windows while this character is out.
-   - `effects`: `"explosion"` swaps the ice effects for blasts, sparks, and booms.
+   - `effects`: `"explosion"` swaps the ice effects for blasts, sparks, and booms;
+     `"aura"` for violet spirit wisps and rings on the ground. Leave it out for ice.
    - `ultimateForm`: `false` means donations play the show-off animation but never
      switch to an ultimate form.
    - `scale`: image height relative to the pet (1.0 = 188 pet units).

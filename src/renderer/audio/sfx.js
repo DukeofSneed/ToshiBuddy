@@ -197,6 +197,13 @@
       noise(t, { dur: 0.32, type: 'bandpass', freq: 900, to: 500, q: 1.2, gain: 0.2, attack: 0.02 });
       tone(t, { freq: 300, to: 220, dur: 0.2, type: 'triangle', gain: 0.08 });
     },
+    // Spirit power swelling up (for characters with aura effects).
+    surge(t) {
+      tone(t, { freq: 90, to: 180, dur: 0.9, type: 'sawtooth', gain: 0.14, attack: 0.25, filter: { type: 'lowpass', freq: 700, q: 4 } });
+      tone(t + 0.05, { freq: 135, to: 270, dur: 0.85, type: 'triangle', gain: 0.1, attack: 0.25 });
+      noise(t, { dur: 0.9, type: 'bandpass', freq: 300, to: 2400, q: 3, gain: 0.07, attack: 0.3 });
+      [660, 990].forEach((f, i) => tone(t + 0.55 + i * 0.08, { freq: f, dur: 0.5, gain: 0.06 }));
+    },
   };
 
   // loudness: 0-1, a fraction of the sound's normal level (default 1).

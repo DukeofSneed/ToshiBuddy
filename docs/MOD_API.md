@@ -117,7 +117,8 @@ BuddyMods.register({
   - `prop`: `{ id, show: true|false }` or `{ id, toggle: true }`;
   - `sound`: one built-in sound effect: `pop`, `boop`, `whee`, `land`, `land-hard`,
     `shimmer`, `coin`, `yawn`, `chirp`, `fanfare`, `womp`, `hum`, `tick`, `freeze`,
-    `chime`, `blizzard`, `stamp`, `scribble`, `huff`. Mods cannot add audio files.
+    `chime`, `blizzard`, `stamp`, `scribble`, `huff`, `boom`, `crackle`, `surge`.
+    Mods cannot add audio files.
   When a mod handles `idle`, `click`, `dblclick`, `drop`, `wake`, `hour`, or `desk`,
   the built-in reaction for that event is skipped that time.
 

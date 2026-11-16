@@ -87,6 +87,7 @@ app.whenReady().then(() => {
     const nb = imp.saveCharacter(ROOT, id, { sheet: { markBoxes: [], plainBoxes: [] } }).sheet;
     ok(!('markBoxes' in nb) && !('plainBoxes' in nb), 'boxes can be removed');
     ok(imp.cleanBoxes(Array.from({ length: 60 }, (_, i) => [i, 0, i + 10, 10])).length === 40, 'at most 40 boxes');
+    ok(['ice', 'explosion', 'aura'].every((e) => imp.cleanConfig({ effects: e }).effects === e) && !('effects' in imp.cleanConfig({ effects: 'lasers' })), 'effect styles: ice, explosion, aura; nothing else');
     throws(() => imp.saveCharacter(ROOT, id, { sheet: { animations: { idle: { frames: '0:0; rm -rf' } } } }), /frames/, 'bad frames');
     throws(() => imp.saveCharacter(ROOT, '..\\evil', {}), /Unknown/, 'path traversal id');
 

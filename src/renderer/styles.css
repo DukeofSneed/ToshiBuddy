@@ -356,6 +356,29 @@ html, body {
 }
 @keyframes spark { from { transform: translate(0, 0); opacity: 1; } to { transform: translate(var(--dx), calc(var(--dy) + 30px)); opacity: 0; } }
 
+/* ---- aura effects (characters with "effects": "aura") ---- */
+.aura-ring {
+  position: absolute; width: 40px; height: 40px; margin: -20px 0 0 -20px; border-radius: 50%;
+  border: 2px solid rgba(220, 205, 255, 0.9);
+  box-shadow: 0 0 16px #7d5cf0, inset 0 0 14px #5b3bd6;
+  pointer-events: none; z-index: 2;
+  animation: auraRing 1200ms ease-out forwards;
+}
+@keyframes auraRing { from { transform: scale(0.5, 0.2); opacity: 0.95; } to { transform: scale(7, 2.2); opacity: 0; } }
+.wisp {
+  position: absolute; width: 10px; height: 26px; margin: -13px 0 0 -5px;
+  border-radius: 50% 50% 45% 45% / 65% 65% 35% 35%;
+  background: radial-gradient(ellipse at 50% 70%, rgba(245, 238, 255, 0.95) 0%, rgba(170, 140, 255, 0.85) 35%, rgba(96, 60, 210, 0) 72%);
+  filter: drop-shadow(0 0 6px #7d5cf0);
+  pointer-events: none; z-index: 4;
+  animation: wisp var(--dur) ease-out both;
+}
+@keyframes wisp {
+  0% { transform: translate(0, 0) scale(0.3, 0.5); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) scale(0.8, 1.6); opacity: 0; }
+}
+
 /* Marks ("?", "!", swirls) are drawn on their own layer so they are never
    mirrored; each layer follows its figure's visibility and desk offset. */
 #skin-ultimate-marks { display: none; }
