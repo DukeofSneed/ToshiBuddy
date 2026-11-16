@@ -33,7 +33,9 @@ limbs); the drawn test character is Kori. Every upgrade must work on both:
 After a donation the pet enters the **ultimate form** for about 30 seconds: the
 `ultimate` class is on `#pet` (plus `has-ultimate` when the character has its own
 ultimate image), with the halo, snow cloak, and sigil held up. Mods can react with
-the `ultimate` trigger or style `#pet.ultimate ...`.
+the `ultimate` trigger or style `#pet.ultimate ...`. Some characters have no ultimate
+form: they show off with their release animation and effects instead, the
+`ultimate` trigger still fires, and the `ultimate` class never appears.
 
 ## register(def)
 
@@ -104,7 +106,7 @@ BuddyMods.register({
   cannot add image files of its own, and must never redraw an attached picture.
 - `behaviors[]`: `trigger` is one of `idle`, `click`, `dblclick`, `drop`, `hour`,
   `wake`, `sleep`, `lean`, `desk` (Kori sits down at the desk), `ultimate` (the
-  ultimate form begins), `donate`, `upgrade`, `desk-done` (a typing session at the desk
+  ultimate form or donation show-off begins), `donate`, `upgrade`, `desk-done` (a typing session at the desk
   ends; `{minutes}` in `say`), `desk-long` (the same, for sessions of 20 minutes or
   more), `desk-active` (every 15 seconds of typing at the desk; count it with
   `every: 3` for once per 45 seconds), `app-switch` (the user moved to another app; at most once per 20 seconds),

@@ -35,5 +35,18 @@ s.restore('p:base.json|Idle line.'); s.restore('p:base.json|Hello {name}.');
 ok(s.merged(packs).length === 4 && s.merged(packs).some((x) => x.text === 'Hello {name}.'), 'restore works');
 s.remove(`c:${q.id}`);
 ok(s.merged(packs).length === 3, 'custom delete');
+// A pack with the same line under two tags: each copy is its own entry.
+const twice = [
+  { text: 'Interesting.', tags: ['click'], pack: 'character:x' },
+  { text: 'Interesting.', tags: ['random'], pack: 'character:x' },
+];
+const keys = s.editorList(twice).map((x) => x.key);
+ok(keys.length === 2 && keys[0] !== keys[1] && keys[0] === 'p:character:x|Interesting.', 'repeated lines get their own keys: ' + keys.join(', '));
+s.update(keys[1], { text: 'Interesting.', tags: ['idle'] });
+ok(JSON.stringify(s.merged(twice).map((x) => x.tags[0])) === '["click","idle"]', 'editing one copy leaves the other alone');
+s.remove(keys[0]);
+ok(s.merged(twice).length === 1 && s.merged(twice)[0].tags[0] === 'idle', 'removing one copy keeps the other');
+s.restore(keys[0]); s.restore(keys[1]);
+ok(JSON.stringify(s.merged(twice).map((x) => x.tags[0])) === '["click","random"]', 'both restore');
 console.log(`${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

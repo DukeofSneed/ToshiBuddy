@@ -31,11 +31,17 @@ const clean = (s, n) => String(s == null ? '' : s).replace(/[\u0000-\u001f\u007f
 
 // config: character.json (or null for the built-in character, which has every pose).
 // built: titles of tricks already built for this character. planned: titles of its open goals.
+// A character with "ultimateForm": false never transforms; a donation plays its
+// release animation and effects instead (a show-off).
+const SHOW_OFF = 'shows off with a power-up effect when tokens are donated (it has no transformed form), and tends the donation jar in the corner of the screen';
 function describe({ config = null, builtin = false, built = [], planned = [] } = {}) {
   const mapped = builtin ? Object.keys(POSES) : Object.keys(((config && config.sheet) || {}).animations || {}).filter((k) => POSES[k]);
+  const noForm = !builtin && !!config && config.ultimateForm === false;
+  const always = noForm ? ALWAYS.map((s) => (s.startsWith('transforms for a short time') ? SHOW_OFF : s)) : ALWAYS;
+  const poseName = (k) => (noForm && k === 'release' ? 'the donation show-off' : POSES[k]);
   const lines = [];
-  lines.push(`Behaviors already built in: ${ALWAYS.join('; ')}.`);
-  if (mapped.length) lines.push(`Hand-drawn poses the character already has: ${mapped.map((k) => POSES[k]).join(', ')}.`);
+  lines.push(`Behaviors already built in: ${always.join('; ')}.`);
+  if (mapped.length) lines.push(`Hand-drawn poses the character already has: ${mapped.map(poseName).join(', ')}.`);
   const b = built.map((t) => clean(t, 80)).filter(Boolean).slice(0, 30);
   if (b.length) lines.push(`Tricks already built: ${b.join('; ')}.`);
   const p = planned.map((t) => clean(t, 80)).filter(Boolean).slice(0, 40);
@@ -71,7 +77,7 @@ function limits(poses = []) {
       + ' Besides those, the only motion available is moving the whole existing picture (slide, hop, tilt, sway, shrink, grow, fade).',
     'There is no stamping: the character never stamps a form or anything else, at the desk or away from it. If a goal mentions stamping, leave that part out.',
     'Props are small add-ons that sit on top of or beside the character: a hat on top of the head, something held in a hand, something on the desk, something floating nearby. Never clothing, costumes, masks, capes, armour, or anything else that covers the body or face or changes how the outfit looks.',
-    'An upgrade may add: spoken lines; the motion and poses above; small props drawn from simple shapes (or a picture the owner attached); and reactions to these events only: a click, a double-click, being dropped, the hour changing, waking up, falling asleep, leaning on the screen edge, sitting down at the desk, finishing a typing session at the desk, finishing a long typing session (20 minutes or more), every 15 seconds of typing at the desk, the owner switching to another app, a donation, an upgrade finishing, the donation transformation starting, and a repeating timer.',
+    'An upgrade may add: spoken lines; the motion and poses above; small props drawn from simple shapes (or a picture the owner attached); and reactions to these events only: a click, a double-click, being dropped, the hour changing, waking up, falling asleep, leaning on the screen edge, sitting down at the desk, finishing a typing session at the desk, finishing a long typing session (20 minutes or more), every 15 seconds of typing at the desk, the owner switching to another app, a donation, an upgrade finishing, the donation transformation (or show-off) starting, and a repeating timer.',
     'An upgrade may keep a simple count of how many times one of its events has happened (saved on this computer, so it survives restarts and sleep) and react every so many times or at set milestones, optionally starting the count over (a pile that empties and grows again). At the desk the character only idles while seated, except that it may react with one of its poses (held 2.5 seconds) while something the upgrade drops lands on it; for any other pose at the desk it briefly stands up and then sits back down. That is the only memory there is: no other saved data, scores, dates, or settings. It cannot know what the owner is doing beyond those events, read files or the screen, use the network, or play new sounds.',
     'If an idea would need new artwork of the character, a pose that is not in the list above, a separately moving body part, a change to the outfit, or anything else outside these limits, it must be thrown out, not adapted with a workaround.',
   ].join('\n');

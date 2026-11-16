@@ -104,6 +104,12 @@ check('upgrade prompts get the name, personality and notes, and nothing from the
   const up = new Upgrader({ projectRoot: dir, ledger: new Ledger(fs.mkdtempSync(path.join(os.tmpdir(), 'toshi-ab-'))), guard: {}, settings: { get: () => undefined }, git: {}, character: () => who2 });
   const prompts = [profile.buildPrompt(who2), up.buildPrompt({ title: 'T', summary: 'S', goalTokens: 1 }, {})];
   for (const p of prompts) { assert.ok(p.includes('falls asleep after a while')); assert.match(p, /never fake a pose the character already has drawn/); }
+  assert.match(has, /transforms for a short time/);
+  // A character with no ultimate form shows off instead of transforming.
+  const noForm = abilities.describe({ config: JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'characters', 'parnkgjas', 'character.json'), 'utf8')) });
+  assert.ok(!/transforms|donation transformation/.test(noForm), 'no transformation claimed for a character without one');
+  assert.match(noForm, /shows off with a power-up effect when tokens are donated/);
+  assert.match(noForm, /the donation show-off/);
   console.log('overlap checks passed');
 }
 

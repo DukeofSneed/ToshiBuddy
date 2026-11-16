@@ -28,7 +28,8 @@ table.anims input[type=number] { width: 64px; }
 .choose-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 10px; }
 .buddy { white-space: normal; background: var(--card); border: 2px solid var(--line); border-radius: 12px; padding: 10px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; text-align: left; color: var(--text); font-weight: 400; }
 .buddy:hover { border-color: var(--accent2); filter: none; }
-.buddy.active { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(63, 143, 220, 0.35); }
+/* The bright accent, so a dark theme color (navy) still shows which buddy is picked. */
+.buddy.active { border-color: var(--accent2); box-shadow: 0 0 0 2px var(--tb-glow, rgba(63, 143, 220, 0.35)); }
 .buddy .pic { height: 150px; border-radius: 8px; background: var(--bg) center / contain no-repeat; }
 .buddy .pic.sheet { background-size: auto 520%; background-position: 0 0; }
 .buddy .nm { font-weight: 700; font-size: 14px; }

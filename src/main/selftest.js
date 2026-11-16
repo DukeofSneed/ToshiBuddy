@@ -213,11 +213,12 @@ function runSelftest(ctx, selftestDir) {
       fs.writeFileSync(path.join(selftestDir, 'release.png'), rel.toPNG());
       // Ultimate form, captured while held after the release finishes.
       await new Promise((r) => setTimeout(r, 3000));
-      await overlay.webContents.executeJavaScript(`BuddyBubble.hide(); BuddyBrain.enterUltimate(12); 1`);
+      // Count the mod `ultimate` events it sends (one, with or without an ultimate form).
+      await overlay.webContents.executeJavaScript(`BuddyBubble.hide(); window.__ultEvents = 0; window.__behaviors = BuddyMods.behaviors; BuddyMods.behaviors = (t) => { if (t === 'ultimate') window.__ultEvents++; return window.__behaviors(t); }; BuddyBrain.enterUltimate(12); 1`);
       await new Promise((r) => setTimeout(r, 5200));
       const ult = await capture(overlay, { x: rx, y: Math.max(0, Math.round(pos.y) - 260), width: 600, height: 460 });
       fs.writeFileSync(path.join(selftestDir, 'ultimate.png'), ult.toPNG());
-      const ultState = await overlay.webContents.executeJavaScript(`JSON.stringify({ classes: document.getElementById('pet').className, primaryShown: (() => { const e = document.getElementById('skin-img'); return e ? getComputedStyle(e).display : 'n/a'; })(), ultimateShown: (() => { const e = document.getElementById('skin-ultimate'); return e ? getComputedStyle(e).display : 'n/a'; })() })`);
+      const ultState = await overlay.webContents.executeJavaScript(`BuddyMods.behaviors = window.__behaviors; JSON.stringify({ classes: document.getElementById('pet').className, noUltimate: !!BuddyApp.noUltimate, ultimateEvents: window.__ultEvents, primaryShown: (() => { const e = document.getElementById('skin-img'); return e ? getComputedStyle(e).display : 'n/a'; })(), ultimateShown: (() => { const e = document.getElementById('skin-ultimate'); return e ? getComputedStyle(e).display : 'n/a'; })() })`);
       fs.writeFileSync(path.join(selftestDir, 'ultimate.json'), ultState);
       const jp = await capture(jarWin);
       fs.writeFileSync(path.join(selftestDir, 'jar.png'), jp.toPNG());

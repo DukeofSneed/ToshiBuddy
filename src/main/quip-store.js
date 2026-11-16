@@ -5,7 +5,9 @@
 //   added:  quips the user wrote             [{ id, text, tags }]
 //   hidden: built-in quips the user removed  [key]
 //   edits:  built-in quips the user changed  { key: { text, tags } }
-// A built-in quip's key is "<pack file>|<original text>".
+// A built-in quip's key is "<pack file>|<original text>"; a pack that has the same
+// line more than once (under different tags) adds "#2", "#3"... to the later copies,
+// so each copy is edited, removed, and restored on its own.
 const fs = require('fs');
 const path = require('path');
 
@@ -45,13 +47,23 @@ class QuipStore {
   }
 
   static key(q) { return `${q.pack}|${q.text}`; }
+  static keys(packQuips) {
+    const seen = new Map();
+    return packQuips.map((q) => {
+      const k = QuipStore.key(q);
+      const n = (seen.get(k) || 0) + 1;
+      seen.set(k, n);
+      return n === 1 ? k : `${k}#${n}`;
+    });
+  }
 
   // What the pet uses: packs with edits and removals applied, plus the user's own.
   merged(packQuips) {
     const hidden = new Set(this.data.hidden);
     const out = [];
-    for (const q of packQuips) {
-      const k = QuipStore.key(q);
+    const keys = QuipStore.keys(packQuips);
+    for (const [i, q] of packQuips.entries()) {
+      const k = keys[i];
       if (hidden.has(k)) continue;
       const e = this.data.edits[k];
       out.push(e ? { ...q, text: e.text, tags: e.tags } : q);
@@ -64,8 +76,9 @@ class QuipStore {
   editorList(packQuips) {
     const hidden = new Set(this.data.hidden);
     const items = this.data.added.map((q) => ({ key: `c:${q.id}`, source: 'yours', text: q.text, tags: q.tags, removed: false, edited: false }));
-    for (const q of packQuips) {
-      const k = QuipStore.key(q);
+    const keys = QuipStore.keys(packQuips);
+    for (const [i, q] of packQuips.entries()) {
+      const k = keys[i];
       const e = this.data.edits[k];
       items.push({
         key: `p:${k}`,

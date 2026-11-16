@@ -260,8 +260,13 @@
   function enterUltimate(seconds) {
     const el = pet();
     // Characters with "ultimateForm": false just show off (the release animation
-    // and effects) without changing form.
-    if (window.BuddyApp && BuddyApp.noUltimate) { playAnimation('release'); return true; }
+    // and effects) without changing form. Mods still get the `ultimate` event, at
+    // the same moment a transforming character would.
+    if (window.BuddyApp && BuddyApp.noUltimate) {
+      playAnimation('release');
+      setTimeout(() => fire('ultimate', {}), 550);
+      return true;
+    }
     const ms = Math.max(5, Math.min(600, seconds || (window.BuddyApp && BuddyApp.ultimateSeconds) || 30)) * 1000;
     const already = el.classList.contains('ultimate');
     if (!already) {
