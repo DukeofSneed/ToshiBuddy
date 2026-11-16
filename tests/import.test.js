@@ -88,6 +88,7 @@ app.whenReady().then(() => {
     ok(!('markBoxes' in nb) && !('plainBoxes' in nb), 'boxes can be removed');
     ok(imp.cleanBoxes(Array.from({ length: 60 }, (_, i) => [i, 0, i + 10, 10])).length === 40, 'at most 40 boxes');
     ok(['ice', 'explosion', 'aura'].every((e) => imp.cleanConfig({ effects: e }).effects === e) && !('effects' in imp.cleanConfig({ effects: 'lasers' })), 'effect styles: ice, explosion, aura; nothing else');
+    ok(imp.cleanConfig({ portraitBackground: '#2e2e74' }).portraitBackground === '#2e2e74' && !('portraitBackground' in imp.cleanConfig({ portraitBackground: 'red; x: url(evil)' })), 'portrait background: a #rrggbb color or nothing');
     throws(() => imp.saveCharacter(ROOT, id, { sheet: { animations: { idle: { frames: '0:0; rm -rf' } } } }), /frames/, 'bad frames');
     throws(() => imp.saveCharacter(ROOT, '..\\evil', {}), /Unknown/, 'path traversal id');
 

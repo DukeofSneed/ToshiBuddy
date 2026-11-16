@@ -53,6 +53,8 @@ Images can be PNG, WebP, GIF, or JPG. The pet uses the sheet when there is one.
      not as speech.
    - `theme`: `{ "accent": "#d92b22" }` recolors the speech bubble, the jar on screen,
      and the app's windows while this character is out.
+   - `portraitBackground`: a `#rrggbb` color shown behind his picture in **Choose
+     your buddy**, for a still image with a transparent background.
    - `effects`: `"explosion"` swaps the ice effects for blasts, sparks, and booms;
      `"aura"` for violet spirit wisps and rings on the ground. Leave it out for ice.
    - `ultimateForm`: `false` means donations play the show-off animation but never

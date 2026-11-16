@@ -39,7 +39,7 @@
     const list = r.characters.filter((c) => !c.test).concat(r.characters.filter((c) => c.test));
     $('choose-list').innerHTML = list.map((c) => `
       <button class="buddy ${c.id === r.active ? 'active' : ''}" data-id="${esc(c.id)}">
-        <div class="pic ${c.cover && c.cover.kind === 'sheet' ? 'sheet' : ''}" data-cover="${c.cover ? esc(c.cover.url) : ''}"></div>
+        <div class="pic ${c.cover && c.cover.kind === 'sheet' ? 'sheet' : ''}" data-cover="${c.cover ? esc(c.cover.url) : ''}" data-color="${c.coverColor ? esc(c.coverColor) : ''}"></div>
         <div class="nm">${esc(c.name)}</div>
         ${c.test ? '<span class="tag">test character</span>' : ''}
         <div class="ps">${esc(c.personality || '')}</div>
@@ -47,6 +47,7 @@
     // Set through the DOM: the page's security policy blocks inline style attributes.
     document.querySelectorAll('#choose-list .pic').forEach((p) => {
       if (p.dataset.cover) p.style.backgroundImage = 'url("' + p.dataset.cover.replace(/"/g, '%22') + '")';
+      if (/^#[0-9a-f]{6}$/i.test(p.dataset.color || '')) p.style.backgroundColor = p.dataset.color;
     });
   }
   $('choose-list').addEventListener('click', async (e) => {

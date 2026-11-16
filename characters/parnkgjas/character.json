@@ -89,6 +89,7 @@
   "theme": {
     "accent": "#8b6cf6"
   },
+  "portraitBackground": "#2e2e74",
   "effects": "aura",
   "ultimateForm": false,
   "ownQuipsOnly": true

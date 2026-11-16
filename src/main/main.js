@@ -603,6 +603,7 @@ function start() {
     characters: listCharacters(PROJECT_ROOT).map((c) => ({
       id: c.name, name: displayNameOf(c), test: c.test, builtin: c.builtin,
       personality: c.config.personality || '', cover: coverOf(c),
+      coverColor: /^#[0-9a-f]{6}$/i.test(c.config.portraitBackground || '') ? c.config.portraitBackground : null,
     })),
   }));
   // A picture for the chooser: the still image, else the sheet itself (the page
